@@ -6,4 +6,10 @@
     <title>ProviderApplicationForm</title>
     <access_arguments>access CiviCRM</access_arguments>
   </item>
+  <item>
+    <path>civicrm/one-stop-provider-application-confirm</path>
+    <page_callback>CRM_Aoonestopshop_Form_ProviderApplicationConfirm</page_callback>
+    <title>ProviderApplicationConfirm</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
 </menu>

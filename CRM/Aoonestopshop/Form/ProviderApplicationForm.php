@@ -7,7 +7,7 @@ use CRM_Aoonestopshop_ExtensionUtil as E;
  *
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
-class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Core_Form {
+class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_Form_ProviderApplication {
   public function buildQuickForm() {
 
     $defaults = [];
@@ -23,11 +23,11 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Core_Form {
     $this->add('text', 'primary_email', E::ts('Email address'));
     $this->add('text', 'primary_phone_number', E::ts('Phone Number'));
     $this->add('text', 'primary_website', E::ts('Website'));
-    $this->add('advCheckBox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
+    $this->add('advcheckbox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
     $defaults['display_name_public'] = 1;
-    $this->add('advCheckBox', 'display_email', E::ts('Display email address in public listing?'));
+    $this->add('advcheckbox', 'display_email', E::ts('Display email address in public listing?'));
     $defaults['display_email'] = 1;
-    $this->add('advCheckBox', 'display_phone', E::ts('Display phone number in public listing?'));
+    $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
     $defaults['display_phone'] = 1;
     
     for ($rowNumber = 1; $rowNumber <= 10; $rowNumber++) {
@@ -41,21 +41,44 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Core_Form {
     }
     
     $this->setDefaults($defaults);
+    $this->_elements;
     $this->addButtons(array(
       array(
-        'type' => 'submit',
-        'name' => E::ts('Submit'),
+        'type' => 'upload',
+        'name' => E::ts('Continue'),
         'isDefault' => TRUE,
       ),
     ));
 
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
+    $this->addFormRule(['CRM_Aoonestopshop_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
 
+  public function providerFormRule($values) {
+    $errors = [];
+    if ($values['provider_type'] == 1 && empty($values['display_name_public'])) {
+      $errors['display_name_public'] = E::ts('Provider first name and last name must be displayed in public listing');
+    }
+    if ($values['provider_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
+      $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
+    }
+    if ($values['provider_type'] == 1 && empty($values['primary_phone_number']) && empty($values['primary_email'])) {
+      $errors['primary_phone_number'] = E::ts('At least one of email or phone must be provided and made public');
+    }
+    $addressFieldLables = ['phone' => E::ts('Work Phone Number'), 'work_address' => E::ts('Work Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town'), 'postal_code' =>  E::ts('Postal code')];
+    foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
+      if (empty($values[$addressField][1])) {
+        $errors[$addressField . '[1]'] = E::ts('Need to supply %1', [1 => $addressFieldLables[$addressField]]);
+      }
+    }
+    return empty($errors) ? TRUE : $errors;
+  }
+
   public function postProcess() {
-    $values = $this->exportValues();
+    $formValues = $this->controller->exportValues($this->_name);
+    $this->set('formValues', $formValues);
     parent::postProcess();
   }
 

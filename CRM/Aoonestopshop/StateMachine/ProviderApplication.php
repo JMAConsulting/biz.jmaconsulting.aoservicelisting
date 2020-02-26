@@ -34,7 +34,7 @@ class CRM_Aoonestopshop_StateMachine_ProviderApplication extends CRM_Core_StateM
 
     $this->_pages = [
       'CRM_Aoonestopshop_Form_ProviderApplicationForm' => NULL,
-//      'CRM_Aoonestopshop_Form_ProviderApplicationConfirm' => NULL,
+      'CRM_Aoonestopshop_Form_ProviderApplicationConfirm' => NULL,
     ];
 
     $this->addSequentialPages($this->_pages, $action);
