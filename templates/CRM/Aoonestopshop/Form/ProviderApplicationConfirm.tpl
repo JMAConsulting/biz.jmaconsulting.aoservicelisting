@@ -128,13 +128,13 @@
 {section name='c' start=1 loop=21}
   {assign var='rowN' value=$smarty.section.c.index}
   <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
-    <div class="label">{$form.custom_13.$rowN.label}</div>
-    <div class="content">{$form.custom_13.$rowN.html}</div>
+    <div class="label">{$form.custom_858.$rowN.label}</div>
+    <div class="content">{$form.custom_858.$rowN.html}</div>
     <div class="clear"></div>
     <div class="label">{ts}Camp Session Dates{/ts}</div>
     <div class="content">
-      <div style="float:left;">{$form.custom_14.$rowN.label}<br>{$form.custom_14.$rowN.html}</div>
-      <div>{$form.custom_15.$rowN.label}<br>{$form.custom_15.$rowN.html}</div>
+      <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
+      <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
     </div>
     <div class="clear"></div>
   </div>

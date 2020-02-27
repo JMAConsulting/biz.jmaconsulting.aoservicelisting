@@ -35,7 +35,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
     }
-    [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
+    $customFields = [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
     foreach ($customFields as $id => $isRequired) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
     }
