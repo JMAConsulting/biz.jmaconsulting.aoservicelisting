@@ -39,7 +39,20 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
     }
-    
+    $customFields = [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
+    foreach ($customFields as $id => $isRequired) {
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
+    }
+    $this->assign('beforeStaffCustomFields', [861, 862, 863]);
+    $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
+    $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
+
+    for ($row = 1; $row <= 20; $row++) {
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
+    }
+
     $this->setDefaults($defaults);
     $this->_elements;
     $this->addButtons(array(

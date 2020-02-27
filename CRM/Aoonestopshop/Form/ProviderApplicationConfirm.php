@@ -9,7 +9,6 @@ use CRM_Aoonestopshop_ExtensionUtil as E;
  */
 class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopshop_Form_ProviderApplication {
   public function buildQuickForm() {
-
     $this->addButtons([
       [
         'type' => 'submit',
