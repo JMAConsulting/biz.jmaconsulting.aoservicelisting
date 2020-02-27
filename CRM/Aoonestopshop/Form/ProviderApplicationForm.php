@@ -17,7 +17,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     $defaults['provider_type'] = 1;
     $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('text', 'organization_email', E::ts('Organization Email'));
-    
+    $this->add('text', 'website', E::ts('Website'));    
     $this->add('text', 'primary_first_name', E::ts('First Name'));
     $this->add('text', 'primary_last_name', E::ts('Last Name'));
     $this->add('text', 'primary_email', E::ts('Email address'));

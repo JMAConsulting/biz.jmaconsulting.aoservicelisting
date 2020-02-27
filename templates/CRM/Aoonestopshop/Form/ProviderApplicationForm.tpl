@@ -62,7 +62,7 @@
 </fieldset>
 
 <div class="crm-public-form-item crm-section">
-  {section name='i' start=1 loop=10}
+  {section name='i' start=1 loop=11}
   {assign var='rowNumber' value=$smarty.section.i.index}
   {if $rowNumber < 2}
     <fieldset><legend><span class="fieldset-legend">Primary Work Location</span></legend>
@@ -100,7 +100,7 @@
   </div>
 {/foreach}
 <div class="crm-public-form-item crm-section">
-  {section name='s' start=1 loop=10}
+  {section name='s' start=1 loop=11}
     {assign var='rowNum' value=$smarty.section.s.index}
     <div id="staff_member-{$rowNumber}" class="{if $rowNum > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
@@ -133,7 +133,7 @@
     <div class="clear"></div>
   </div>
 {/foreach}
-{section name='c' start=1 loop=20}
+{section name='c' start=1 loop=21}
   {assign var='rowN' value=$smarty.section.c.index}
   <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
     <div class="label">{$form.custom_858.$rowN.label}</div>
