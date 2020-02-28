@@ -64,30 +64,30 @@
 <div class="crm-public-form-item crm-section">
   {section name='i' start=1 loop=11}
   {assign var='rowNumber' value=$smarty.section.i.index}
-  {if $rowNumber < 2}
-    <fieldset><legend><span class="fieldset-legend">Primary Work Location</span></legend>
-    <p>{ts}Work location information is include in public service provider listings{/ts}</p>
-  {/if}
   <div id="work_address-{$rowNumber}" class="{if $rowNumber > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
-    <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
-    <div class="content">{$form.phone.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.work_address.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.city.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.postal_code.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    {if $rowNumber neq 1}
-       <div><a href=# class="remove_item_employee crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+    {if $rowNumber < 2}
+      <fieldset><legend><span class="fieldset-legend">{ts}Primary Work Location{/ts}</span></legend>
+      <p>{ts}Work location information is included in public service provider listings{/ts}</p>
+    {else}
+      <fieldset><legend><span class="fieldset-legend">{ts 1=$rowNumber-1}Supplementary Work Location %1{/ts}</span></legend>
     {/if}
-  </div>
-  {if $rowNumber < 2}
+      <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
+      <div class="content">{$form.phone.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.work_address.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.city.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.postal_code.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      {if $rowNumber neq 1}
+         <div><a href=# class="remove_item_employee crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+      {/if}
     </fieldset>
-  {/if}
+  </div>
   {/section}
 </div>
 <span id="add-another-employee" class="crm-hover-button"><a href=#>{ts}Add another work location{/ts}</a></span>
@@ -100,9 +100,9 @@
   </div>
 {/foreach}
 <div class="crm-public-form-item crm-section">
-  {section name='s' start=1 loop=11}
+  {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
-    <div id="staff_member-{$rowNumber}" class="{if $rowNum > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
+    <div id="staff_member-{$rowNum}" class="{if $rowNum > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend>
           <span class="fieldset-legend">{ts 1=$rowNum}Staff Person %1{/ts}</span>
@@ -191,6 +191,9 @@
         e.preventDefault();
         var row = $(this).closest('[id^="work_address-"]');
         row.addClass('hiddenElement');
+        row.find('div.content').each(function() {
+          $(this).find('input').val('').trigger('change');
+        });
       });
       $('#add-another-staff').on('click', function(e) {
         e.preventDefault();
@@ -202,6 +205,9 @@
         e.preventDefault();
         var row = $(this).closest('[id^="staff_member-"]');
         row.addClass('hiddenElement');
+        row.find('div.content').each(function() {
+          $(this).find('input').val('').trigger('change');
+        });
       });
       $('#add-another-camp').on('click', function(e) {
         e.preventDefault();
@@ -209,14 +215,24 @@
           $('[id^="camp_session-"].hiddenElement:first').removeClass('hiddenElement');
         }
       });
-      $('.remove_item_staff').on('click', function(e) {
+      $('.remove_item_camp').on('click', function(e) {
         e.preventDefault();
         var row = $(this).closest('[id^="camp_session-"]');
         row.addClass('hiddenElement');
-     });
-     $('#camp_session-1').addClass('hiddenElement');
-     $('#add-another-camp').hide();
-     $('#custom_863_3').on('change', function() {
+        row.find('[id^=custom_]').val('').trigger('change');
+      });
+      $('#camp_session-1').addClass('hiddenElement');
+      $('#add-another-camp').hide();
+      if ($('#custom_863_3').prop('checked')) {
+        $('#camp_session-1').removeClass('hiddenElement');
+        $('#add-another-camp').show();
+        $('[id^=custom_859_').each(function() {
+          if ($(this).val().length) {
+            $(this).parent().parent().parent().parent().removeClass('hiddenElement');
+          }
+        });
+      }
+      $('#custom_863_3').on('change', function() {
        if ($(this).prop('checked')) {
          $('#camp_session-1').removeClass('hiddenElement');
          $('#add-another-camp').show();
@@ -224,11 +240,50 @@
        else {
          $('.camp-section').each(function() {
            $(this).addClass('hiddenElement');
+           $(this).find('[id^=custom_]').val('').trigger('change');
          });
          $('#add-another-camp').hide();
        }
-     });
-   });
+      });
+      $('[id^=staff_record_regulator_]').each(function() {
+        if ($(this).val().length) {
+          $(this).parent().parent().parent().removeClass('hiddenElement');
+        }
+      });
+      var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];
+      $.each(addressFields, function(index, field) {
+        $('[id^=' + field + ']').each(function() {
+          if ($(this).val().length) {
+            $(this).parent().parent().parent().removeClass('hiddenElement');
+          }
+        });
+      });
+      $('#primary_first_name').change(function() {
+        $('#staff_first_name_1').val($(this).val()).trigger('change');
+      });
+      $('#primary_last_name').change(function() {
+        $('#staff_last_name_1').val($(this).val()).trigger('change');
+      });
+      $('[name=custom_862]').change(function() {
+        if ($(this).val() == "1") {
+          $('.edit-row-custom_863').show();
+        }
+        else {
+          $('.edit-row-custom_863').hide();
+          $('[id^=custom_863_]').each(function() {
+             if ($(this).prop('checked')) {
+               $(this).prop('checked', false).trigger('change');
+             }
+          });
+        }
+      });
+      var checkboxCustomFIelds = ['863', '865', '866'];
+      $.each(checkboxCustomFIelds, function(index, cfield) {
+        $('[id^=custom_' + cfield + ']').each(function() {
+          $(this).add($(this).prev()).add($(this).next()).wrapAll('<span class="custom-checkbox">');
+        });
+      });
+    });
   </script>
 {/literal}
 {/crmScope}

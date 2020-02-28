@@ -64,27 +64,27 @@
 <div class="crm-public-form-item crm-section">
   {section name='i' start=1 loop=11}
   {assign var='rowNumber' value=$smarty.section.i.index}
-  {if $rowNumber < 2}
-    <fieldset><legend><span class="fieldset-legend">Primary Work Location</span></legend>
-    <p>{ts}Work location information is include in public service provider listings{/ts}</p>
-  {/if}
   <div id="work_address-{$rowNumber}" class=" {cycle values="odd-row,even-row"} crm-section form-item">
-    <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
-    <div class="content">{$form.phone.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.work_address.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.city.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-    <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.postal_code.$rowNumber.html}</div>
-    <div class="clear"></div><br/>
-  </div>
   {if $rowNumber < 2}
-    </fieldset>
+    <fieldset><legend><span class="fieldset-legend">{ts}Primary Work Location{/ts}</span></legend>
+    <p>{ts}Work location information is included in public service provider listings{/ts}</p>
+  {else}
+    <fieldset><legend><span class="fieldset-legend">{ts 1=$rowNumber-1}Supplementary Work Location %1{/ts}</span></legend>
   {/if}
+      <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
+      <div class="content">{$form.phone.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.work_address.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.city.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+      <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+      <div class="content">{$form.postal_code.$rowNumber.html}</div>
+      <div class="clear"></div><br/>
+    </fieldset>
+  </div>
   {/section}
 </div>
 {foreach from=$beforeStaffCustomFields item=field}
@@ -96,7 +96,7 @@
   </div>
 {/foreach}
 <div class="crm-public-form-item crm-section">
-  {section name='s' start=1 loop=11}
+  {section name='s' start=1 loop=22}
     {assign var='rowNum' value=$smarty.section.s.index}
     <div id="staff_member-{$rowNum}" class=" {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
@@ -149,7 +149,7 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-      var serviceProvider = $('[name=provider_type]:checked').val();
+      var serviceProvider = $('[name=provider_type]').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
@@ -178,7 +178,7 @@
       });
       $('[id^=work_address_]').each(function() {
         if ($(this).parent().text().length < 2) {
-          $(this).parent().parent().parent().addClass('hiddenElement');
+          $(this).parent().parent().parent().parent().addClass('hiddenElement');
         }
       });
     });

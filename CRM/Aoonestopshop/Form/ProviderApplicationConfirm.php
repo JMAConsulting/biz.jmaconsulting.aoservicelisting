@@ -15,25 +15,27 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
     $serviceProviderOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('provider_type', E::ts('Type of Service Provider'), $serviceProviderOptions);
     $this->add('text', 'organization_name', E::ts('Organization Name'));
-    $this->add('text', 'organization_email', E::ts('Organization Email'));
+    $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));
     $this->add('text', 'primary_first_name', E::ts('First Name'));
     $this->add('text', 'primary_last_name', E::ts('Last Name'));
-    $this->add('text', 'primary_email', E::ts('Email address'));
+    $this->add('email', 'primary_email', E::ts('Email address'));
     $this->add('text', 'primary_phone_number', E::ts('Phone Number'));
-    $this->add('text', 'primary_website', E::ts('Website'));
+    $this->add('text', 'primary_website', E::ts('Website'), ['maxlength' => 255]);
     $this->add('advcheckbox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
     $this->add('advcheckbox', 'display_email', E::ts('Display email address in public listing?'));
     $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
 
-    for ($rowNumber = 1; $rowNumber <= 10; $rowNumber++) {
+    for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "work_address[$rowNumber]", E::ts('Work Address'), ['size' => 45, 'maxlength' => 96, 'class' => 'huge']);
       $this->add('text', "postal_code[$rowNumber]", E::ts('Postal code'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
       $this->add('text', "city[$rowNumber]", E::ts('City/Town'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
+    }
+    for ($rowNumber = 1; $rowNumber <= 22; $rowNumber++) {
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
-      $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
     }
     $customFields = [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
     foreach ($customFields as $id => $isRequired) {
@@ -42,7 +44,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
     $this->assign('beforeStaffCustomFields', [861, 862, 863]);
     $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
 
-    for ($row = 1; $row <= 20; $row++) {
+    for ($row = 1; $row <= 21; $row++) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
@@ -77,26 +79,93 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
 
   public function postProcess() {
     $values = $this->exportValues();
-    $options = $this->getColorOptions();
-    CRM_Core_Session::setStatus(E::ts('You picked color "%1"', array(
-      1 => $options[$values['favorite_color']],
-    )));
     parent::postProcess();
+    $this->submit($values);
   }
 
-  public function getColorOptions() {
-    $options = array(
-      '' => E::ts('- select -'),
-      '#f00' => E::ts('Red'),
-      '#0f0' => E::ts('Green'),
-      '#00f' => E::ts('Blue'),
-      '#f0f' => E::ts('Purple'),
-    );
-    foreach (array('1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e') as $f) {
-      $options["#{$f}{$f}{$f}"] = E::ts('Grey (%1)', array(1 => $f));
+  public function submit($values) {
+    if (empty($values['organiation_name'])) {
+      $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
+      $values['organization_email'] = $values['primary_email'];
     }
-    return $options;
-  }
+    $organization_params = [
+      'organization_name' => $values['organization_name'],
+      'email' => $values['organization_email'],
+    ];
+    $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
+    $dedupeParams['check_permission'];
+    $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
+    $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+    $organization_params['contact_sub_type'] = 'service_provider';
+    $organization = civicrm_api3('Contact', 'create', $organization_params);
+    civicrm_api3('Address', 'create', [
+      'street_address' => $values['work_address'][1],
+      'postal_code' => $values['postal_code'][1],
+      'city' => $values['city'][1],
+      'state_province_id' => 'Ontario',
+      'country_id' => 'Canada',
+      'location_type_id' => 'Work',
+      'is_primary' => 1,
+      'contact_id' => $organization['id'],
+    ]);
+    if (!empty($values['primary_phone_number'])) {
+      civicrm_api3('Phone', 'create', [
+        'phone' => $values['primary_phone_number'],
+        'location_type_id' => 'Work',
+        'contact_id' => $organization['id'],
+        'phone_type_id' => 'Phone',
+      ]);
+    }
+    $customFields = ['861', '862', '863', '864', '865', '866', '867'];
+    $customFieldParams = ['entity_id' => $organization['id']];
+    foreach ($customFields as $customField) {
+      $customFieldParams['custom_' . $customField] = $values['custom_' . $customField];
+    } 
+    civicrm_api3('CustomValue', 'create', $customFieldParams);
+    for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
+      if (!empty($values['custom_858'][$rowNumber])) {
+        $campCustomFieldParams = [
+          'entity_id' => $organization['id'],
+          'custom_858' => $values['custom_858'][$rowNumber],
+          'custom_859' => $values['custom_859'][$rowNumber],    
+          'custom_860' => $values['custom_860'][$rowNumber],
+        ];
+        civicrm_api3('CustomValue', 'create', $campCustomFieldParams);
+      }
+      if (!empty($values['staff_first_name'][$rowNumber])) {
+        $individualParams = [
+          'first_name' => $values['staff_first_name'][$rowNumber],
+          'last_name' => $values['staff_last_name'][$rowNumber],
+        ];
+        $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
+        $dedupeParams['check_permission'];
+        $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 9);
+        $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+        if (empty($individualParams['contact_id'])) {
+          $individualParams['contact_sub_type'] = 'Provider';
+        }
+        if ($rowNumber === 1) {
+          $individualParams['email'] = $values['primary_email'];
+        }
+        $staffMember = civicrm_api3('Contact', 'create', $individualParams);
+        $relationshipParams = [
+          'contact_id_a' => $staffMember['id'],
+          'contact_id_b' => $organization['id'],
+          'relationship_type_id' => 5,
+        ];
+        $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
+        if (empty($relationshipCheck['count'])) {
+          try {
+            civicrm_api3('Relationship', 'create', $relationshipParams);
+          }
+          catch (Exception $e) {
+          }
+        }
+        // @todo add in handling for primary contact relationship.
+        // if ($rowNumber === 1) {
+      }
+    }
+  }  
 
   /**
    * Get the fields/elements defined in this form.

@@ -1,0 +1,14 @@
+.custom-checkbox {
+  display: block;
+  margin-left: 7px;
+}
+
+.crm-form-textarea, .crm-form-text, .select2-container {
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .custom-checkbox {
+    margin-left: initial;
+  }
+}

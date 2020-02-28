@@ -10,19 +10,21 @@ use CRM_Aoonestopshop_ExtensionUtil as E;
 class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_Form_ProviderApplication {
   public function buildQuickForm() {
 
+    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoonestopshop', 'css/providerformstyle.css');
+
     $defaults = [];
 
     $serviceProviderOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('provider_type', E::ts('Type of Service Provider'), $serviceProviderOptions);
     $defaults['provider_type'] = 1;
     $this->add('text', 'organization_name', E::ts('Organization Name'));
-    $this->add('text', 'organization_email', E::ts('Organization Email'));
+    $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));    
     $this->add('text', 'primary_first_name', E::ts('First Name'));
     $this->add('text', 'primary_last_name', E::ts('Last Name'));
-    $this->add('text', 'primary_email', E::ts('Email address'));
+    $this->add('email', 'primary_email', E::ts('Email address'));
     $this->add('text', 'primary_phone_number', E::ts('Phone Number'));
-    $this->add('text', 'primary_website', E::ts('Website'));
+    $this->add('text', 'primary_website', E::ts('Website'), ['maxlength' => 255]);
     $this->add('advcheckbox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
     $defaults['display_name_public'] = 1;
     $this->add('advcheckbox', 'display_email', E::ts('Display email address in public listing?'));
@@ -30,16 +32,18 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
     $defaults['display_phone'] = 1;
     
-    for ($rowNumber = 1; $rowNumber <= 10; $rowNumber++) {
+    for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "work_address[$rowNumber]", E::ts('Work Address'), ['size' => 45, 'maxlength' => 96, 'class' => 'huge']);
       $this->add('text', "postal_code[$rowNumber]", E::ts('Postal code'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
       $this->add('text', "city[$rowNumber]", E::ts('City/Town'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
+    }
+    for ($rowNumber = 1; $rowNumber <= 22; $rowNumber++) {
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
-      $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
     }
-    $customFields = [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
+    $customFields = [861 => TRUE, 862 => TRUE, 863 => FALSE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
     foreach ($customFields as $id => $isRequired) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
     }
@@ -47,7 +51,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
     $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
 
-    for ($row = 1; $row <= 20; $row++) {
+    for ($row = 1; $row <= 21; $row++) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
@@ -70,7 +74,26 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
   }
 
   public function providerFormRule($values) {
-    $errors = [];
+    $errors = $setValues = [];
+    $staffMemberCount = 0;
+    foreach ($values['custom_863'] as $value => $checked) {
+      if ($checked) {
+        $setValues[] = $value;
+      }
+    }
+    foreach ($values['staff_record_regulator'] as $key => $value) {
+      if (!empty($value)) {
+        $staffMemberCount++;
+        if (stristr($value, 'ontariocampassociation.ca') === FALSE) {
+          if (empty($values['staff_first_name'][$key])) {
+            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('Need to provide the first name of the regulated staff member');
+          }
+          if (empty($values['staff_last_name'][$key])) {
+            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
+          }
+        }
+      }
+    }
     if ($values['provider_type'] == 1 && empty($values['display_name_public'])) {
       $errors['display_name_public'] = E::ts('Provider first name and last name must be displayed in public listing');
     }
@@ -79,12 +102,44 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     }
     if ($values['provider_type'] == 1 && empty($values['primary_phone_number']) && empty($values['primary_email'])) {
       $errors['primary_phone_number'] = E::ts('At least one of email or phone must be provided and made public');
+      $errors['primary_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
     $addressFieldLables = ['phone' => E::ts('Work Phone Number'), 'work_address' => E::ts('Work Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town'), 'postal_code' =>  E::ts('Postal code')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
         $errors[$addressField . '[1]'] = E::ts('Need to supply %1', [1 => $addressFieldLables[$addressField]]);
       }
+    }
+    $workLocationIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    foreach ($workLocationIds as $workRecordId) {
+      if (!empty($values['phone'][$workRecordId]) || !empty($values['work_address'][$workRecordId]) || !empty($values['postal_code'][$workRecordId]) || !empty($values['city'][$workRecordId])) {
+        foreach (['phone', 'work_address', 'postal_code', 'city'] as $field) {
+          if (empty($values[$field][$workRecordId])) {
+            $errors[$field . '[' . $workRecordId . ']'] = E::ts('You need to supply supplemental work location %1 %2', [1 => ($workRecordId - 1), 2 => $addressFieldLables[$field]]);
+          }
+        }
+      }
+    }
+    if ($values['provider_type'] == 1 && count($setValues) > 1 ) {
+      $errors['custom_863'] = E::ts('You have selected more than one registered service');
+    }
+    if ($values['provider_type'] == 2 && count($setValues) > $staffMemberCount) {
+      $errors['custom_863'] = E::ts('Ensure you have entered all the staff members that match the registered services');
+    }
+    if ($values['provider_type'] == 2 && empty($values['organization_name'])) {
+      $errors['organization_name'] = E::ts('Need to supply the organization name');
+    }
+    if ($values['provider_type'] == 2 && empty($values['organization_email'])) {
+      $errors['organization_email'] = E::ts('Need to supply the organization email');
+    }
+    if (!empty($values['custom_862']) && empty($setValues)) {
+      $errors['custom_863'] = E::ts('You must select at least one registered service');
+    }
+    if (empty($values['primary_first_name'])) {
+      $errors['primary_first_name'] = E::ts('You must supply the first name of the primary contact');
+    }
+    if (empty($values['primary_last_name'])) {
+      $errors['primary_last_name'] = E::ts('You must supply the first name of the primary contact');
     }
     return empty($errors) ? TRUE : $errors;
   }
