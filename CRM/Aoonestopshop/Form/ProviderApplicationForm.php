@@ -31,7 +31,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     $defaults['display_email'] = 1;
     $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
     $defaults['display_phone'] = 1;
-    
+    $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver')); 
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "work_address[$rowNumber]", E::ts('Work Address'), ['size' => 45, 'maxlength' => 96, 'class' => 'huge']);
@@ -140,6 +140,12 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
     }
     if (empty($values['primary_last_name'])) {
       $errors['primary_last_name'] = E::ts('You must supply the first name of the primary contact');
+    }
+    if (empty($values['waiver_field'])) {
+      $errors['waiver_field'] = E::ts('You must agree to the waivers for the application to proceed');
+    }
+    if (empty($values['website'])) {
+      $errors['website'] = E::ts('Need to supply a website');
     }
     return empty($errors) ? TRUE : $errors;
   }

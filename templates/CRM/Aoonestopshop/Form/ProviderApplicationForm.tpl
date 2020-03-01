@@ -152,8 +152,13 @@
 {/section}
 <span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
 
-<p>{ts}Please note Autism Ontario reserves the right to refuse, suspend, or remove an applicant or previously approved member of Autism OneStop Listing Service{/ts}</p>
 {* FOOTER *}
+<div class="crm-public-form-item crm-section waiver-section">
+  <p>{ts}I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario One Stop and I understand that failure to comply with the above criteria, may result in the removal of my listing{/ts}</p>
+  <div class="label">{$form.waiver_field.label}</div>
+  <div class="content">{$form.waiver_field.html}</div>
+  <p>{ts}Please note Autism Ontario reserves the right to refuse, suspend, or remove an applicant or previously approved member of Autism OneStop Listing Service{/ts}</p>
+</div>
 <div class="crm-submit-buttons">
 {include file="CRM/common/formButtons.tpl" location="bottom"}
 </div>
