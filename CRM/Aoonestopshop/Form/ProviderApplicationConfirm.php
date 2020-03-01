@@ -252,6 +252,8 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
         civicrm_api3('Address', 'create', $params);
       }
     }
+    // Redirect to thank you page.
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-provider-thankyou', 'reset=1'));
   }  
 
   /**

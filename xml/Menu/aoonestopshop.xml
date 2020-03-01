@@ -4,12 +4,21 @@
     <path>civicrm/one-stop-provider-application</path>
     <page_callback>CRM_Aoonestopshop_Controller_ProviderApplication</page_callback>
     <title>ProviderApplicationForm</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>*always allow*</access_arguments>
+    <is_public>true</is_public>
   </item>
   <item>
     <path>civicrm/one-stop-provider-application-confirm</path>
     <page_callback>CRM_Aoonestopshop_Form_ProviderApplicationConfirm</page_callback>
     <title>ProviderApplicationConfirm</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>*always allow*</access_arguments>
+    <is_public>true</is_public>
+  </item>
+  <item>
+    <path>civicrm/one-stop-provider-thankyou</path>
+    <page_callback>CRM_Aoonestopshop_Page_ProviderApplicationThankYou</page_callback>
+    <title>Application Submitted</title>
+    <access_arguments>*always allow*</access_arguments>
+    <is_public>true</is_public>
   </item>
 </menu>
