@@ -135,16 +135,20 @@
 {/foreach}
 {section name='c' start=1 loop=21}
   {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
-    <div class="label">{$form.custom_858.$rowN.label}</div>
-    <div class="content">{$form.custom_858.$rowN.html}</div>
-    <div class="clear"></div>
-    <div class="label">{ts}Camp Session Dates{/ts}</div>
-    <div class="content">
-      <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
-      <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
+  <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
+    <div class="crm-section">
+      <div class="label">{$form.custom_858.$rowN.label}</div>
+      <div class="content">{$form.custom_858.$rowN.html}</div>
+      <div class="clear"></div><br/>
     </div>
-    <div class="clear"></div>
+    <div class="crm-section">
+      <div class="label" style="font-weight:inherit;">{ts}Camp Session Dates{/ts}</div>
+      <div class="content">
+        <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
+        <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
+      </div>
+      <div class="clear"></div><br/>
+    </div>
     {if $rowN neq 1}
        <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
     {/if}
@@ -170,17 +174,21 @@
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
+        $('#display_name_public').prop({'checked': true, 'disabled': true});
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
+        $('#display_name_public').removeAttr('disabled');
       }
       $('[name=provider_type]').on('change', function() {
         if ($(this).val() == "1") {
           $('.edit-row-organization_name').hide();
           $('.edit-row-organization_email').hide();
+          $('#display_name_public').prop({'checked': true, 'disabled': true});
         }
         else {
+          $('#display_name_public').removeAttr('disabled');
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
         }
