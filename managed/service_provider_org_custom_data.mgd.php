@@ -5,7 +5,7 @@ return [
     'entity' => 'CustomGroup',
     'params' => [
       'name' => 'service_provider_details',
-      'title' => 'Service Provider Details',
+      'title' => 'Service Listing Details',
       'extends' => 'Organization',
       'extends_entity_column_value' => 'service_provider',
       'style' => 'Inline',
@@ -20,7 +20,7 @@ return [
     'entity' => 'CustomGroup',
     'params' => [
       'name' => 'service_provider_events',
-      'title' => 'Service Provider Events',
+      'title' => 'Service Listing Events',
       'extends' => 'Organization',
       'extends_entity_column_value' => 'service_provider',
       'style' => 'Tab',
