@@ -1,9 +1,9 @@
 {* HEADER *}
 {crmScope extensionKey='biz.jmaconsulting.aoonestop'}
 
-<div class="crm-section edit-row-{$form.provider_type.id}">
-  <div class="label">{$form.provider_type.label}</div>
-  <div class="content">{$form.provider_type.html}</div>
+<div class="crm-section edit-row-{$form.listing_type.id}">
+  <div class="label">{$form.listing_type.label}</div>
+  <div class="content">{$form.listing_type.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.organization_name.id}">
@@ -154,8 +154,8 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-      var serviceProvider = $('[name=provider_type]').val();
-      if (serviceProvider == "1") {
+      var serviceListing = $('[name=listing_type]').val();
+      if (serviceListing == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
       }

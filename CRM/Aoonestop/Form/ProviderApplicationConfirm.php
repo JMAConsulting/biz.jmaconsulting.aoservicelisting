@@ -12,8 +12,8 @@ class CRM_Aoonestop_Form_ProviderApplicationConfirm extends CRM_Aoonestop_Form_P
     $defaults = $this->get('formValues');
     unset($defaults['qfKey']);
     unset($defaults['entryUrl']);
-    $serviceProviderOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
-    $this->addRadio('provider_type', E::ts('Type of Service Provider'), $serviceProviderOptions);
+    $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
+    $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
     $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));
@@ -253,7 +253,7 @@ class CRM_Aoonestop_Form_ProviderApplicationConfirm extends CRM_Aoonestop_Form_P
       }
     }
     // Redirect to thank you page.
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-provider-thankyou', 'reset=1'));
+    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-listing-thankyou', 'reset=1'));
   }  
 
   /**

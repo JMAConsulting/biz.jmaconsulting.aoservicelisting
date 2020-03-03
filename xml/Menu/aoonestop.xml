@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <menu>
   <item>
-    <path>civicrm/one-stop-provider-application</path>
+    <path>civicrm/one-stop-listing-application</path>
     <page_callback>CRM_Aoonestop_Controller_ProviderApplication</page_callback>
-    <title>OneStop Provider Listing Application</title>
+    <title>OneStop Service Listing Application</title>
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/one-stop-provider-application-confirm</path>
+    <path>civicrm/one-stop-listing-application-confirm</path>
     <page_callback>CRM_Aoonestop_Form_ProviderApplicationConfirm</page_callback>
-    <title>OneStop Provider Listing Application Confirm</title>
+    <title>OneStop Service Listing Application Confirm</title>
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/one-stop-provider-thankyou</path>
+    <path>civicrm/one-stop-listing-thankyou</path>
     <page_callback>CRM_Aoonestop_Page_ProviderApplicationThankYou</page_callback>
     <title>Application Submitted</title>
     <access_arguments>*always allow*</access_arguments>

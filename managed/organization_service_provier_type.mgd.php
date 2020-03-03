@@ -5,7 +5,7 @@ return [
     'entity' => 'ContactType',
     'params' => [
       'version' => 3,
-      'label' => 'Service Provider',
+      'label' => 'Service Listing',
       'name' => 'service_provider',
       'parent_id' => 'Organization',
       'is_active' => 1,

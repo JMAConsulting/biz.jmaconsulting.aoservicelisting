@@ -14,9 +14,9 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
 
     $defaults = [];
 
-    $serviceProviderOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
-    $this->addRadio('provider_type', E::ts('Type of Service Provider'), $serviceProviderOptions);
-    $defaults['provider_type'] = 1;
+    $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
+    $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
+    $defaults['listing_type'] = 1;
     $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));    
@@ -94,13 +94,13 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
         }
       }
     }
-    if ($values['provider_type'] == 1 && empty($values['display_name_public'])) {
-      $errors['display_name_public'] = E::ts('Provider first name and last name must be displayed in public listing');
+    if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
+      $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
     }
-    if ($values['provider_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
+    if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
       $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
-    if ($values['provider_type'] == 1 && empty($values['primary_phone_number']) && empty($values['primary_email'])) {
+    if ($values['listing_type'] == 1 && empty($values['primary_phone_number']) && empty($values['primary_email'])) {
       $errors['primary_phone_number'] = E::ts('At least one of email or phone must be provided and made public');
       $errors['primary_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
@@ -120,16 +120,16 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
         }
       }
     }
-    if ($values['provider_type'] == 1 && count($setValues) > 1 ) {
+    if ($values['listing_type'] == 1 && count($setValues) > 1 ) {
       $errors['custom_863'] = E::ts('You have selected more than one registered service');
     }
-    if ($values['provider_type'] == 2 && count($setValues) > $staffMemberCount) {
+    if ($values['listing_type'] == 2 && count($setValues) > $staffMemberCount) {
       $errors['custom_863'] = E::ts('Ensure you have entered all the staff members that match the registered services');
     }
-    if ($values['provider_type'] == 2 && empty($values['organization_name'])) {
+    if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Need to supply the organization name');
     }
-    if ($values['provider_type'] == 2 && empty($values['organization_email'])) {
+    if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
       $errors['organization_email'] = E::ts('Need to supply the organization email');
     }
     if (!empty($values['custom_862']) && empty($setValues)) {
