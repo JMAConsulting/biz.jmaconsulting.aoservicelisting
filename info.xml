@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="biz.jmaconsulting.aoonestop" type="module">
   <file>aoonestop</file>
-  <name>Autism Ontario One Stop Shop</name>
-  <description>CiviCRM Forms and processing for the Austim Ontario One Stop Shop</description>
+  <name>Autism Ontario One Stop</name>
+  <description>CiviCRM Forms and processing for the Austim Ontario One Stop</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Seamus Lee</author>
