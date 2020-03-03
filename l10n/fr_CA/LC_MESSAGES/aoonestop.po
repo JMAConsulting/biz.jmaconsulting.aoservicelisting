@@ -4,212 +4,212 @@
 # make sure you license it to CiviCRM LLC under Academic Free License 3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: aoonestopshop\n"
-"POT-Creation-Date: 2020-03-02 10:37+1100\n"
+"Project-Id-Version: aoonestop\n"
+"POT-Creation-Date: 2020-03-03 16:19+1100\n"
 "Language-Team: CiviCRM Translators <civicrm-translators@lists.civicrm.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Individual"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Organization"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Type of Service Provider"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Organization Name"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Organization Email"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Website"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "First Name"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Last Name"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Email address"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Phone Number"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Display First Name and Last Name in public listing?"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Display email address in public listing?"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Display phone number in public listing?"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "I agree to the above waiver"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Work Address"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Postal code"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "City/Town"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Record on Regulator's site"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Continue"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
 msgid "Submit"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationConfirm.php
+#: CRM/Aoonestop/Form/ProviderApplicationConfirm.php
 msgid "Previous"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to provide the first name of the regulated staff member"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to provide the last name of the regulated staff member"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Provider first name and last name must be displayed in public listing"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "At least one of email or phone must be provided and made public"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Work Phone Number"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to supply %1"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "You need to supply supplemental work location %1 %2"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "You have selected more than one registered service"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid ""
 "Ensure you have entered all the staff members that match the registered "
 "services"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to supply the organization name"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to supply the organization email"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "You must select at least one registered service"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "You must supply the first name of the primary contact"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "You must agree to the waivers for the application to proceed"
 msgstr ""
 
-#: CRM/Aoonestopshop/Form/ProviderApplicationForm.php
+#: CRM/Aoonestop/Form/ProviderApplicationForm.php
 msgid "Need to supply a website"
 msgstr ""
 
-#: CRM/Aoonestopshop/Page/ProviderApplicationThankYou.php
+#: CRM/Aoonestop/Page/ProviderApplicationThankYou.php
 msgid "Thank you for submitting your application"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid ""
 "The primary contact's name, email and phone will be used by Autism Ontario "
 "to communicate about the is application/listing"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Primary Work Location"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid ""
 "Work location information is included in public service provider listings"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Supplementary Work Location %1"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Staff Person %1"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid ""
 "For each staff person who is a regulated professional, add a link to their "
 "listing on their College's site showing their status. If a url directly to "
@@ -218,13 +218,13 @@ msgid ""
 "Autism Ontario for verification purposes and is not displayed to the public"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Camp Session Dates"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid ""
 "I certify that all of the information contained in my listing is true and I "
 "have the authority to add this listing to Autism Ontario One Stop and I "
@@ -232,34 +232,34 @@ msgid ""
 "removal of my listing"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid ""
 "Please note Autism Ontario reserves the right to refuse, suspend, or remove "
 "an applicant or previously approved member of Autism OneStop Listing Service"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Hide"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Add another work location"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Add another staff person who is a regulated professional"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Form/ProviderApplicationForm.tpl
+#: templates/CRM/Aoonestop/Form/ProviderApplicationForm.tpl
 msgid "Add another session"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Page/ProviderApplicationThankYou.tpl
+#: templates/CRM/Aoonestop/Page/ProviderApplicationThankYou.tpl
 msgid "Application Submitted"
 msgstr ""
 
-#: templates/CRM/Aoonestopshop/Page/ProviderApplicationThankYou.tpl
+#: templates/CRM/Aoonestop/Page/ProviderApplicationThankYou.tpl
 msgid ""
 "Thank you for your application. Autism Ontario will be in touch with any "
 "questions in regards to your application"
