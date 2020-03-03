@@ -19,7 +19,7 @@
  * State machine for managing different states of the Import process.
  *
  */
-class CRM_Aoonestopshop_StateMachine_ProviderApplication extends CRM_Core_StateMachine {
+class CRM_Aoonestop_StateMachine_ProviderApplication extends CRM_Core_StateMachine {
 
   /**
    * Class constructor.
@@ -33,8 +33,8 @@ class CRM_Aoonestopshop_StateMachine_ProviderApplication extends CRM_Core_StateM
     parent::__construct($controller, $action);
 
     $this->_pages = [
-      'CRM_Aoonestopshop_Form_ProviderApplicationForm' => NULL,
-      'CRM_Aoonestopshop_Form_ProviderApplicationConfirm' => NULL,
+      'CRM_Aoonestop_Form_ProviderApplicationForm' => NULL,
+      'CRM_Aoonestop_Form_ProviderApplicationConfirm' => NULL,
     ];
 
     $this->addSequentialPages($this->_pages, $action);

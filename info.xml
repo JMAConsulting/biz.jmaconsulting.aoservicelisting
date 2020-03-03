@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<extension key="biz.jmaconsulting.aoonestopshop" type="module">
-  <file>aoonestopshop</file>
+<extension key="biz.jmaconsulting.aoonestop" type="module">
+  <file>aoonestop</file>
   <name>Autism Ontario One Stop Shop</name>
   <description>CiviCRM Forms and processing for the Austim Ontario One Stop Shop</description>
   <license>AGPL-3.0</license>
@@ -25,6 +25,6 @@
     <psr4 prefix="Civi\" path="Civi"/>
   </classloader>
   <civix>
-    <namespace>CRM/Aoonestopshop</namespace>
+    <namespace>CRM/Aoonestop</namespace>
   </civix>
 </extension>

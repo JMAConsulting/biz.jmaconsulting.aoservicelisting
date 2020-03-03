@@ -1,4 +1,4 @@
-# biz.jmaconsulting.aoonestopshop
+# biz.jmaconsulting.aoonestop
 
 ![Screenshot](/images/screenshot.png)
 
@@ -22,7 +22,7 @@ install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
 cd <extension-dir>
-cv dl biz.jmaconsulting.aoonestopshop@https://github.com/FIXME/biz.jmaconsulting.aoonestopshop/archive/master.zip
+cv dl biz.jmaconsulting.aoonestop@https://github.com/FIXME/biz.jmaconsulting.aoonestopshop/archive/master.zip
 ```
 
 ## Installation (CLI, Git)
@@ -31,8 +31,8 @@ Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) 
 install it with the command-line tool [cv](https://github.com/civicrm/cv).
 
 ```bash
-git clone https://github.com/FIXME/biz.jmaconsulting.aoonestopshop.git
-cv en aoonestopshop
+git clone https://github.com/FIXME/biz.jmaconsulting.aoonestop.git
+cv en aoonestop
 ```
 
 ## Usage

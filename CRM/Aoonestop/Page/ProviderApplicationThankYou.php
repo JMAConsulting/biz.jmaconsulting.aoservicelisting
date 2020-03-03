@@ -1,7 +1,7 @@
 <?php
-use CRM_Aoonestopshop_ExtensionUtil as E;
+use CRM_Aoonestop_ExtensionUtil as E;
 
-class CRM_Aoonestopshop_Page_ProviderApplicationThankYou extends CRM_Core_Page {
+class CRM_Aoonestop_Page_ProviderApplicationThankYou extends CRM_Core_Page {
 
   public function run() {
     // Example: Set the page-title dynamically; alternatively, declare a static title in xml/Menu/*.xml

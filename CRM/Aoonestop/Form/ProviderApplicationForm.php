@@ -1,16 +1,16 @@
 <?php
 
-use CRM_Aoonestopshop_ExtensionUtil as E;
+use CRM_Aoonestop_ExtensionUtil as E;
 
 /**
  * Form controller class
  *
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
-class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_Form_ProviderApplication {
+class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_ProviderApplication {
   public function buildQuickForm() {
 
-    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoonestopshop', 'css/providerformstyle.css');
+    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoonestop', 'css/providerformstyle.css');
 
     $defaults = [];
 
@@ -69,7 +69,7 @@ class CRM_Aoonestopshop_Form_ProviderApplicationForm extends CRM_Aoonestopshop_F
 
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
-    $this->addFormRule(['CRM_Aoonestopshop_Form_ProviderApplicationForm', 'providerFormRule']);
+    $this->addFormRule(['CRM_Aoonestop_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
 

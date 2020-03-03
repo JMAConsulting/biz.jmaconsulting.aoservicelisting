@@ -26,7 +26,7 @@
  * The second form is used to process search results with the associated actions
  *
  */
-class CRM_Aoonestopshop_Controller_ProviderApplication extends CRM_Core_Controller {
+class CRM_Aoonestop_Controller_ProviderApplication extends CRM_Core_Controller {
 
   /**
    * Class constructor.
@@ -38,7 +38,7 @@ class CRM_Aoonestopshop_Controller_ProviderApplication extends CRM_Core_Controll
   public function __construct($title = NULL, $action = CRM_Core_Action::NONE, $modal = TRUE) {
     parent::__construct($title, $modal);
 
-    $this->_stateMachine = new CRM_Aoonestopshop_StateMachine_ProviderApplication($this, $action);
+    $this->_stateMachine = new CRM_Aoonestop_StateMachine_ProviderApplication($this, $action);
 
     // create and instantiate the pages
     $this->addPages($this->_stateMachine, $action);

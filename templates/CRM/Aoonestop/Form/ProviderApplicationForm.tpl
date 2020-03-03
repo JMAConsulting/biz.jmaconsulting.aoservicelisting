@@ -1,5 +1,5 @@
 {* HEADER *}
-{crmScope extensionKey='biz.jmaconsulting.aoonestopshop'}
+{crmScope extensionKey='biz.jmaconsulting.aoonestop'}
 
 <div class="crm-section edit-row-{$form.provider_type.id}">
   <div class="label">{$form.provider_type.label}</div>
