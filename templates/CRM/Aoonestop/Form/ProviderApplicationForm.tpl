@@ -71,18 +71,26 @@
     {else}
       <fieldset><legend><span class="fieldset-legend">{ts 1=$rowNumber-1}Supplementary Work Location %1{/ts}</span></legend>
     {/if}
-      <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
-      <div class="content">{$form.phone.$rowNumber.html}</div>
-      <div class="clear"></div><br/>
-      <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-      <div class="content">{$form.work_address.$rowNumber.html}</div>
-      <div class="clear"></div><br/>
-      <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-      <div class="content">{$form.city.$rowNumber.html}</div>
-      <div class="clear"></div><br/>
-      <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-      <div class="content">{$form.postal_code.$rowNumber.html}</div>
-      <div class="clear"></div><br/>
+      <div class="crm-section">
+        <div class="label">{$form.phone.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span> </div>
+        <div class="content">{$form.phone.$rowNumber.html}</div>
+        <div class="clear"></div>
+      </div>
+      <div class="crm-section">
+        <div class="label">{$form.work_address.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+        <div class="content">{$form.work_address.$rowNumber.html}</div>
+        <div class="clear"></div>
+      </div>
+      <div class="crm-section">
+        <div class="label">{$form.city.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+        <div class="content">{$form.city.$rowNumber.html}</div>
+        <div class="clear"></div>
+      </div>
+      <div class="crm-section">
+        <div class="label">{$form.postal_code.$rowNumber.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+        <div class="content">{$form.postal_code.$rowNumber.html}</div>
+        <div class="clear"></div>
+      </div>
       {if $rowNumber neq 1}
          <div><a href=# class="remove_item_employee crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
       {/if}
@@ -107,15 +115,21 @@
         <legend>
           <span class="fieldset-legend">{ts 1=$rowNum}Staff Person %1{/ts}</span>
         </legend>
-        <div class="label">{$form.staff_first_name.$rowNum.label}</div>
-        <div class="content">{$form.staff_first_name.$rowNum.html}</div>
-        <div class="clear"></div><br/>
-        <div class="label">{$form.staff_last_name.$rowNum.label}</div>
-        <div class="content">{$form.staff_last_name.$rowNum.html}</div>
-        <div class="clear"></div><br/>
-        <div class="label">{$form.staff_record_regulator.$rowNum.label}</div>
-        <div class="content">{$form.staff_record_regulator.$rowNum.html}</div>
-        <div class="clear"></div><br/>
+        <div class="crm-section">
+          <div class="label">{$form.staff_first_name.$rowNum.label}</div>
+          <div class="content">{$form.staff_first_name.$rowNum.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.staff_last_name.$rowNum.label}</div>
+          <div class="content">{$form.staff_last_name.$rowNum.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.staff_record_regulator.$rowNum.label}</div>
+          <div class="content">{$form.staff_record_regulator.$rowNum.html}</div>
+          <div class="clear"></div>
+        </div>
         {if $rowNum neq 1}
           <div><a href=# class="remove_item_staff crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
         {/if}
@@ -175,21 +189,21 @@ $('#crm-container.crm-public .label').css('font-size', '16px');
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
-        $('#display_name_public').prop({'checked': true, 'disabled': true});
+        $('#display_name_public').prop({'checked': true, 'readonly': true});
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
-        $('#display_name_public').removeAttr('disabled');
+        $('#display_name_public').removeAttr('readonly');
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
           $('.edit-row-organization_name').hide();
           $('.edit-row-organization_email').hide();
-          $('#display_name_public').prop({'checked': true, 'disabled': true});
+          $('#display_name_public').prop({'checked': true, 'readonly': true});
         }
         else {
-          $('#display_name_public').removeAttr('disabled');
+          $('#display_name_public').removeAttr('readonly');
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
         }
