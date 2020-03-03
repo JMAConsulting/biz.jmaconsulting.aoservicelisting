@@ -7,6 +7,10 @@
   max-width: 100%;
 }
 
+#crm-container .crm-public .label {
+  font-size': 16px
+}
+
 @media (min-width: 768px) {
   .custom-checkbox {
     margin-left: initial;
