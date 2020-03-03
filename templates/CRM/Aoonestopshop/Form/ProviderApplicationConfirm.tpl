@@ -164,7 +164,7 @@
         $('.edit-row-organization_email').show();
       }
 
-      if ($('#custom_863_3').prop('checked')) {
+      if ($('#custom_863_3').val() == "1") {
         $('[id^=custom_858]').each(function() {
           if ($(this).parent().text().length < 2) {
             $(this).parent().parent().parent().addClass('hiddenElement');

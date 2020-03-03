@@ -157,8 +157,8 @@ class CRM_Aoonestopshop_Form_ProviderApplicationConfirm extends CRM_Aoonestopsho
         $campCustomFieldParams = [
           'entity_id' => $organization['id'],
           'custom_858' => $values['custom_858'][$rowNumber],
-          'custom_859' => $values['custom_859'][$rowNumber],    
-          'custom_860' => $values['custom_860'][$rowNumber],
+          'custom_859' => date('Ymd', strtotime($values['custom_859'][$rowNumber])),
+          'custom_860' => date('Ymd', strtotime($values['custom_860'][$rowNumber])),
         ];
         civicrm_api3('CustomValue', 'create', $campCustomFieldParams);
       }

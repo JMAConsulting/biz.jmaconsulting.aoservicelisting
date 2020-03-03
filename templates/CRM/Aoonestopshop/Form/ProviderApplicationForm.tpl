@@ -170,6 +170,7 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
+$('#crm-container.crm-public .label').css('font-size', '16px');
       var serviceProvider = $('[name=provider_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
