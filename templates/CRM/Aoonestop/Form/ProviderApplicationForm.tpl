@@ -24,12 +24,12 @@
 <fieldset>
   <legend><span class="fieldset-legend">Primary Contact</span></legend>
   <div class="crm-section edit-row-{$form.primary_first_name.id}">
-    <div class="label">{$form.primary_first_name.label}</div>
+    <div class="label">{$form.primary_first_name.label}  <span class="crm-marker" title="This field is required.">*</span></div>
     <div class="content">{$form.primary_first_name.html}</div>
     <div class="clear"></div>
   </div>
   <div class="crm-section edit-row-{$form.primary_last_name.id}">
-    <div class="label">{$form.primary_last_name.label}</div>
+    <div class="label">{$form.primary_last_name.label}  <span class="crm-marker" title="This field is required.">*</span></div>
     <div class="content">{$form.primary_last_name.html}</div>
     <div class="clear"></div>
   </div>
@@ -39,7 +39,7 @@
     <div class="clear"></div>
   </div>
   <div class="crm-section edit-row-{$form.primary_email.id}">
-    <div class="label">{$form.primary_email.label}</div>
+    <div class="label">{$form.primary_email.label}  <span class="crm-marker" title="This field is required.">*</span></div>
     <div class="content">{$form.primary_email.html}</div>
     <div class="clear"></div>
   </div>
@@ -49,7 +49,7 @@
     <div class="clear"></div>
   </div>
   <div class="crm-section edit-row-{$form.primary_phone_number.id}">
-    <div class="label">{$form.primary_phone_number.label}</div>
+    <div class="label">{$form.primary_phone_number.label}  <span class="crm-marker" title="This field is required.">*</span></div>
     <div class="content">{$form.primary_phone_number.html}</div>
     <div class="clear"></div>
   </div>
@@ -58,7 +58,7 @@
     <div class="content">{$form.display_phone.html}</div>
     <div class="clear"></div>
   </div>
-  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the is application/listing{/ts}</p>
+  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application.{/ts}</p>
 </fieldset>
 
 <div class="crm-public-form-item crm-section">
@@ -173,7 +173,7 @@
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
   <p>{ts}I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario One Stop and I understand that failure to comply with the above criteria, may result in the removal of my listing{/ts}</p>
-  <div class="label">{$form.waiver_field.label}</div>
+  <div class="label">{$form.waiver_field.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.waiver_field.html}</div>
   <p>{ts}Please note Autism Ontario reserves the right to refuse, suspend, or remove an applicant or previously approved member of Autism OneStop Listing Service{/ts}</p>
 </div>

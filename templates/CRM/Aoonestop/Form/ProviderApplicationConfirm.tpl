@@ -133,8 +133,7 @@
     <div class="clear"></div>
     <div class="label">{ts}Camp Session Dates{/ts}</div>
     <div class="content">
-      <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
-      <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
+      <div style="float:left;">{$form.custom_859.$rowN.html}&nbsp;&nbsp;-&nbsp;&nbsp;{$form.custom_860.$rowN.html}</div>
     </div>
     <div class="clear"></div>
   </div>
