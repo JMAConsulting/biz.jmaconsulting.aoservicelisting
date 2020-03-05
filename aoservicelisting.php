@@ -1,15 +1,15 @@
 <?php
 
-require_once 'aoonestop.civix.php';
-use CRM_Aoonestop_ExtensionUtil as E;
+require_once 'aoservicelisting.civix.php';
+use CRM_Aoservicelisting_ExtensionUtil as E;
 
 /**
  * Implements hook_civicrm_config().
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_config/ 
  */
-function aoonestop_civicrm_config(&$config) {
-  _aoonestop_civix_civicrm_config($config);
+function aoservicelisting_civicrm_config(&$config) {
+  _aoservicelisting_civix_civicrm_config($config);
 }
 
 /**
@@ -17,8 +17,8 @@ function aoonestop_civicrm_config(&$config) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_xmlMenu
  */
-function aoonestop_civicrm_xmlMenu(&$files) {
-  _aoonestop_civix_civicrm_xmlMenu($files);
+function aoservicelisting_civicrm_xmlMenu(&$files) {
+  _aoservicelisting_civix_civicrm_xmlMenu($files);
 }
 
 /**
@@ -26,8 +26,8 @@ function aoonestop_civicrm_xmlMenu(&$files) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_install
  */
-function aoonestop_civicrm_install() {
-  _aoonestop_civix_civicrm_install();
+function aoservicelisting_civicrm_install() {
+  _aoservicelisting_civix_civicrm_install();
 }
 
 /**
@@ -35,8 +35,8 @@ function aoonestop_civicrm_install() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_postInstall
  */
-function aoonestop_civicrm_postInstall() {
-  _aoonestop_civix_civicrm_postInstall();
+function aoservicelisting_civicrm_postInstall() {
+  _aoservicelisting_civix_civicrm_postInstall();
 }
 
 /**
@@ -44,8 +44,8 @@ function aoonestop_civicrm_postInstall() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_uninstall
  */
-function aoonestop_civicrm_uninstall() {
-  _aoonestop_civix_civicrm_uninstall();
+function aoservicelisting_civicrm_uninstall() {
+  _aoservicelisting_civix_civicrm_uninstall();
 }
 
 /**
@@ -53,8 +53,8 @@ function aoonestop_civicrm_uninstall() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_enable
  */
-function aoonestop_civicrm_enable() {
-  _aoonestop_civix_civicrm_enable();
+function aoservicelisting_civicrm_enable() {
+  _aoservicelisting_civix_civicrm_enable();
 }
 
 /**
@@ -62,8 +62,8 @@ function aoonestop_civicrm_enable() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_disable
  */
-function aoonestop_civicrm_disable() {
-  _aoonestop_civix_civicrm_disable();
+function aoservicelisting_civicrm_disable() {
+  _aoservicelisting_civix_civicrm_disable();
 }
 
 /**
@@ -71,8 +71,8 @@ function aoonestop_civicrm_disable() {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_upgrade
  */
-function aoonestop_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _aoonestop_civix_civicrm_upgrade($op, $queue);
+function aoservicelisting_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
+  return _aoservicelisting_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -83,8 +83,8 @@ function aoonestop_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_managed
  */
-function aoonestop_civicrm_managed(&$entities) {
-  _aoonestop_civix_civicrm_managed($entities);
+function aoservicelisting_civicrm_managed(&$entities) {
+  _aoservicelisting_civix_civicrm_managed($entities);
 }
 
 /**
@@ -96,8 +96,8 @@ function aoonestop_civicrm_managed(&$entities) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_caseTypes
  */
-function aoonestop_civicrm_caseTypes(&$caseTypes) {
-  _aoonestop_civix_civicrm_caseTypes($caseTypes);
+function aoservicelisting_civicrm_caseTypes(&$caseTypes) {
+  _aoservicelisting_civix_civicrm_caseTypes($caseTypes);
 }
 
 /**
@@ -110,8 +110,8 @@ function aoonestop_civicrm_caseTypes(&$caseTypes) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_angularModules
  */
-function aoonestop_civicrm_angularModules(&$angularModules) {
-  _aoonestop_civix_civicrm_angularModules($angularModules);
+function aoservicelisting_civicrm_angularModules(&$angularModules) {
+  _aoservicelisting_civix_civicrm_angularModules($angularModules);
 }
 
 /**
@@ -119,8 +119,8 @@ function aoonestop_civicrm_angularModules(&$angularModules) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_alterSettingsFolders
  */
-function aoonestop_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
-  _aoonestop_civix_civicrm_alterSettingsFolders($metaDataFolders);
+function aoservicelisting_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
+  _aoservicelisting_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
 /**
@@ -130,15 +130,15 @@ function aoonestop_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
  */
-function aoonestop_civicrm_entityTypes(&$entityTypes) {
-  _aoonestop_civix_civicrm_entityTypes($entityTypes);
+function aoservicelisting_civicrm_entityTypes(&$entityTypes) {
+  _aoservicelisting_civix_civicrm_entityTypes($entityTypes);
 }
 
 /**
  * Implements hook_civicrm_thems().
  */
-function aoonestop_civicrm_themes(&$themes) {
-  _aoonestop_civix_civicrm_themes($themes);
+function aoservicelisting_civicrm_themes(&$themes) {
+  _aoservicelisting_civix_civicrm_themes($themes);
 }
 
 // --- Functions below this ship commented out. Uncomment as required. ---
@@ -148,7 +148,7 @@ function aoonestop_civicrm_themes(&$themes) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_preProcess
  *
-function aoonestop_civicrm_preProcess($formName, &$form) {
+function aoservicelisting_civicrm_preProcess($formName, &$form) {
 
 } // */
 
@@ -157,8 +157,8 @@ function aoonestop_civicrm_preProcess($formName, &$form) {
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_navigationMenu
  *
-function aoonestop_civicrm_navigationMenu(&$menu) {
-  _aoonestop_civix_insert_navigation_menu($menu, 'Mailings', array(
+function aoservicelisting_civicrm_navigationMenu(&$menu) {
+  _aoservicelisting_civix_insert_navigation_menu($menu, 'Mailings', array(
     'label' => E::ts('New subliminal message'),
     'name' => 'mailing_subliminal_message',
     'url' => 'civicrm/mailing/subliminal',
@@ -166,5 +166,5 @@ function aoonestop_civicrm_navigationMenu(&$menu) {
     'operator' => 'OR',
     'separator' => 0,
   ));
-  _aoonestop_civix_navigationMenu($menu);
+  _aoservicelisting_civix_navigationMenu($menu);
 } // */

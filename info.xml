@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
-<extension key="biz.jmaconsulting.aoonestop" type="module">
-  <file>aoonestop</file>
-  <name>Autism Ontario One Stop</name>
-  <description>CiviCRM Forms and processing for the Austim Ontario One Stop</description>
+<extension key="biz.jmaconsulting.aoservicelisting" type="module">
+  <file>aoservicelisting</file>
+  <name>Autism Ontario Service Listing</name>
+  <description>CiviCRM Forms and processing for the Austim Ontario Service Listing Application</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Seamus Lee</author>
@@ -25,6 +25,6 @@
     <psr4 prefix="Civi\" path="Civi"/>
   </classloader>
   <civix>
-    <namespace>CRM/Aoonestop</namespace>
+    <namespace>CRM/Servicelisting</namespace>
   </civix>
 </extension>

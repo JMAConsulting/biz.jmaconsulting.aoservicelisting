@@ -1,13 +1,13 @@
 <?php
 
-use CRM_Aoonestop_ExtensionUtil as E;
+use CRM_Aoservicelisting_ExtensionUtil as E;
 
 /**
  * Form controller class
  *
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
-class CRM_Aoonestop_Form_ProviderApplicationConfirm extends CRM_Aoonestop_Form_ProviderApplication {
+class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
   public function buildQuickForm() {
     $defaults = $this->get('formValues');
     unset($defaults['qfKey']);

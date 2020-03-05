@@ -17,7 +17,7 @@
 /**
  * This class generates form components for processing Event.
  */
-class CRM_Aoonestop_Form_ProviderApplication extends CRM_Core_Form {
+class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
 
 /**
  * Submitted form values
