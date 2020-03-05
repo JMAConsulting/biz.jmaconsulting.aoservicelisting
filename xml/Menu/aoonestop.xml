@@ -3,7 +3,7 @@
   <item>
     <path>civicrm/one-stop-listing-application</path>
     <page_callback>CRM_Aoonestop_Controller_ProviderApplication</page_callback>
-    <title>OneStop Service Listing Application</title>
+    <title>Autism Ontario Service Listing Application</title>
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>

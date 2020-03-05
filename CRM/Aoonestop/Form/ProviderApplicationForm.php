@@ -19,7 +19,7 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
     $defaults['listing_type'] = 1;
     $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
-    $this->add('text', 'website', E::ts('Website'));    
+    $this->add('text', 'website', E::ts('Website'));
     $this->add('text', 'primary_first_name', E::ts('First Name'));
     $this->add('text', 'primary_last_name', E::ts('Last Name'));
     $this->add('email', 'primary_email', E::ts('Email address'));
@@ -31,7 +31,7 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
     $defaults['display_email'] = 1;
     $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
     $defaults['display_phone'] = 1;
-    $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver')); 
+    $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "work_address[$rowNumber]", E::ts('Work Address'), ['size' => 45, 'maxlength' => 96, 'class' => 'huge']);
@@ -107,7 +107,7 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
     $addressFieldLables = ['phone' => E::ts('Work Phone Number'), 'work_address' => E::ts('Work Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town'), 'postal_code' =>  E::ts('Postal code')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
-        $errors[$addressField . '[1]'] = E::ts('Need to supply %1', [1 => $addressFieldLables[$addressField]]);
+        $errors[$addressField . '[1]'] = E::ts('Primary Work Location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
       }
     }
     $workLocationIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -136,13 +136,13 @@ class CRM_Aoonestop_Form_ProviderApplicationForm extends CRM_Aoonestop_Form_Prov
       $errors['custom_863'] = E::ts('You must select at least one registered service');
     }
     if (empty($values['primary_first_name'])) {
-      $errors['primary_first_name'] = E::ts('You must supply the first name of the primary contact');
+      $errors['primary_first_name'] = E::ts('First name of the primary contact is a required field.');
     }
     if (empty($values['primary_last_name'])) {
-      $errors['primary_last_name'] = E::ts('You must supply the first name of the primary contact');
+      $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field.');
     }
     if (empty($values['waiver_field'])) {
-      $errors['waiver_field'] = E::ts('You must agree to the waivers for the application to proceed');
+      $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');
     }
     if (empty($values['website'])) {
       $errors['website'] = E::ts('Need to supply a website');
