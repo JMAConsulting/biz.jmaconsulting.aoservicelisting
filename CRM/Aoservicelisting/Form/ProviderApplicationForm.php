@@ -58,7 +58,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
 
     $this->setDefaults($defaults);
-    $this->_elements;
     $this->addButtons(array(
       array(
         'type' => 'upload',
@@ -99,10 +98,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
       $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
-    }
-    if ($values['listing_type'] == 1 && empty($values['primary_phone_number']) && empty($values['primary_email'])) {
-      $errors['primary_phone_number'] = E::ts('At least one of email or phone must be provided and made public');
-      $errors['primary_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
     $addressFieldLables = ['phone' => E::ts('Work Phone Number'), 'work_address' => E::ts('Work Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town'), 'postal_code' =>  E::ts('Postal code')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
@@ -145,7 +140,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');
     }
     if (empty($values['website'])) {
-      $errors['website'] = E::ts('Need to supply a website');
+      $errors['website'] = E::ts('Website is a required field.');
     }
     return empty($errors) ? TRUE : $errors;
   }

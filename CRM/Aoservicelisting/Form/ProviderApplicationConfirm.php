@@ -10,8 +10,6 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
   public function buildQuickForm() {
     $defaults = $this->get('formValues');
-    unset($defaults['qfKey']);
-    unset($defaults['entryUrl']);
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
     $this->add('text', 'organization_name', E::ts('Organization Name'));
@@ -51,6 +49,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
     }
     $this->setDefaults($defaults);
+    foreach ($this->_elements as $element) {
+      if (strpos($element->getName(), '[') !== FALSE) {
+         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
+         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
+         $element->setValue($defaults[$key][$arrayKey]);
+      }
+      else {
+        $key = $element->getName();
+        $element->setValue($defaults[$key]);
+      }
+    }
     $this->freeze();
     $this->addButtons(array(
       array(
