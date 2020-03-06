@@ -81,6 +81,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       17 => 'ccpa-accp.ca',
       17 => 'psych.on.ca',
       12 => 'occupationaltherapist.coto.org',
+      20 => 'osla.on.ca',
     ];
     foreach ($values['custom_863'] as $value => $checked) {
       if ($checked) {
@@ -100,8 +101,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
         $regulatedUrlValidated = FALSE;
         $urls = [];
-        foreach ($setValues as $value) {
-          $urls[] = $regulatorUrlMapping[$value];
+        foreach ($setValues as $serviceValue) {
+          $urls[] = $regulatorUrlMapping[$serviceValue];
         }
         foreach ($urls as $url) {
           if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
