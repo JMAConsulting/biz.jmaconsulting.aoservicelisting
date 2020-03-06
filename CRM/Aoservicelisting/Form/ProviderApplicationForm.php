@@ -128,16 +128,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     $primaryAddressGeocodeParams = [
        'country' => 'CA',
-       'street_address' => $values['work_address'],
-       'city' => $values['city'],
-       'postal_code' => $values['postal_code'],
+       'street_address' => $values['work_address'][1],
+       'city' => $values['city'][1],
+       'postal_code' => $values['postal_code'][1],
        'state_province' => 'Ontario',
     ];
     try {
       $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
-      $result = $geocodeProvider->format($primaryAddressGeocodeParams);
-      if (!empty($result['geo_code_error'])) {
-        $errors['work_address'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+      $geocodeProvider->format($primaryAddressGeocodeParams);
+      if (!empty($primaryAddressGeocodeParams['geo_code_error'])) {
+        $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
       }
     }
     catch (Exception $e) {
@@ -160,8 +160,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         ];
         try {
           $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
-          $result = $geocodeProvider->format($primaryAddressGeocodeParams);
-          if (!empty($result['geo_code_error'])) {
+          $geocodeProvider->format($supplementalAddressGeocodeParams);
+          if (!empty($supplementalAddressGeocodeParams['geo_code_error'])) {
             $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
           }
         }
