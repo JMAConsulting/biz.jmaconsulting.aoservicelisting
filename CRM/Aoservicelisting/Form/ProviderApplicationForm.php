@@ -75,6 +75,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   public function providerFormRule($values) {
     $errors = $setValues = [];
     $staffMemberCount = 0;
+    $regulatorUrlMapping = [
+      19 => 'findasocialworker.ca',
+      7 => 'members.dietitians.ca',
+      17 => 'ccpa-accp.ca',
+      17 => 'psych.on.ca',
+      12 => 'occupationaltherapist.coto.org',
+    ];
     foreach ($values['custom_863'] as $value => $checked) {
       if ($checked) {
         $setValues[] = $value;
@@ -91,6 +98,19 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
           }
         }
+        $regulatedUrlValidated = FALSE;
+        $urls = [];
+        foreach ($setValues as $value) {
+          $urls[] = $regulatorUrlMapping[$value];
+        }
+        foreach ($urls as $url) {
+          if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
+            $regulatedUrlValidated = TRUE;
+          }
+        }
+        if (!$regulatedUrlValidated) {
+          $errors['staff_record_regulator[' . $key . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
+        }
       }
     }
     if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
@@ -99,19 +119,52 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
       $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
-    $addressFieldLables = ['phone' => E::ts('Work Phone Number'), 'work_address' => E::ts('Work Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town'), 'postal_code' =>  E::ts('Postal code')];
+    $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
         $errors[$addressField . '[1]'] = E::ts('Primary Work Location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
       }
     }
+    $primaryAddressGeocodeParams = [
+       'country' => 'CA',
+       'street_address' => $values['work_address'],
+       'city' => $values['city'],
+       'postal_code' => $values['postal_code'],
+       'state_province' => 'Ontario',
+    ];
+    try {
+      $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
+      $result = $geocodeProvider->format($primaryAddressGeocodeParams);
+      if (!empty($result['geo_code_error'])) {
+        $errors['work_address'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+      }
+    }
+    catch (Exception $e) {
+    }
+
     $workLocationIds = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     foreach ($workLocationIds as $workRecordId) {
       if (!empty($values['phone'][$workRecordId]) || !empty($values['work_address'][$workRecordId]) || !empty($values['postal_code'][$workRecordId]) || !empty($values['city'][$workRecordId])) {
         foreach (['phone', 'work_address', 'postal_code', 'city'] as $field) {
           if (empty($values[$field][$workRecordId])) {
-            $errors[$field . '[' . $workRecordId . ']'] = E::ts('You need to supply supplemental work location %1 %2', [1 => ($workRecordId - 1), 2 => $addressFieldLables[$field]]);
+            $errors[$field . '[' . $workRecordId . ']'] = E::ts('Supplemental work location %1 %2 is a required field', [1 => ($workRecordId - 1), 2 => $addressFieldLables[$field]]);
           }
+        }
+        $supplementalAddressGeocodeParams = [
+          'country' => 'CA',
+          'street_address' => $values['work_address'][$workRecordId],
+          'city' => $values['city'][$workRecordId],
+          'postal_code' => $values['postal_code'][$workRecordId],
+          'state_province' => 'Ontario',
+        ];
+        try {
+          $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
+          $result = $geocodeProvider->format($primaryAddressGeocodeParams);
+          if (!empty($result['geo_code_error'])) {
+            $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+          }
+        }
+        catch (Exception $e) {
         }
       }
     }
