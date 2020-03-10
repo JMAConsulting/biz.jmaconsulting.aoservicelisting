@@ -137,7 +137,7 @@
     </div>
   {/section}
 </div>
-<p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a url directly to the record is not available a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
+<p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
 <span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
 {foreach from=$afterStaffCustomFields item=field}
   {assign var=fieldName value="custom_$field"}
@@ -172,7 +172,7 @@
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
-  <p>{ts}I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario Service Listing and I understand that failure to comply with the above criteria, may result in the removal of my listing{/ts}</p>
+  <p>{ts}I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario and I understand that failure to comply with the above criteria may result in the removal of my listing{/ts}</p>
   <div class="label">{$form.waiver_field.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.waiver_field.html}</div>
   <p>{ts}Please note Autism Ontario reserves the right to refuse, suspend, or remove an applicant or previously approved member of Autism Ontario Listing Service{/ts}</p>
