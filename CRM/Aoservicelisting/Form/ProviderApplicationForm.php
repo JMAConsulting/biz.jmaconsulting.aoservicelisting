@@ -80,11 +80,31 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $defaults['website'] = $primaryWebsite['values'][0]['url'];
         $primaryWorkPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
         $defaults['primary_phone_number'] = $primaryWorkPhone['phone'];
+        // Get details of the other staff members
+        $staffMembers = civicrm_api3('Relationship', 'get', [
+          'contact_id_b' => $this->organizationId,
+          'contact_id_a' => ['!=' => $loggedInContactId],
+          'sequential' => 1,
+        ]);
+        $staffRowCount = $campRowCount = 1;
+        if (!empty($staffMembers['count'])) {
+          foreach ($staffMembers['values'] as $staffMember) {
+            $staffMemberContactId = $staffMembers['contact_id_a'];
+            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId]);
+            $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
+            $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
+            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
+            if (!empty($website['count'])) {
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
+            }
+            $staffRowCount++;
+          }
+        }
       }
     }
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
-    $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
-    $this->add('text', 'organization_name', E::ts('Organization Name'));
+    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
+    $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));
     $this->add('text', 'primary_first_name', E::ts('First Name'));
@@ -119,6 +139,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $defaults['display_name_public'] = 1;
       $defaults['listing_type'] = 1;
       $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
+    }
+    else {
+      $listingTypeField->freeze();
+      $organizationNameField->freeze();
     }
 
     for ($row = 1; $row <= 21; $row++) {
