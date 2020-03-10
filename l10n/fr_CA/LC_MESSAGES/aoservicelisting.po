@@ -17,6 +17,12 @@ msgstr "Demande d'inscription au Répertoire des services d'Autisme Ontario"
 msgid "Primary Contact"
 msgstr "Principale personne-ressource"
 
+msgid "Accepting new clients"
+msgstr "Accepte de nouveaux clients"
+
+msgid "Services are provided"
+msgstr "Fourniture des services"
+
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Individual"
