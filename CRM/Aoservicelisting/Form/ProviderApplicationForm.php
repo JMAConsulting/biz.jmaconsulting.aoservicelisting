@@ -89,7 +89,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffRowCount = $campRowCount = 1;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
-            $staffMemberContactId = $staffMembers['contact_id_a'];
+            $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId]);
             $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
             $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
