@@ -104,6 +104,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   public function submit($values) {
     $this->processCustomValue($values);
     if (empty($values['organiation_name'])) {
+
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
     }
     $organization_params = [
@@ -124,6 +125,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $organization = civicrm_api3('Contact', 'create', $organization_params);
 
     $addressParams1 = [
+
       'street_address' => $values['work_address'][1],
       'postal_code' => $values['postal_code'][1],
       'city' => $values['city'][1],
@@ -209,6 +211,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'contact_id' => $staffMember['id'],
         ]);
         if ($rowNumber == 1) {
+          // Create activity
+          if (empty($this->_loggedInContactID)) {
+            E::createActivity($staffMember['id']);
+            E::createUserAccount($staffMember['id']);
+          }
+          else {
+            E::editActivity($this->_loggedInContactID);
+          }
+
           if (!empty($values['phone-Primary-6'])) {
             civicrm_api3('Phone', 'create', [
               'phone' => $values['phone-Primary-6'],
