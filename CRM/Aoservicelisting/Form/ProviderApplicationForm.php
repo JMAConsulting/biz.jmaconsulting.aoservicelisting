@@ -21,30 +21,36 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         'relationship_type_id' => 74,
       ]);
       if (!empty($relationship['count'])) {
+        $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
         $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
-        $organisation = civicrm_api3('Contact', 'getsingle', [
+        $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
-          'return' => ['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867', 'custom_868', 'custom_869', 'custom_870'],
+          'return' => ['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867', 'custom_868', 'custom_869', 'custom_870', 'email'],
         ]);
         $primrayContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $loggedInContactId,
         ]);
+        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $loggedInContactId, 'is_primary' => 1]);
         $defaults['primary_first_name'] = $primrayContact['first_name'];
         $defaults['primary_last_name'] = $primrayContact['last_name'];
         $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
         $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
+        $defaults['phone[1]'] = $primaryContactPhone['phone'];
         $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
-        foreach (['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867'] as $field) {
-          if ($field === 'organization_name' && stristr($organisation[$field], 'self-employed') === FALSE) {
+        foreach (['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867', 'custom_868', 'custom_869', 'custom_870', 'email'] as $field) {
+          if ($field === 'organization_name' && stristr($organization[$field], 'self-employed') === FALSE) {
             $defaults['listing_type'] = 2;
           }
           else {
             $defaults['listing_type'] = 1;
           }
-          if ($field === 'custom_865' || $field == 'custom_866') {
+          if ($field === 'email') {
+            $defaults['organization_email'] = $organization[$field];
+          }
+          if ($field === 'custom_865' || $field == 'custom_866' || $field === 'custom_863') {
             $selctedOptions = [];
             foreach ($organization[$field] as $option) {
               $selctedOptions[$option] = 1;
@@ -65,13 +71,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           }
         }
         $primrayWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
-        $defaults['work_address[1]'] = $primrayWorkAddress['street_addres'];
+        $defaults['work_address[1]'] = $primrayWorkAddress['street_address'];
         $defaults['postal_code[1]'] = $primrayWorkAddress['postal_code'];
         $defaults['city[1]'] = $primrayWorkAddress['city'];
         $priamryEmailAddress = civicrm_api3('Email', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
         $defaults['primary_email'] = $priamryEmailAddress['email'];
-        $primaryWebsite = civicrm_api3('Website', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
-        $defaults['website'] = $primaryWebsite['url'];
+        $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
+        $defaults['website'] = $primaryWebsite['values'][0]['url'];
+        $primaryWorkPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['primary_phone_number'] = $primaryWorkPhone['phone'];
       }
     }
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
