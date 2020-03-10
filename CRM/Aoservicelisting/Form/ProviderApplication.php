@@ -25,4 +25,6 @@ class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
  */
 public $formValues = [];
 
+public $organizationId;
+
 }

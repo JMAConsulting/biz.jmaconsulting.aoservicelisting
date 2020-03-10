@@ -103,7 +103,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'email' => $values['organization_email'],
     ];
     $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
-    $dedupeParams['check_permission'];
+    $dedupeParams['check_permission'] = 0;
     $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
     $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
     $organization_params['contact_sub_type'] = 'service_provider';
@@ -201,7 +201,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['primary_email'];
         }
         $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
-        $dedupeParams['check_permission'];
+        $dedupeParams['check_permission'] = 0;
         $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 9);
         $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
         $individualParams['contact_type'] = 'Individual';

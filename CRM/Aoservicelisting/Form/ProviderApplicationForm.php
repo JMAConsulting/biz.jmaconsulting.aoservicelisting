@@ -14,9 +14,68 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     $defaults = [];
 
+    $loggedInContactId = $this->getLoggedInUserContactID();
+    if (!empty($loggedInContactId)) {
+      $relationship = civicrm_api3('Relationship', 'get', [
+        'contact_id_a' => $loggedInContactId,
+        'relationship_type_id' => 74,
+      ]);
+      if (!empty($relationship['count'])) {
+        $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+        $organisation = civicrm_api3('Contact', 'getsingle', [
+          'id' => $this->organizationId,
+          'return' => ['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867', 'custom_868', 'custom_869', 'custom_870'],
+        ]);
+        $primrayContact = civicrm_api3('Contact', 'getsingle', [
+          'id' => $loggedInContactId,
+        ]);
+        $defaults['primary_first_name'] = $primrayContact['first_name'];
+        $defaults['primary_last_name'] = $primrayContact['last_name'];
+        $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
+        $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1]);
+        if (!empty($primaryStaffWebsite['count'])) {
+          $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
+        }
+        foreach (['organization_name', 'custom_861', 'custom_862', 'custom_863', 'custom_864', 'custom_865', 'custom_866', 'custom_867'] as $field) {
+          if ($field === 'organization_name' && stristr($organisation[$field], 'self-employed') === FALSE) {
+            $defaults['listing_type'] = 2;
+          }
+          else {
+            $defaults['listing_type'] = 1;
+          }
+          if ($field === 'custom_865' || $field == 'custom_866') {
+            $selctedOptions = [];
+            foreach ($organization[$field] as $option) {
+              $selctedOptions[$option] = 1;
+            }
+            $defaults[$field] = $selctedOptions;
+          }
+          elseif ($field === 'custom_868') {
+            $defaults['display_name_public'] = $organization[$field];
+          }
+          elseif ($field === 'custom_869') {
+            $defaults['display_email'] = $organization[$field];
+          }
+          elseif ($field === 'custom_870') {
+            $defaults['display_phone'] = $organization[$field];
+          }
+          else {
+            $defaults[$field] = $organization[$field];
+          }
+        }
+        $primrayWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['work_address[1]'] = $primrayWorkAddress['street_addres'];
+        $defaults['postal_code[1]'] = $primrayWorkAddress['postal_code'];
+        $defaults['city[1]'] = $primrayWorkAddress['city'];
+        $priamryEmailAddress = civicrm_api3('Email', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['primary_email'] = $priamryEmailAddress['email'];
+        $primaryWebsite = civicrm_api3('Website', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['website'] = $primaryWebsite['url'];
+      }
+    }
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
-    $defaults['listing_type'] = 1;
     $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'));
@@ -26,11 +85,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->add('text', 'primary_phone_number', E::ts('Phone Number'));
     $this->add('text', 'primary_website', E::ts('Website'), ['maxlength' => 255]);
     $this->add('advcheckbox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
-    $defaults['display_name_public'] = 1;
     $this->add('advcheckbox', 'display_email', E::ts('Display email address in public listing?'));
-    $defaults['display_email'] = 1;
     $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
-    $defaults['display_phone'] = 1;
     $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
@@ -49,7 +105,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     $this->assign('beforeStaffCustomFields', [861, 862, 863]);
     $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
-    $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
+    if (empty($this->organizationId)) {
+      $defaults['display_phone'] = 1;
+      $defaults['display_email'] = 1;
+      $defaults['display_name_public'] = 1;
+      $defaults['listing_type'] = 1;
+      $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
+    }
 
     for ($row = 1; $row <= 21; $row++) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
