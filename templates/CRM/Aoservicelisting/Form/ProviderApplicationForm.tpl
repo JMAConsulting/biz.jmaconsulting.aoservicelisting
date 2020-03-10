@@ -58,7 +58,7 @@
     <div class="content">{$form.display_phone.html}</div>
     <div class="clear"></div>
   </div>
-  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application.{/ts}</p>
+  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
 </fieldset>
 
 <div class="crm-public-form-item crm-section">
