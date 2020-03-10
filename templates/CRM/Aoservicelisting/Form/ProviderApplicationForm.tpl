@@ -99,6 +99,11 @@
   {/section}
 </div>
 <span id="add-another-employee" class="crm-hover-button"><a href=#>{ts}Add another work location{/ts}</a></span>
+<div class="crm-public-form-item crm-section listing1">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
+</div>
+
+<!--
 {foreach from=$beforeStaffCustomFields item=field}
   {assign var=fieldName value="custom_$field"}
   <div class="crm-section edit-row-custom_{$field}">
@@ -107,6 +112,7 @@
     <div class="clear"></div>
   </div>
 {/foreach}
+-->
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
@@ -139,6 +145,14 @@
 </div>
 <p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
 <span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
+<div class="crm-public-form-item crm-section listing2">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
+</div>
+
+{assign var="groupID" value=$groupID}
+<div id="customData1"></div>
+{include file="CRM/Aoservicelisting/Form/customData.tpl"}
+<!--
 {foreach from=$afterStaffCustomFields item=field}
   {assign var=fieldName value="custom_$field"}
   <div class="crm-section edit-row-custom_{$field}">
@@ -169,6 +183,7 @@
   </div>
 {/section}
 <span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
+-->
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
@@ -184,7 +199,8 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-$('#crm-container.crm-public .label').css('font-size', '16px');
+      $('#crm-container.crm-public .label').css('font-size', '16px');
+      CRM.buildCustomData('Organization', 'service_provider', 1);
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();

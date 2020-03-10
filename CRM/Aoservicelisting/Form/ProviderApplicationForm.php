@@ -127,12 +127,23 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
     }
+
+    $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
+    $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
+    $this->assign('customDataType', 'Organization');
+    $this->assign('customDataSubType', 'Service Listing');
+    $this->assign('entityID', $this->organizationId);
+    $this->assign('groupID', CAMP_CG);
+
+    /**
     $customFields = [861 => TRUE, 862 => TRUE, 863 => FALSE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
     foreach ($customFields as $id => $isRequired) {
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
     }
     $this->assign('beforeStaffCustomFields', [861, 862, 863]);
     $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
+
+
     if (empty($this->organizationId)) {
       $defaults['display_phone'] = 1;
       $defaults['display_email'] = 1;
@@ -150,7 +161,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
     }
-
+*/
     $this->setDefaults($defaults);
     $this->addButtons(array(
       array(
