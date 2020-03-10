@@ -36,7 +36,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
         $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1]);
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
