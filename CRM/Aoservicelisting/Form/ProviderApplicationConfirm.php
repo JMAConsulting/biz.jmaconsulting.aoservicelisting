@@ -78,17 +78,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->assign('campValues', $campValues);
 
     $this->setDefaults($defaults);
-    foreach ($this->_elements as $element) {
-      if (strpos($element->getName(), '[') !== FALSE) {
-         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
-         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
-         $element->setValue($defaults[$key][$arrayKey]);
-      }
-      else {
-        $key = $element->getName();
-        $element->setValue($defaults[$key]);
-      }
-    }
     $this->freeze();
     $this->addButtons(array(
       array(
@@ -123,6 +112,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   }
 
   public function submit($values) {
+    $this->processCustomValue($values);
     if (empty($values['organiation_name'])) {
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
       $values['organization_email'] = $values['primary_email'];
@@ -169,37 +159,18 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     $addressIds = [0 => [$address1['id'], $address1Params]];
     $staffMemberIds = [];
-    $customFields = ['861', '862', '863', '864', '865', '866', '867'];
-    $customFieldParams = ['entity_id' => $organization['id']];
-    foreach ($customFields as $customField) {
-      if (in_array($customField, ['863', '865', '866'])) {
-        $selectedValues = [];
-        foreach ($values['custom_' . $customField] as $val => $selected) {
-          if ($selected) {
-            $selectedValues[] = $val;
-          }
-        }
-        $customFieldParams['custom_' . $customField] = $selectedValues;
-      }
-      else {
-        $customFieldParams['custom_' . $customField] = $values['custom_' . $customField];
-      }
+
+    $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
+    if (!empty($customValues) && is_array($customValues)) {
+      CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
     }
+
     $customFieldParams['custom_868'] = empty($values['display_name_public']) ? 0 : 1;
     $customFieldParams['custom_869'] = empty($values['display_email']) ? 0 : 1;
     $customFieldParams['custom_870'] = empty($values['display_phone']) ? 0 : 1;
     $customFieldParams['custom_871'] = $values['waiver_field'];
     civicrm_api3('CustomValue', 'create', $customFieldParams);
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
-      if (!empty($values['custom_858'][$rowNumber])) {
-        $campCustomFieldParams = [
-          'entity_id' => $organization['id'],
-          'custom_858' => $values['custom_858'][$rowNumber],
-          'custom_859' => date('Ymd', strtotime($values['custom_859'][$rowNumber])),
-          'custom_860' => date('Ymd', strtotime($values['custom_860'][$rowNumber])),
-        ];
-        civicrm_api3('CustomValue', 'create', $campCustomFieldParams);
-      }
       if (!empty($values['phone'][$rowNumber])) {
         civicrm_api3('Phone', 'create', [
           'phone' => $values['phone'][$rowNumber],
