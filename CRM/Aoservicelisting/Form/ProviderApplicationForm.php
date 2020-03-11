@@ -9,6 +9,12 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
+  public function preProcess() {
+    if (!empty($_POST['hidden_custom'])) {
+      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
+    }
+  }
+
   public function setDefaultValues() {
     $defaults = [];
     $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE1, FALSE);
@@ -351,7 +357,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function postProcess() {
-    $formValues = $this->controller->exportValues($this->_name);
+    $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
   }

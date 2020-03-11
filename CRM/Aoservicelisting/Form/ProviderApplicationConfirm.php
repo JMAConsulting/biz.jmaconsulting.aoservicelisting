@@ -8,6 +8,13 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
+
+  public function preProcess() {
+    if (!empty($_POST['hidden_custom'])) {
+      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
+    }
+  }
+
   public function buildQuickForm() {
     $defaults = $this->get('formValues');
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
@@ -39,6 +46,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
+    
     $this->setDefaults($defaults);
     foreach ($this->_elements as $element) {
       if (strpos($element->getName(), '[') !== FALSE) {
