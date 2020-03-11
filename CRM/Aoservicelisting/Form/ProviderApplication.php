@@ -33,7 +33,7 @@ public $organizationId;
       $cid = CRM_Utils_Request::retrieve('cid', 'Positive', $this);
       $session = CRM_Core_Session::singleton();
       $contactID = $session->get('userID');
-
+      $contactID = NULL;
       // we don't allow conflicting fields to be
       // configured via profile
       $fieldsToIgnore = array(

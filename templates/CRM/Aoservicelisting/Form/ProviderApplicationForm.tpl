@@ -1,6 +1,5 @@
 {* HEADER *}
 {crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}
-
 <div class="crm-section edit-row-{$form.listing_type.id}">
   <div class="label">{$form.listing_type.label}</div>
   <div class="content">{$form.listing_type.html}</div>
@@ -199,8 +198,8 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-      $('#crm-container.crm-public .label').css('font-size', '16px');
       CRM.buildCustomData('Organization', 'service_provider', 1);
+      $('#crm-container.crm-public .label').css('font-size', '16px');
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
@@ -223,6 +222,15 @@
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
         }
+      });
+
+      $('[id^="staff_member-"]').each(function() {
+        var section = $(this);
+        $(this).find('.content > input').each(function() {
+          if ($(this).val().length) {
+            section.removeClass('hiddenElement');
+          }
+        });
       });
 
       $('#add-another-employee').on('click', function(e) {

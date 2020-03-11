@@ -134,7 +134,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->assign('customDataSubType', 'Service Listing');
     $this->assign('entityID', $this->organizationId);
     $this->assign('groupID', CAMP_CG);
-
     /**
     $customFields = [861 => TRUE, 862 => TRUE, 863 => FALSE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
     foreach ($customFields as $id => $isRequired) {
@@ -172,21 +171,42 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     ));
 
     // export form elements
-    $this->assign('elementNames', $this->getRenderableElementNames());
+    //$this->assign('elementNames', $this->getRenderableElementNames());
     $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
 
   public function providerFormRule($values) {
     $errors = $setValues = [];
+    $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = 0;
     $regulatorUrlMapping = [
-      19 => 'findasocialworker.ca',
+      1 => 'caslpo.com',
+      2 => 'cco.on.ca',
+      3 => 'ontariocampsassociation.ca',
+      4 => 'oacyc.org',
+      5 => 'cdho.org',
+      6 => 'rcdso.org',
       7 => 'members.dietitians.ca',
+      7 => 'collegeofdietitians.org',
+      8 => 'college-ece.ca',
+      9 => 'collegeoftrades.ca',
+      10 => 'coko.ca',
+      11 => 'cmto.com',
+      12 => 'coto.org',
+      13 => 'collegeoptom.on.ca',
+      14 => 'coptont.org',
+      15 => 'cpso.on.ca',
+      16 => 'collegept.org',
       17 => 'ccpa-accp.ca',
       17 => 'psych.on.ca',
-      12 => 'occupationaltherapist.coto.org',
+      17 => 'cpo.on.ca',
+      18 => 'eopa.ca',
+      19 => 'findasocialworker.ca',
+      19 => 'ocwssw.org',
       20 => 'osla.on.ca',
+      20 => 'caslpo.com',
+      21 => 'oct.ca',
     ];
     foreach ($values['custom_863'] as $value => $checked) {
       if ($checked) {
@@ -195,6 +215,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     foreach ($values['staff_record_regulator'] as $key => $value) {
       if (!empty($value)) {
+        $regulatorRecordKeys[$key] = 1;
         $staffMemberCount++;
         if (stristr($value, 'ontariocampassociation.ca') === FALSE) {
           if (empty($values['staff_first_name'][$key])) {
@@ -204,18 +225,39 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
           }
         }
+        // Check if the content of the record on regulator site matches a given url.
         $regulatedUrlValidated = FALSE;
         $urls = [];
         foreach ($setValues as $serviceValue) {
-          $urls[] = $regulatorUrlMapping[$serviceValue];
-        }
-        foreach ($urls as $url) {
-          if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
-            $regulatedUrlValidated = TRUE;
+          if (!empty($regulatorUrlMapping[$serviceValue])) {
+            $verifiedURLCounter[$serviceValue] = 0;
+            $urls[] = $regulatorUrlMapping[$serviceValue];
           }
         }
-        if (!$regulatedUrlValidated) {
-          $errors['staff_record_regulator[' . $key . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
+        if (!empty($urls)) {
+          foreach ($urls as $url) {
+            if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
+              $serviceValueFound = array_search($url, $regulatorUrlMapping);
+              $verifiedURLCounter[$serviceValue] = $verifiedURLCounter[$serviceValue] + 1;
+              $regulatedUrlValidated = TRUE;
+              unset($regulatorRecordKeys[$key]);
+            }
+          }
+        }
+        else {
+          unset($regulatorRecordKeys[$key]);
+        }
+        // If any urls have not matched show an error.
+        if (!empty($regulatorRecordKeys)) {
+          foreach ($regulatorRecordKeys as $rowKey => $val) {
+            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
+          }
+        }
+        foreach ($verifiedURLCounter as $value => $counter) {
+          if (empty($counter)) {
+            $options = self::_getServieOptions();
+            $missingRegulators[] = $options[$value];
+          }
         }
       }
     }
@@ -242,7 +284,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
       $geocodeProvider->format($primaryAddressGeocodeParams);
       if (!empty($primaryAddressGeocodeParams['geo_code_error'])) {
-        $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+        // Disabled for now until the geocoding api is fixed.
+        // $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
       }
     }
     catch (Exception $e) {
@@ -267,7 +310,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
           $geocodeProvider->format($supplementalAddressGeocodeParams);
           if (!empty($supplementalAddressGeocodeParams['geo_code_error'])) {
-            $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+            // Disabled for now until the geocoding api is fixed.
+            // $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
           }
         }
         catch (Exception $e) {
@@ -279,6 +323,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     if ($values['listing_type'] == 2 && count($setValues) > $staffMemberCount) {
       $errors['custom_863'] = E::ts('Ensure you have entered all the staff members that match the registered services');
+    }
+    if (!empty($missingRegulators)) {
+      $errors['custom_863'] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Need to supply the organization name');
@@ -329,6 +376,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       }
     }
     return $elementNames;
+  }
+
+  public static function _getServieOptions() {
+    $options = [];
+    $customFieldAPI = civicrm_api3('Custom Field', 'getsingle', ['name' => 'Regulated_Services_Provided']);
+    $dbOptions = civicrm_api3('OptionValue', 'get', ['option_group_id' => $customFieldAPI['option_group_id']]);
+    foreach ($dbOptions['values'] as $optionValue) {
+      $options['value'] = $options['label'];
+    }
+    return $options;
   }
 
 }
