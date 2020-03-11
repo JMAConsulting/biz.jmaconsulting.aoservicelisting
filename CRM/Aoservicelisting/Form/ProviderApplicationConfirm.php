@@ -46,7 +46,37 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
-    
+
+    // populating camp values
+    $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
+    $campValues = [];
+    $count = 1;
+    $totalCount = 21;
+    while($count < $totalCount) {
+      $entryFound = FALSE;
+      $campValues[$count] = [];
+      foreach ($customFields as $customField) {
+        $key = 'custom_' . $customField['id'];
+        $campValues[$count][$key] = [
+          'label' => $customField['label'],
+          'html' => NULL,
+        ];
+        if (!empty($defaults[$key . '_-' . $count])) {
+          $campValues[$count][$key]['html'] = $defaults[$key . '_-' . $count];
+          $entryFound = TRUE;
+        }
+        elseif (!empty($defaults[$key . '_' . $count])) {
+          $campValues[$count][$key]['html'] = $defaults[$key . '_' . $count];
+          $entryFound = TRUE;
+        }
+      }
+      if (!$entryFound) {
+        unset($campValues[$count]);
+      }
+      $count++;
+    }
+    $this->assign('campValues', $campValues);
+
     $this->setDefaults($defaults);
     foreach ($this->_elements as $element) {
       if (strpos($element->getName(), '[') !== FALSE) {

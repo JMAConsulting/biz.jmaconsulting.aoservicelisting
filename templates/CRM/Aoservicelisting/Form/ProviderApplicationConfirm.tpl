@@ -115,19 +115,22 @@
 <div class="crm-public-form-item crm-section listing2">
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
-{section name='c' start=1 loop=21}
-  {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
-    <div class="label">{$form.custom_858.$rowN.label}</div>
-    <div class="content">{$form.custom_858.$rowN.html}</div>
-    <div class="clear"></div>
-    <div class="label">{ts}Camp Session Dates{/ts}</div>
-    <div class="content">
-      <div style="float:left;">{$form.custom_859.$rowN.html}&nbsp;&nbsp;-&nbsp;&nbsp;{$form.custom_860.$rowN.html}</div>
+
+{if !empty($campValues)}
+  {section name='c' start=1 loop=21}
+    {assign var='rowN' value=$smarty.section.c.index}
+    {if !empty($campValues.$rowN)}
+    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
+      {foreach from=$campValues.$rowN key=customKey item=dontCare}
+        <div class="label">{$campValues.$rowN.$customKey.label}</div>
+        <div class="content">{$campValues.$rowN.$customKey.html}</div>
+        <div class="clear"></div>
+      {/foreach}
     </div>
     <div class="clear"></div>
-  </div>
-{/section}
+    {/if}
+  {/section}
+{/if}
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
