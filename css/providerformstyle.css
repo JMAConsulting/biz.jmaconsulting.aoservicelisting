@@ -28,3 +28,12 @@ input[type="checkbox"][readonly] {
     margin-left: initial;
   }
 }
+
+fieldset:not(.fieldgroup) {
+  background-color: transparent !important;
+  border-top: 0;
+}
+
+table th, table td {
+  background-color: transparent !important;
+}

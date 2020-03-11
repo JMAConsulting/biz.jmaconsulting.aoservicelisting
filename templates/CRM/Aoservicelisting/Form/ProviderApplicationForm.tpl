@@ -1,23 +1,22 @@
 {* HEADER *}
 {crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}
-
 <div class="crm-section edit-row-{$form.listing_type.id}">
-  <div class="label">{$form.listing_type.label}</div>
+  <div class="label">{$form.listing_type.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.listing_type.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.organization_name.id}">
-  <div class="label">{$form.organization_name.label}</div>
+  <div class="label">{$form.organization_name.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.organization_name.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.organization_email.id}">
-  <div class="label">{$form.organization_email.label}</div>
+  <div class="label">{$form.organization_email.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.organization_email.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.website.id}">
-  <div class="label">{$form.website.label}</div>
+  <div class="label">{$form.website.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.website.html}</div>
   <div class="clear"></div>
 </div>
@@ -33,33 +32,11 @@
     <div class="content">{$form.primary_last_name.html}</div>
     <div class="clear"></div>
   </div>
-  <div class="crm-section edit-row-{$form.display_name_public.id}">
-    <div class="label">{$form.display_name_public.label}</div>
-    <div class="content">{$form.display_name_public.html}</div>
-    <div class="clear"></div>
+  </fieldset>
+  <div class="crm-public-form-item crm-section listing">
+    {include file="CRM/UF/Form/Block.tpl" fields=$profile}
+    <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
   </div>
-  <div class="crm-section edit-row-{$form.primary_email.id}">
-    <div class="label">{$form.primary_email.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.primary_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_email.id}">
-    <div class="label">{$form.display_email.label}</div>
-    <div class="content">{$form.display_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.primary_phone_number.id}">
-    <div class="label">{$form.primary_phone_number.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.primary_phone_number.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_phone.id}">
-    <div class="label">{$form.display_phone.label}</div>
-    <div class="content">{$form.display_phone.html}</div>
-    <div class="clear"></div>
-  </div>
-  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
-</fieldset>
 
 <div class="crm-public-form-item crm-section">
   {section name='i' start=1 loop=11}
@@ -99,14 +76,10 @@
   {/section}
 </div>
 <span id="add-another-employee" class="crm-hover-button"><a href=#>{ts}Add another work location{/ts}</a></span>
-{foreach from=$beforeStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
+<div class="crm-public-form-item crm-section listing1">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
+</div>
+
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
@@ -137,38 +110,17 @@
     </div>
   {/section}
 </div>
-<p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
-<span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
-{foreach from=$afterStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
-{section name='c' start=1 loop=21}
-  {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
-    <div class="crm-section">
-      <div class="label">{$form.custom_858.$rowN.label}</div>
-      <div class="content">{$form.custom_858.$rowN.html}</div>
-      <div class="clear"></div><br/>
-    </div>
-    <div class="crm-section">
-      <div class="label" style="font-weight:inherit;">{ts}Camp Session Dates{/ts}</div>
-      <div class="content">
-        <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
-        <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
-      </div>
-      <div class="clear"></div><br/>
-    </div>
-    {if $rowN neq 1}
-       <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
-    {/if}
-  </div>
-{/section}
-<span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
+<div id="regulated-staff-message"><p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
+<span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span></div>
+<div class="crm-public-form-item crm-section listing2">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
+</div>
+
+<div id="camp-section">
+  {assign var="groupID" value=$groupID}
+  <div id="customData1"></div>
+  {include file="CRM/Aoservicelisting/Form/customData.tpl"}
+</div>
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
@@ -184,7 +136,8 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-$('#crm-container.crm-public .label').css('font-size', '16px');
+      CRM.buildCustomData('Organization', 'service_provider', 1);
+      $('#crm-container.crm-public .label').css('font-size', '16px');
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
@@ -207,6 +160,24 @@ $('#crm-container.crm-public .label').css('font-size', '16px');
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
         }
+      });
+
+      $('[id^="staff_member-"]').each(function() {
+        var section = $(this);
+        $(this).find('.content > input').each(function() {
+          if ($(this).val().length) {
+            section.removeClass('hiddenElement');
+          }
+        });
+      });
+
+      $('[id^="work_address-"]').each(function() {
+        var workSection = $(this);
+        $(this).find('.content > input').each(function() {
+          if ($(this).val().length) {
+            workSection.removeClass('hiddenElement');
+          }
+        });
       });
 
       $('#add-another-employee').on('click', function(e) {
@@ -249,10 +220,11 @@ $('#crm-container.crm-public .label').css('font-size', '16px');
         row.addClass('hiddenElement');
         row.find('[id^=custom_]').val('').trigger('change');
       });
-      $('#camp_session-1').addClass('hiddenElement');
+      $('#camp_session-1, #camp-section').addClass('hiddenElement');
+
       $('#add-another-camp').hide();
       if ($('#custom_863_3').prop('checked')) {
-        $('#camp_session-1').removeClass('hiddenElement');
+        $('#camp_session-1, #camp-section').removeClass('hiddenElement');
         $('#add-another-camp').show();
         $('[id^=custom_859_').each(function() {
           if ($(this).val().length) {
@@ -262,7 +234,7 @@ $('#crm-container.crm-public .label').css('font-size', '16px');
       }
       $('#custom_863_3').on('change', function() {
        if ($(this).prop('checked')) {
-         $('#camp_session-1').removeClass('hiddenElement');
+         $('#camp_session-1, #camp-section').removeClass('hiddenElement');
          $('#add-another-camp').show();
        }
        else {
@@ -294,15 +266,28 @@ $('#crm-container.crm-public .label').css('font-size', '16px');
       });
       $('[name=custom_862]').change(function() {
         if ($(this).val() == "1") {
-          $('.edit-row-custom_863').show();
+          $('.editrow_custom_863-section').show();
+          $('[id^=staff_record_regulator]').each(function() {
+            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
+              $(this).parent().parent().show();
+            }
+          });
+          $('#regulated-staff-message').show();
         }
         else {
-          $('.edit-row-custom_863').hide();
+          $('.editrow_custom_863-section').hide();
           $('[id^=custom_863_]').each(function() {
              if ($(this).prop('checked')) {
                $(this).prop('checked', false).trigger('change');
              }
           });
+          $('[id^=staff_record_regulator]').each(function() {
+            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
+              $(this).val('').trigger('change');
+              $(this).parent().parent().hide();
+            }
+          });
+          $('#regulated-staff-message').hide();
         }
       });
       var checkboxCustomFIelds = ['863', '865', '866'];

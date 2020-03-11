@@ -33,33 +33,11 @@
     <div class="content">{$form.primary_last_name.html}</div>
     <div class="clear"></div>
   </div>
-  <div class="crm-section edit-row-{$form.display_name_public.id}">
-    <div class="label">{$form.display_name_public.label}</div>
-    <div class="content">{$form.display_name_public.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.primary_email.id}">
-    <div class="label">{$form.primary_email.label}</div>
-    <div class="content">{$form.primary_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_email.id}">
-    <div class="label">{$form.display_email.label}</div>
-    <div class="content">{$form.display_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.primary_phone_number.id}">
-    <div class="label">{$form.primary_phone_number.label}</div>
-    <div class="content">{$form.primary_phone_number.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_phone.id}">
-    <div class="label">{$form.display_phone.label}</div>
-    <div class="content">{$form.display_phone.html}</div>
-    <div class="clear"></div>
-  </div>
-  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
 </fieldset>
+<div class="crm-public-form-item crm-section listing">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile}
+  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
+</div>
 
 <div class="crm-public-form-item crm-section">
   {section name='i' start=1 loop=11}
@@ -87,14 +65,9 @@
   </div>
   {/section}
 </div>
-{foreach from=$beforeStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
+<div class="crm-public-form-item crm-section listing1">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
+</div>
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=22}
     {assign var='rowNum' value=$smarty.section.s.index}
@@ -117,27 +90,25 @@
   {/section}
 </div>
 <p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
-{foreach from=$afterStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
-{section name='c' start=1 loop=21}
-  {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
-    <div class="label">{$form.custom_858.$rowN.label}</div>
-    <div class="content">{$form.custom_858.$rowN.html}</div>
-    <div class="clear"></div>
-    <div class="label">{ts}Camp Session Dates{/ts}</div>
-    <div class="content">
-      <div style="float:left;">{$form.custom_859.$rowN.html}&nbsp;&nbsp;-&nbsp;&nbsp;{$form.custom_860.$rowN.html}</div>
+<div class="crm-public-form-item crm-section listing2">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
+</div>
+
+{if !empty($campValues)}
+  {section name='c' start=1 loop=21}
+    {assign var='rowN' value=$smarty.section.c.index}
+    {if !empty($campValues.$rowN)}
+    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
+      {foreach from=$campValues.$rowN key=customKey item=dontCare}
+        <div class="label">{$campValues.$rowN.$customKey.label}</div>
+        <div class="content">{$campValues.$rowN.$customKey.html}</div>
+        <div class="clear"></div>
+      {/foreach}
     </div>
     <div class="clear"></div>
-  </div>
-{/section}
+    {/if}
+  {/section}
+{/if}
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
