@@ -302,6 +302,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if (!empty($missingRegulators)) {
       $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
+    if (!empty($missingRegulators)) {
+      $errors['custom_863'] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+    }
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Need to supply the organization name');
     }

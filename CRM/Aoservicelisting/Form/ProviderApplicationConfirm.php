@@ -70,6 +70,21 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       }
       $count++;
     }
+
+    $this->assign('campValues', $campValues);
+
+    $this->setDefaults($defaults);
+    foreach ($this->_elements as $element) {
+      if (strpos($element->getName(), '[') !== FALSE) {
+         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
+         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
+         $element->setValue($defaults[$key][$arrayKey]);
+      }
+      if (!$entryFound) {
+        unset($campValues[$count]);
+      }
+      $count++;
+    }
     $this->assign('campValues', $campValues);
 
     $this->setDefaults($defaults);
