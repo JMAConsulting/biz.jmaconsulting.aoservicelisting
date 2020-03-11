@@ -24,12 +24,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->add('text', 'website', E::ts('Website'));
     $this->add('text', 'primary_first_name', E::ts('First Name'));
     $this->add('text', 'primary_last_name', E::ts('Last Name'));
-    $this->add('email', 'primary_email', E::ts('Email address'));
-    $this->add('text', 'primary_phone_number', E::ts('Phone Number'));
-    $this->add('text', 'primary_website', E::ts('Website'), ['maxlength' => 255]);
-    $this->add('advcheckbox', 'display_name_public', E::ts('Display First Name and Last Name in public listing?'));
-    $this->add('advcheckbox', 'display_email', E::ts('Display email address in public listing?'));
-    $this->add('advcheckbox', 'display_phone', E::ts('Display phone number in public listing?'));
     $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
 
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
@@ -44,6 +38,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
     }
 
+    $this->buildCustom(PRIMARY_PROFILE, 'profile', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
 
@@ -115,7 +110,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->processCustomValue($values);
     if (empty($values['organiation_name'])) {
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
-      $values['organization_email'] = $values['primary_email'];
     }
     $organization_params = [
       'organization_name' => $values['organization_name'],
@@ -148,27 +142,19 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'website_type_id' => 'Work',
     ];
     civicrm_api3('Website', 'create', $websiteParams);
-    if (!empty($values['primary_phone_number'])) {
-      civicrm_api3('Phone', 'create', [
-        'phone' => $values['primary_phone_number'],
-        'location_type_id' => 'Work',
-        'contact_id' => $organization['id'],
-        'phone_type_id' => 'Phone',
-        'is_primary' => 1,
-      ]);
-    }
     $addressIds = [0 => [$address1['id'], $address1Params]];
     $staffMemberIds = [];
+
+    $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE, CRM_Core_Action::VIEW);
+    $values['skip_greeting_processing'] = TRUE;
+    CRM_Contact_BAO_Contact::createProfileContact($values, $fields, $organization['id'], NULL, PRIMARY_PROFILE);
 
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
     if (!empty($customValues) && is_array($customValues)) {
       CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
     }
 
-    $customFieldParams['custom_868'] = empty($values['display_name_public']) ? 0 : 1;
-    $customFieldParams['custom_869'] = empty($values['display_email']) ? 0 : 1;
-    $customFieldParams['custom_870'] = empty($values['display_phone']) ? 0 : 1;
-    $customFieldParams['custom_871'] = $values['waiver_field'];
+    $customFieldParams[WAIVER_FIELD] = $values['waiver_field'];
     civicrm_api3('CustomValue', 'create', $customFieldParams);
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
       if (!empty($values['phone'][$rowNumber])) {
@@ -198,7 +184,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'last_name' => $values['staff_last_name'][$rowNumber],
         ];
         if ($rowNumber === 1) {
-          $individualParams['email'] = $values['primary_email'];
+          $individualParams['email'] = $values['email-Primary'];
         }
         $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
         $dedupeParams['check_permission'] = 0;
@@ -216,9 +202,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'contact_id' => $staffMember['id'],
         ]);
         if ($rowNumber == 1) {
-          if (!empty($values['primary_phone_number'])) {
+          if (!empty($values['phone-Primary-6'])) {
             civicrm_api3('Phone', 'create', [
-              'phone' => $values['primary_phone_number'],
+              'phone' => $values['phone-Primary-6'],
               'location_type_id' => 'Work',
               'contact_id' => $staffMember['id'],
               'phone_type_id' => 'Phone',

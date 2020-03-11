@@ -32,33 +32,11 @@
     <div class="content">{$form.primary_last_name.html}</div>
     <div class="clear"></div>
   </div>
-  <div class="crm-section edit-row-{$form.display_name_public.id}">
-    <div class="label">{$form.display_name_public.label}</div>
-    <div class="content">{$form.display_name_public.html}</div>
-    <div class="clear"></div>
+  </fieldset>
+  <div class="crm-public-form-item crm-section listing">
+    {include file="CRM/UF/Form/Block.tpl" fields=$profile}
+    <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
   </div>
-  <div class="crm-section edit-row-{$form.primary_email.id}">
-    <div class="label">{$form.primary_email.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.primary_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_email.id}">
-    <div class="label">{$form.display_email.label}</div>
-    <div class="content">{$form.display_email.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.primary_phone_number.id}">
-    <div class="label">{$form.primary_phone_number.label}  <span class="crm-marker" title="This field is required.">*</span></div>
-    <div class="content">{$form.primary_phone_number.html}</div>
-    <div class="clear"></div>
-  </div>
-  <div class="crm-section edit-row-{$form.display_phone.id}">
-    <div class="label">{$form.display_phone.label}</div>
-    <div class="content">{$form.display_phone.html}</div>
-    <div class="clear"></div>
-  </div>
-  <p>{ts}The primary contact's name, email and phone will be used by Autism Ontario to communicate about the Service Listing and application{/ts}</p>
-</fieldset>
 
 <div class="crm-public-form-item crm-section">
   {section name='i' start=1 loop=11}
