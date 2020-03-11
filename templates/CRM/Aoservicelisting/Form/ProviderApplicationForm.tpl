@@ -1,22 +1,22 @@
 {* HEADER *}
 {crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}
 <div class="crm-section edit-row-{$form.listing_type.id}">
-  <div class="label">{$form.listing_type.label}</div>
+  <div class="label">{$form.listing_type.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.listing_type.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.organization_name.id}">
-  <div class="label">{$form.organization_name.label}</div>
+  <div class="label">{$form.organization_name.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.organization_name.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.organization_email.id}">
-  <div class="label">{$form.organization_email.label}</div>
+  <div class="label">{$form.organization_email.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.organization_email.html}</div>
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.website.id}">
-  <div class="label">{$form.website.label}</div>
+  <div class="label">{$form.website.label} <span class="crm-marker" title="This field is required.">*</span></div>
   <div class="content">{$form.website.html}</div>
   <div class="clear"></div>
 </div>
@@ -142,8 +142,8 @@
     </div>
   {/section}
 </div>
-<p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
-<span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
+<div id="regulated-staff-message"><p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
+<span id="add-another-staff" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span></div>
 <div class="crm-public-form-item crm-section listing2">
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
@@ -233,6 +233,15 @@
         });
       });
 
+      $('[id^="work_address-"]').each(function() {
+        var workSection = $(this);
+        $(this).find('.content > input').each(function() {
+          if ($(this).val().length) {
+            workSection.removeClass('hiddenElement');
+          }
+        });
+      });
+
       $('#add-another-employee').on('click', function(e) {
         e.preventDefault();
         if ($('[id^="work_address-"]').hasClass("hiddenElement")) {
@@ -318,15 +327,28 @@
       });
       $('[name=custom_862]').change(function() {
         if ($(this).val() == "1") {
-          $('.edit-row-custom_863').show();
+          $('.editrow_custom_863-section').show();
+          $('[id^=staff_record_regulator]').each(function() {
+            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
+              $(this).parent().parent().show();
+            }
+          });
+          $('#regulated-staff-message').show();
         }
         else {
-          $('.edit-row-custom_863').hide();
+          $('.editrow_custom_863-section').hide();
           $('[id^=custom_863_]').each(function() {
              if ($(this).prop('checked')) {
                $(this).prop('checked', false).trigger('change');
              }
           });
+          $('[id^=staff_record_regulator]').each(function() {
+            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
+              $(this).val('').trigger('change');
+              $(this).parent().parent().hide();
+            }
+          });
+          $('#regulated-staff-message').hide();
         }
       });
       var checkboxCustomFIelds = ['863', '865', '866'];

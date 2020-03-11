@@ -208,6 +208,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       20 => 'caslpo.com',
       21 => 'oct.ca',
     ];
+
     foreach ($values['custom_863'] as $value => $checked) {
       if ($checked) {
         $setValues[] = $value;
@@ -230,7 +231,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $urls = [];
         foreach ($setValues as $serviceValue) {
           if (!empty($regulatorUrlMapping[$serviceValue])) {
-            $verifiedURLCounter[$serviceValue] = 0;
+            if (array_key_exists($serviceValue, $verifiedURLCounter) === FALSE) {
+              $verifiedURLCounter[$serviceValue] = 0;
+            }
             $urls[] = $regulatorUrlMapping[$serviceValue];
           }
         }
@@ -238,7 +241,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           foreach ($urls as $url) {
             if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
               $serviceValueFound = array_search($url, $regulatorUrlMapping);
-              $verifiedURLCounter[$serviceValue] = $verifiedURLCounter[$serviceValue] + 1;
+              $verifiedURLCounter[$serviceValueFound] = $verifiedURLCounter[$serviceValueFound] + 1;
               $regulatedUrlValidated = TRUE;
               unset($regulatorRecordKeys[$key]);
             }
@@ -253,12 +256,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
           }
         }
-        foreach ($verifiedURLCounter as $value => $counter) {
-          if (empty($counter)) {
-            $options = self::_getServieOptions();
-            $missingRegulators[] = $options[$value];
-          }
-        }
+      }
+    }
+    $options = self::_getServieOptions();
+    foreach ($verifiedURLCounter as $value => $counter) {
+      if (empty($counter) && array_key_exists($value, $options) !== FALSE) {
+        $missingRegulators[] = $options[$value];
       }
     }
     if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
@@ -383,7 +386,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $customFieldAPI = civicrm_api3('Custom Field', 'getsingle', ['name' => 'Regulated_Services_Provided']);
     $dbOptions = civicrm_api3('OptionValue', 'get', ['option_group_id' => $customFieldAPI['option_group_id']]);
     foreach ($dbOptions['values'] as $optionValue) {
-      $options['value'] = $options['label'];
+      $options[$optionValue['value']] = $optionValue['label'];
     }
     return $options;
   }
