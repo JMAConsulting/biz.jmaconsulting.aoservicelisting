@@ -124,4 +124,23 @@ public $organizationId;
     }
   }
 
+  public function processCustomValue(&$values) {
+    foreach ($values as $key => $value) {
+      if (strstr($key, 'custom_')) {
+        if (!is_array($value)) {
+          if (trim($value) === '') {
+            unset($values[$key]);
+          }
+        }
+        else {
+          foreach ($value as $k => $v) {
+            if (trim($value) === '') {
+              unset($values[$key][$k]);
+            }
+          }
+        }
+      }
+    }
+  }
+
 }

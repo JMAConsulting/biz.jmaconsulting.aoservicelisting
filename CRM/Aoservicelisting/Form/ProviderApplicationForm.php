@@ -8,11 +8,20 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  * @see https://docs.civicrm.org/dev/en/latest/framework/quickform/
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
-  public function buildQuickForm() {
 
-    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
-
+  public function setDefaultValues() {
     $defaults = [];
+    $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE1, FALSE);
+    CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
+    $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE2, FALSE);
+    CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
+    if (empty($this->organizationId)) {
+      $defaults['display_phone'] = 1;
+      $defaults['display_email'] = 1;
+      $defaults['display_name_public'] = 1;
+      $defaults['listing_type'] = 1;
+      $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
+    }
 
     $loggedInContactId = $this->getLoggedInUserContactID();
     if (!empty($loggedInContactId)) {
@@ -102,6 +111,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
     }
+
+    return $defaults;
+  }
+
+  public function buildQuickForm() {
+
+    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
+
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
@@ -131,37 +148,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
     $this->assign('customDataType', 'Organization');
-    $this->assign('customDataSubType', 'Service Listing');
+    $this->assign('customDataSubType', 'service_provider');
     $this->assign('entityID', $this->organizationId);
     $this->assign('groupID', CAMP_CG);
-    /**
-    $customFields = [861 => TRUE, 862 => TRUE, 863 => FALSE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
-    foreach ($customFields as $id => $isRequired) {
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
-    }
-    $this->assign('beforeStaffCustomFields', [861, 862, 863]);
-    $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
 
 
-    if (empty($this->organizationId)) {
-      $defaults['display_phone'] = 1;
-      $defaults['display_email'] = 1;
-      $defaults['display_name_public'] = 1;
-      $defaults['listing_type'] = 1;
-      $defaults['custom_866'] = [1 => 1, 2 => 1, 3 => 1, 4 => 1];
-    }
-    else {
+    if (!empty($this->organizationId)) {
       $listingTypeField->freeze();
       $organizationNameField->freeze();
     }
 
-    for ($row = 1; $row <= 21; $row++) {
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
-    }
-*/
-    $this->setDefaults($defaults);
     $this->addButtons(array(
       array(
         'type' => 'upload',

@@ -102,16 +102,6 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
 
-<!--
-{foreach from=$beforeStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
--->
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
@@ -148,41 +138,11 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
 
-{assign var="groupID" value=$groupID}
-<div id="customData1"></div>
-{include file="CRM/Aoservicelisting/Form/customData.tpl"}
-<!--
-{foreach from=$afterStaffCustomFields item=field}
-  {assign var=fieldName value="custom_$field"}
-  <div class="crm-section edit-row-custom_{$field}">
-    <div class="label">{$form.$fieldName.label}</div>
-    <div class="content">{$form.$fieldName.html}</div>
-    <div class="clear"></div>
-  </div>
-{/foreach}
-{section name='c' start=1 loop=21}
-  {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
-    <div class="crm-section">
-      <div class="label">{$form.custom_858.$rowN.label}</div>
-      <div class="content">{$form.custom_858.$rowN.html}</div>
-      <div class="clear"></div><br/>
-    </div>
-    <div class="crm-section">
-      <div class="label" style="font-weight:inherit;">{ts}Camp Session Dates{/ts}</div>
-      <div class="content">
-        <div style="float:left;">{$form.custom_859.$rowN.label}<br>{$form.custom_859.$rowN.html}</div>
-        <div>{$form.custom_860.$rowN.label}<br>{$form.custom_860.$rowN.html}</div>
-      </div>
-      <div class="clear"></div><br/>
-    </div>
-    {if $rowN neq 1}
-       <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
-    {/if}
-  </div>
-{/section}
-<span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
--->
+<div id="camp-section">
+  {assign var="groupID" value=$groupID}
+  <div id="customData1"></div>
+  {include file="CRM/Aoservicelisting/Form/customData.tpl"}
+</div>
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
@@ -282,10 +242,11 @@
         row.addClass('hiddenElement');
         row.find('[id^=custom_]').val('').trigger('change');
       });
-      $('#camp_session-1').addClass('hiddenElement');
+      $('#camp_session-1, #camp-section').addClass('hiddenElement');
+
       $('#add-another-camp').hide();
       if ($('#custom_863_3').prop('checked')) {
-        $('#camp_session-1').removeClass('hiddenElement');
+        $('#camp_session-1, #camp-section').removeClass('hiddenElement');
         $('#add-another-camp').show();
         $('[id^=custom_859_').each(function() {
           if ($(this).val().length) {
@@ -295,7 +256,7 @@
       }
       $('#custom_863_3').on('change', function() {
        if ($(this).prop('checked')) {
-         $('#camp_session-1').removeClass('hiddenElement');
+         $('#camp_session-1, #camp-section').removeClass('hiddenElement');
          $('#add-another-camp').show();
        }
        else {

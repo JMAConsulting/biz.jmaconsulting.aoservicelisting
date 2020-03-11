@@ -36,18 +36,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
     }
-    $customFields = [861 => TRUE, 862 => TRUE, 863 => TRUE, 864 => TRUE, 865 => TRUE, 866 => FALSE, 867 => TRUE];
-    foreach ($customFields as $id => $isRequired) {
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_{$id}", $id, $isRequired);
-    }
-    $this->assign('beforeStaffCustomFields', [861, 862, 863]);
-    $this->assign('afterStaffCustomFields', [864, 865, 866, 867]);
 
-    for ($row = 1; $row <= 21; $row++) {
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_858[$row]", 858, FALSE);
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_859[$row]", 859, FALSE);
-      CRM_Core_BAO_CustomField::addQuickFormElement($this, "custom_860[$row]", 860, FALSE);
-    }
+    $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1', TRUE);
+    $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
     $this->setDefaults($defaults);
     foreach ($this->_elements as $element) {
       if (strpos($element->getName(), '[') !== FALSE) {
@@ -83,7 +74,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     // export form elements
     $this->assign('elementNames', $this->getRenderableElementNames());
-    
+
     parent::buildQuickForm();
   }
 
@@ -263,7 +254,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     // Redirect to thank you page.
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-listing-thankyou', 'reset=1'));
-  }  
+  }
 
   /**
    * Get the fields/elements defined in this form.
