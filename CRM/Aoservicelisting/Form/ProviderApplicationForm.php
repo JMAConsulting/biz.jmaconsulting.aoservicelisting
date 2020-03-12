@@ -123,15 +123,47 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->buildCustom(PRIMARY_PROFILE, 'profile');
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
-    $this->assign('customDataType', 'Organization');
-    $this->assign('customDataSubType', 'service_provider');
-    $this->assign('entityID', $this->organizationId);
-    $this->assign('groupID', CAMP_CG);
 
+    // this part is to render camp fields
+    $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
+    $campFields = $campDefaultValues = $columnNames = [];
+    for ($i = 1; $i <= 21; $i++) {
+      $campFields[$i] = [];
+      foreach ($customFields as $customField) {
+        // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
+        $marker = $this->organization ? $i : '-' . $i;
+        if ($this->organization) {
+          $campDefaultValues[$i] = [$customField['column_name'] => $marker];
+          if ($i == 1) {
+            $columnNames[] = $customField['column_name'];
+          }
+        }
+        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        $campFields[$i][] = $key
+        CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
+      }
+    }
+    $this->assign('campFields', $campFields);
 
     if (!empty($this->organizationId)) {
       $listingTypeField->freeze();
       $organizationNameField->freeze();
+
+      // this part is to set default values of camp fields on basis of stored value
+      $defaults = [];
+      $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
+      $results = CRM_Core_DAO::executeQuery("SELECT * FROM $tableName WHERE entity_id = " . $this->organizationId)->fetchAll();
+      foreach ($results as $key => $values) {
+        $count = $key + 1;
+        foreach ($values as $columnName => $value) {
+          if (in_array($columnName, $columnNames)) {
+            $defaults[$campDefaultValues[$count][$columnName]] = $value;
+          }
+        }
+      }
+      if (!empty($defaults)) {
+        $this->setDefaults($defaults);
+      }
     }
 
     $this->addButtons(array(
@@ -142,8 +174,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       ),
     ));
 
-    // export form elements
-    //$this->assign('elementNames', $this->getRenderableElementNames());
+
     $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
@@ -327,27 +358,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
   }
 
   public static function _getServieOptions() {
