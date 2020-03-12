@@ -9,12 +9,6 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
-  public function preProcess() {
-    if (!empty($_POST['hidden_custom'])) {
-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
-    }
-  }
-
   public function buildQuickForm() {
     $defaults = $this->get('formValues');
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
@@ -74,20 +68,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->assign('campValues', $campValues);
 
     $this->setDefaults($defaults);
-    foreach ($this->_elements as $element) {
-      if (strpos($element->getName(), '[') !== FALSE) {
-         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
-         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
-         $element->setValue($defaults[$key][$arrayKey]);
-      }
-      if (!$entryFound) {
-        unset($campValues[$count]);
-      }
-      $count++;
-    }
-    $this->assign('campValues', $campValues);
-
-    $this->setDefaults($defaults);
     $this->freeze();
     $this->addButtons(array(
       array(
@@ -108,9 +88,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         'name' => E::ts('Previous'),
       ],
     ]);
-
-    // export form elements
-    $this->assign('elementNames', $this->getRenderableElementNames());
 
     parent::buildQuickForm();
   }
@@ -241,7 +218,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           }
         }
         if ($rowNumber === 1) {
-          $relationshipParams['relationship_type_id'] = 74;
+          $relationshipParams['relationship_type_id'] = PRIMARY_CONTACT_REL;
           $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
           if (empty($relationshipCheck['count'])) {
             try {
@@ -264,27 +241,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     // Redirect to thank you page.
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-listing-thankyou', 'reset=1'));
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
   }
 
 }

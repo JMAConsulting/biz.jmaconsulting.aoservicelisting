@@ -26,6 +26,20 @@ class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
 public $formValues = [];
 
 public $organizationId;
+public $_loggedInContactID;
+
+  public function preProcess() {
+    $loggedInContactId = $this->getLoggedInUserContactID();
+    if (!empty($loggedInContactId)) {
+      $relationship = civicrm_api3('Relationship', 'get', [
+        'contact_id_a' => $loggedInContactId,
+        'relationship_type_id' => PRIMARY_CONTACT_REL,
+      ]);
+      $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
+      $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+    }
+    parent::preProcess();
+  }
 
   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
     if ($id) {

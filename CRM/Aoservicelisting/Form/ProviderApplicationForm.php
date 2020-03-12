@@ -9,12 +9,6 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
-  public function preProcess() {
-    if (!empty($_POST['hidden_custom'])) {
-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
-    }
-  }
-
   public function setDefaultValues() {
     $defaults = [];
     $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE);
@@ -27,23 +21,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $defaults['listing_type'] = 1;
     }
 
-    $loggedInContactId = $this->getLoggedInUserContactID();
-    if (!empty($loggedInContactId)) {
-      $relationship = civicrm_api3('Relationship', 'get', [
-        'contact_id_a' => $loggedInContactId,
-        'relationship_type_id' => 74,
-      ]);
+    if (!empty($this->_loggedInContactID)) {
       if (!empty($relationship['count'])) {
-        $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
-        $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
         ]);
         $primrayContact = civicrm_api3('Contact', 'getsingle', [
-          'id' => $loggedInContactId,
+          'id' => $this->_loggedInContactID,
         ]);
-        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $loggedInContactId, 'is_primary' => 1]);
+        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
         $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
         $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
@@ -73,7 +60,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
-          'contact_id_a' => ['!=' => $loggedInContactId],
+          'contact_id_a' => ['!=' => $this->_loggedInContactID],
           'sequential' => 1,
         ]);
         $staffRowCount = $campRowCount = 1;
@@ -139,7 +126,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           }
         }
         $key = 'custom_' . $customField['id'] . '_' . $marker;
-        $campFields[$i][] = $key
+        $campFields[$i][] = $key;
         CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
       }
     }
@@ -267,12 +254,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $missingRegulators[] = $options[$value];
       }
     }
+    /**
+     * TODO: display_name_public , display_email and display_phone are now replaced by custom field, so use appropriate field key to apply these validation rule
+
     if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
       $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
     }
     if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
       $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
     }
+    */
     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
@@ -333,20 +324,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if (!empty($missingRegulators)) {
       $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
-    if (!empty($missingRegulators)) {
-      $errors['custom_863'] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
-    }
+
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Need to supply the organization name');
     }
     if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
       $errors['organization_email'] = E::ts('Need to supply the organization email');
-    }
-    if (empty($values['primary_first_name'])) {
-      $errors['primary_first_name'] = E::ts('First name of the primary contact is a required field.');
-    }
-    if (empty($values['primary_last_name'])) {
-      $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field.');
     }
     if (empty($values['waiver_field'])) {
       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');

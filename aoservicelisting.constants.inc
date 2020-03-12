@@ -5,3 +5,4 @@
   define('CAMP_CG', 70);
   define('WAIVER_FIELD', 'custom_871');
   define('REGULATED_SERVICE_CF', 'custom_863');
+  define('PRIMARY_CONTACT_REL', 74);

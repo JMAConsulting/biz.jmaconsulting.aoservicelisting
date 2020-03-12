@@ -123,11 +123,15 @@
     <div class="crm-section">
       <div class="label">{$form.$field.label}</div>
       <div class="content">{$form.$field.html}</div>
-      <div class="clear"></div><br/>
+      <div class="clear"></div>
     </div>
     {/foreach}
+    {if $rowN neq 1}
+       <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+    {/if}
   </div>
 {/section}
+<span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
@@ -144,6 +148,7 @@
     CRM.$(function($) {
       $('.crm-profile legend').hide();
       $('#crm-container.crm-public .label').css('font-size', '16px');
+      $('.crm-clear-link').hide();
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
