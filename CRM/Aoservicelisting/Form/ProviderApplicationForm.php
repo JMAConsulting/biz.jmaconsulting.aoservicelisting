@@ -22,7 +22,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
 
     if (!empty($this->_loggedInContactID)) {
-      if (!empty($relationship['count'])) {
+      if (!empty($this->organizationId)) {
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
@@ -87,8 +87,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
 
+    $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
-    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
+    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), TRUE);
@@ -118,14 +119,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $campFields[$i] = [];
       foreach ($customFields as $customField) {
         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
-        $marker = $this->organization ? $i : '-' . $i;
-        if ($this->organization) {
-          $campDefaultValues[$i] = [$customField['column_name'] => $marker];
+        $marker = $this->organizationId ? $i : '-' . $i;
+        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        if ($this->organizationId) {
+          $campDefaultValues[$i][$customField['column_name'] = $key;
           if ($i == 1) {
             $columnNames[] = $customField['column_name'];
           }
         }
-        $key = 'custom_' . $customField['id'] . '_' . $marker;
         $campFields[$i][] = $key;
         CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
       }
@@ -133,9 +134,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->assign('campFields', $campFields);
 
     if (!empty($this->organizationId)) {
-      $listingTypeField->freeze();
-      $organizationNameField->freeze();
-
       // this part is to set default values of camp fields on basis of stored value
       $defaults = [];
       $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);

@@ -29,8 +29,11 @@ public $organizationId;
 public $_loggedInContactID;
 
   public function preProcess() {
-    $loggedInContactId = $this->getLoggedInUserContactID();
+    parent::preProcess();
+    // for testing purpose consider cid value from url
+    $loggedInContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE) ?: $this->getLoggedInUserContactID();
     if (!empty($loggedInContactId)) {
+      $this->_loggedInContactID = $loggedInContactId;
       $relationship = civicrm_api3('Relationship', 'get', [
         'contact_id_a' => $loggedInContactId,
         'relationship_type_id' => PRIMARY_CONTACT_REL,
@@ -38,7 +41,6 @@ public $_loggedInContactID;
       $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
       $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
     }
-    parent::preProcess();
   }
 
   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
