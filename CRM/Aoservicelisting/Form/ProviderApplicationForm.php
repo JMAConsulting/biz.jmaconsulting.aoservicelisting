@@ -23,18 +23,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (!empty($this->_loggedInContactID)) {
       if (!empty($this->organizationId)) {
+        // isn't it obvious that a person is only allowed to submit the application only after agreeing to the waiver it is a required field to proceed
+        $defaults['waiver_field'] = 1;
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
         ]);
-        $primrayContact = civicrm_api3('Contact', 'getsingle', [
+        $primraryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
-        $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
+        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
+        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
@@ -84,7 +86,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function buildQuickForm() {
-
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
 
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
@@ -122,7 +123,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $marker = $this->organizationId ? $i : '-' . $i;
         $key = 'custom_' . $customField['id'] . '_' . $marker;
         if ($this->organizationId) {
-          $campDefaultValues[$i][$customField['column_name'] = $key;
+          $campDefaultValues[$i][$customField['column_name']] = $key;
           if ($i == 1) {
             $columnNames[] = $customField['column_name'];
           }
@@ -168,34 +169,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = 0;
-    $regulatorUrlMapping = [
-      1 => 'caslpo.com',
-      2 => 'cco.on.ca',
-      3 => 'ontariocampsassociation.ca',
-      4 => 'oacyc.org',
-      5 => 'cdho.org',
-      6 => 'rcdso.org',
-      7 => 'members.dietitians.ca',
-      7 => 'collegeofdietitians.org',
-      8 => 'college-ece.ca',
-      9 => 'collegeoftrades.ca',
-      10 => 'coko.ca',
-      11 => 'cmto.com',
-      12 => 'coto.org',
-      13 => 'collegeoptom.on.ca',
-      14 => 'coptont.org',
-      15 => 'cpso.on.ca',
-      16 => 'collegept.org',
-      17 => 'ccpa-accp.ca',
-      17 => 'psych.on.ca',
-      17 => 'cpo.on.ca',
-      18 => 'eopa.ca',
-      19 => 'findasocialworker.ca',
-      19 => 'ocwssw.org',
-      20 => 'osla.on.ca',
-      20 => 'caslpo.com',
-      21 => 'oct.ca',
-    ];
+    $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
 
     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
       if ($checked) {
@@ -252,16 +226,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $missingRegulators[] = $options[$value];
       }
     }
-    /**
-     * TODO: display_name_public , display_email and display_phone are now replaced by custom field, so use appropriate field key to apply these validation rule
 
-    if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
-      $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
+    if ($values['listing_type'] == 1 && empty($values[DISPLAY_NAME])) {
+      $errors[DISPLAY_NAME] = E::ts('first name and last name of listing must be publicly displayed');
     }
-    if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
-      $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
+    if ($values['listing_type'] == 1 && empty($values[DISPLAY_EMAIL]) && empty($values[DISPLAY_PHONE])) {
+      $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
     }
-    */
+
     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {

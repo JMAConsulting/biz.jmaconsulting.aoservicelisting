@@ -107,12 +107,18 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'organization_name' => $values['organization_name'],
       'email' => $values['organization_email'],
     ];
-    $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
-    $dedupeParams['check_permission'] = 0;
-    $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
-    $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
-    $organization_params['contact_sub_type'] = 'service_provider';
-    $organization_params['contact_type'] = 'Organization';
+    if (!empty($this->organizationId)) {
+      $organization_params['id'] = $this->organizationId;
+    }
+    else {
+      $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
+      $dedupeParams['check_permission'] = 0;
+      $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
+      $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+      $organization_params['contact_sub_type'] = 'service_provider';
+      $organization_params['contact_type'] = 'Organization';
+    }
+
     $organization = civicrm_api3('Contact', 'create', $organization_params);
     $address1Params = [
       'street_address' => $values['work_address'][1],
