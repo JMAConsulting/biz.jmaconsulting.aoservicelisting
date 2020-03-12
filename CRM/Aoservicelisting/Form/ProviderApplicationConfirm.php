@@ -118,9 +118,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $organization_params['contact_sub_type'] = 'service_provider';
       $organization_params['contact_type'] = 'Organization';
     }
-
     $organization = civicrm_api3('Contact', 'create', $organization_params);
-    $address1Params = [
+
+    $addressParams1 = [
       'street_address' => $values['work_address'][1],
       'postal_code' => $values['postal_code'][1],
       'city' => $values['city'][1],
@@ -130,30 +130,36 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'is_primary' => 1,
       'contact_id' => $organization['id'],
     ];
-    $address1 = civicrm_api3('Address', 'get', $address1Params);
-    if (empty($address1['count'])) {
-      $address1 = civicrm_api3('Address', 'create', $address1Params);
-    }
-    $websiteParams = [
+    $address1 = civicrm_api3('Address' , 'create', array_merge($addressParams1,
+     ['id' => civicrm_api3('Address', 'getvalue', ['contact_id' => $organization['id'], 'is_primary' => TRUE, 'return' => 'id'])]
+    ));
+
+    $id = civicrm_api3('Website', 'getvalue', [
       'contact_id' => $organization['id'],
       'url' => $values['website'],
-      'website_type_id' => 'Work',
-    ];
-    civicrm_api3('Website', 'create', $websiteParams);
-    $addressIds = [0 => [$address1['id'], $address1Params]];
-    $staffMemberIds = [];
+      'return' => 'id',
+      'options' => ['limit' => 1],
+    ]);
+    if ($id) {
+      civicrm_api3('Website', 'create', [
+        'contact_id' => $organization['id'],
+        'url' => $values['website'],
+        'website_type_id' => 'Work',
+      ]);
+    }
 
-    $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE, CRM_Core_Action::VIEW);
-    $values['skip_greeting_processing'] = TRUE;
-    CRM_Contact_BAO_Contact::createProfileContact($values, $fields, $organization['id'], NULL, PRIMARY_PROFILE);
+    $addressIds = [0 => [$address1['id'], $addressParams1]];
+    $staffMemberIds = [];
 
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
     if (!empty($customValues) && is_array($customValues)) {
       CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
     }
 
-    $customFieldParams[WAIVER_FIELD] = $values['waiver_field'];
-    civicrm_api3('CustomValue', 'create', $customFieldParams);
+    civicrm_api3('CustomValue', 'create', [
+      WAIVER_FIELD => $values['waiver_field'],
+      'entity_id' => $organization['id'],
+    ]);
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
       if (!empty($values['phone'][$rowNumber])) {
         civicrm_api3('Phone', 'create', [
