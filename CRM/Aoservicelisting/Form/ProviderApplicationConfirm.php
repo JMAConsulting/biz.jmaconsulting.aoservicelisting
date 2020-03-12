@@ -40,32 +40,35 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
     $campValues = [];
     $count = 1;
+    $entryFound = 0;
     $totalCount = 21;
     while($count < $totalCount) {
       $entryFound = FALSE;
-      $campValues[$count] = [];
       foreach ($customFields as $customField) {
         $key = 'custom_' . $customField['id'];
-        $campValues[$count][$key] = [
-          'label' => $customField['label'],
-          'html' => NULL,
-        ];
-        if (!empty($defaults[$key . '_-' . $count])) {
-          $campValues[$count][$key]['html'] = $defaults[$key . '_-' . $count];
-          $entryFound = TRUE;
-        }
-        elseif (!empty($defaults[$key . '_' . $count])) {
-          $campValues[$count][$key]['html'] = $defaults[$key . '_' . $count];
+        if (!empty($defaults[$key . '_-' . $count]) || !empty($defaults[$key . '_' . $count])) {
           $entryFound = TRUE;
         }
       }
       if (!$entryFound) {
-        unset($campValues[$count]);
+        $entryFound++;
       }
       $count++;
     }
 
-    $this->assign('campValues', $campValues);
+    // this part is to render camp fields
+    $campFields = [];
+    for ($i = 1; $i <= $entryFound; $i++) {
+      $campFields[$i] = [];
+      foreach ($customFields as $customField) {
+        // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
+        $marker = $this->organizationId ? $i : '-' . $i;
+        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        $campFields[$i][] = $key;
+        CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
+      }
+    }
+    $this->assign('campFields', $campFields);
 
     $this->setDefaults($defaults);
     $this->freeze();
