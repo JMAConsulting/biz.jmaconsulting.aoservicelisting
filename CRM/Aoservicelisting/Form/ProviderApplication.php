@@ -30,6 +30,7 @@ public $_loggedInContactID;
 
   public function preProcess() {
     parent::preProcess();
+    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
     // for testing purpose consider cid value from url
     $loggedInContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE) ?: $this->getLoggedInUserContactID();
     if (!empty($loggedInContactId)) {

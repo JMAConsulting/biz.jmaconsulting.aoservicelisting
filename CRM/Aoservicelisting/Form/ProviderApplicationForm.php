@@ -91,8 +91,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function buildQuickForm() {
-    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
-
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);

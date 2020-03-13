@@ -124,6 +124,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     ];
     if (!empty($this->organizationId)) {
       $organization_params['id'] = $this->organizationId;
+      // delete all camp session custom values if present
+      $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
+      CRM_Core_DAO::executeQuery("DELETE FROM $tableName WHERE entity_id = " . $this->organizationId);
     }
     else {
       $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
