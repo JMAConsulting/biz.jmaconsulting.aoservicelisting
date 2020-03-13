@@ -104,7 +104,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   public function submit($values) {
     $this->processCustomValue($values);
     if (empty($values['organiation_name'])) {
-
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
     }
     $organization_params = [
@@ -125,7 +124,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $organization = civicrm_api3('Contact', 'create', $organization_params);
 
     $addressParams1 = [
-
       'street_address' => $values['work_address'][1],
       'postal_code' => $values['postal_code'][1],
       'city' => $values['city'][1],
