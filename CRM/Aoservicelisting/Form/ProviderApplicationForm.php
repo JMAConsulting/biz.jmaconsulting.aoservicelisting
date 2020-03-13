@@ -9,6 +9,8 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
+  public $listingType = 1;
+
   public function setDefaultValues() {
     $defaults = [];
     $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE);
@@ -23,8 +25,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (!empty($this->_loggedInContactID)) {
       if (!empty($this->organizationId)) {
-        // isn't it obvious that a person is only allowed to submit the application only after agreeing to the waiver it is a required field to proceed
-        $defaults['waiver_field'] = 1;
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
@@ -43,9 +43,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         foreach (['organization_name',  'email'] as $field) {
           if ($field === 'organization_name' && stristr($organization[$field], 'self-employed') === FALSE) {
             $defaults['listing_type'] = 2;
+            $this->listingType = 2;
           }
           else {
             $defaults['listing_type'] = 1;
+            $this->listingType = 1;
           }
           if ($field === 'email') {
             $defaults['organization_email'] = $organization[$field];
@@ -91,11 +93,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
-    $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
+    $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'), $attr);
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), TRUE);
-    $this->add('text', 'primary_first_name', E::ts('First Name'));
-    $this->add('text', 'primary_last_name', E::ts('Last Name'));
+    $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
+    $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
+    $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr);
     $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
