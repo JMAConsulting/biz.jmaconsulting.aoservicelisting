@@ -20,6 +20,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   }
 
   public function buildQuickForm() {
+    CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerconfirmstyle.css');
     $defaults = $this->get('formValues');
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
@@ -37,6 +38,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $this->add('text', "city[$rowNumber]", E::ts('City/Town'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
     }
     for ($rowNumber = 1; $rowNumber <= 22; $rowNumber++) {
+      $this->add('hidden', "staff_contact_id[$rowNumber]", NULL);
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
@@ -195,6 +197,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $address = civicrm_api3('Address', 'create', $addressParams);
         $addressIds[] = [$address['id'], $addressParams];
       }
+      if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_first_name'][$rowNumber])
+        && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
+        // We had a staff record but it is gone now
+        $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $organization['id'], 'is_active' => 1]);
+        if (!empty($relationships['values'])) {
+          // End Date all relationships as they have either overwritten the data or not.
+          foreach ($relationships['values'] as $relationship) {
+            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+          }
+        }
+      }
       if (!empty($values['staff_first_name'][$rowNumber])) {
         $individualParams = [
           'first_name' => $values['staff_first_name'][$rowNumber],
@@ -202,6 +215,21 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         ];
         if ($rowNumber === 1) {
           $individualParams['email'] = $values['email-Primary'];
+        }
+        if (!empty($values['staff_contact_id'][$rowNumber])) {
+          $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $values['staff_contact_id'][$rowNumber]]);
+          if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
+            $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $organization['id'], 'is_active' => 1]);
+            if (!empty($relationships['values'])) {
+              // End Date all relationships as they have either overwritten the data or not.
+              foreach ($relationships['values'] as $relationship) {
+                civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+              }
+            }
+          }
+          else {
+            $individualParams['id'] = $values['staff_contact_id'][$rowNumber];
+          }
         }
         $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
         $dedupeParams['check_permission'] = 0;

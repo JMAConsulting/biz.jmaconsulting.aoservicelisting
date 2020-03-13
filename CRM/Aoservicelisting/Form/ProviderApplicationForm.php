@@ -35,6 +35,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
         $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
         $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
+        $defaults['staff_contact_id[1]'] = $this->_loggedInContactID;
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
         $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
@@ -65,13 +66,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
           'contact_id_a' => ['!=' => $this->_loggedInContactID],
+          'is_active'  => 1,
           'sequential' => 1,
         ]);
-        $staffRowCount = $campRowCount = 1;
+        $staffRowCount = 2;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId]);
+            $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
             $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
             $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
             $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
@@ -107,6 +110,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "city[$rowNumber]", E::ts('City/Town'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
     }
     for ($rowNumber = 1; $rowNumber <= 22; $rowNumber++) {
+      $this->add('hidden', "staff_contact_id[$rowNumber]", NULL);
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
