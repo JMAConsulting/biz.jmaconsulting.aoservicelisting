@@ -8,7 +8,7 @@
 }
 
 #crm-container .crm-public .label {
-  font-size': 16px !important;
+  font-size: 16px !important;
 }
 
 .crm-container .crm-section .label {
@@ -23,8 +23,22 @@ input[type="checkbox"][readonly] {
   pointer-events: none;
 }
 
+input[type="radio"][readonly] {
+  pointer-events: none;
+}
+
+
 @media (min-width: 768px) {
   .custom-checkbox {
     margin-left: initial;
   }
+}
+
+fieldset:not(.fieldgroup) {
+  background-color: transparent !important;
+  border-top: 0;
+}
+
+table th, table td {
+  background-color: transparent !important;
 }
