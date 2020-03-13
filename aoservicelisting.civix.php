@@ -76,6 +76,90 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
+  public static function createActivity($cid) {
+    civicrm_api3('Activity', 'create', [
+      'source_contact_id' => $cid,
+      'status_id' => 'Completed',
+      'activity_type_id' => "service_listing_created",
+      'sequential' => 0,
+    ]);
+  }
+
+  public static function editActivity($cid) {
+    civicrm_api3('Activity', 'create', [
+      'source_contact_id' => $cid,
+      'status_id' => 'Completed',
+      'activity_type_id' => "service_listing_edited",
+      'sequential' => 0,
+    ]);
+  }
+
+  /**
+   * Validation Rule.
+   *
+   * @param array $params
+   *
+   * @return array|bool
+   */
+  public static function usernameRule($cid) {
+    // Check if there is a UFMatch, if there is, that means there is a CMS ID associated the account.
+    $ufId = CRM_Core_DAO::singleValueQuery("SELECT uf_id FROM civicrm_uf_match WHERE contact_id = %1", [1 => [$cid, "Integer"]]);
+    if (!empty($ufId)) {
+      return TRUE;
+    }
+    // Check if the CMS has an account with the same email.
+    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]);
+    if (!empty($email)) {
+      $config = CRM_Core_Config::singleton();
+      $errors = array();
+      $check_params = array(
+        'mail' => $email,
+      );
+      $config->userSystem->checkUserNameEmailExists($check_params, $errors, 'mail');
+
+      return !empty($errors) ? TRUE : FALSE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * Validation Rule.
+   *
+   * @param array $params
+   *
+   * @return array|bool
+   */
+  public static function emailRule($cid) {
+    // Check if the user has a valid email.
+    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1 AND on_hold <> 1", [1 => [$cid, "Integer"]]);
+    if (!empty($email)) {
+      return FALSE;
+    }
+    return TRUE;
+  }
+
+
+  public static function createUserAccount($cid) {
+    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name)) AS name, display_name
+          FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
+    if (self::usernameRule($cid)) {
+      return FALSE;
+    }
+    if (self::emailRule($cid)) {
+      return FALSE;
+    }
+    $params = [
+      'cms_name' => $name['name'],
+      'cms_pass' => 'changeme',
+      'cms_confirm_pass' => 'changeme',
+      'email' => CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]),
+      'contactID' => $cid,
+      'name' => $name['display_name'],
+      'notify' => TRUE,
+    ];
+    CRM_Core_BAO_CMSUser::create($params, 'email');
+  }
+
 }
 
 use CRM_Aoservicelisting_ExtensionUtil as E;

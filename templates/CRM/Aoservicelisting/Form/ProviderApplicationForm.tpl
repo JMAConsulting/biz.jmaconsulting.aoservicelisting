@@ -153,23 +153,27 @@
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
-        $('#display_name_public').prop({'checked': true, 'readonly': true});
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
-        $('#display_name_public').removeAttr('readonly');
+        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
+        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
           $('.edit-row-organization_name').hide();
           $('.edit-row-organization_email').hide();
-          $('#display_name_public').prop({'checked': true, 'readonly': true});
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
         }
         else {
-          $('#display_name_public').removeAttr('readonly');
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
+          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
         }
       });
 

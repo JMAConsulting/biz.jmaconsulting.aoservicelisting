@@ -5,7 +5,7 @@ return [
     'entity' => 'OptionValue',
     'params' => [
       'option_group_id' => 'activty_type',
-      'lable' => 'Service listing created',
+      'label' => 'Service listing created',
       'name' => 'service_listing_created',
     ],
   ],
@@ -14,7 +14,7 @@ return [
     'entity' => 'OptionValue',
     'params' => [
       'option_group_id' => 'activty_type',
-      'lable' => 'Service listing Edited',
+      'label' => 'Service listing Edited',
       'name' => 'service_listing_edited',
     ],
   ],
