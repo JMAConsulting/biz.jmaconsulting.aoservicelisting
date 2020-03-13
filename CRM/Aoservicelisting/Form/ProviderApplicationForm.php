@@ -66,9 +66,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
           'contact_id_a' => ['!=' => $this->_loggedInContactID],
+          'is_active'  => 1,
           'sequential' => 1,
         ]);
-        $staffRowCount = $campRowCount = 1;
+        $staffRowCount = 2;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
@@ -109,7 +110,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "city[$rowNumber]", E::ts('City/Town'), ['size' => 20, 'maxlength' => 64, 'class' => 'medium']);
     }
     for ($rowNumber = 1; $rowNumber <= 22; $rowNumber++) {
-      $this->add('hidden', "staff_contact_id[$rowNumber]", 'Staff Contact ID');
+      $this->add('hidden', "staff_contact_id[$rowNumber]", NULL);
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
