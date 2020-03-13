@@ -8,21 +8,14 @@
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/one-stop-listing-application</path>
-    <page_callback>CRM_Aoservicelisting_Controller_ProviderApplication</page_callback>
-    <title>Autism Ontario Service Listing Application</title>
-    <access_arguments>*always allow*</access_arguments>
-    <is_public>true</is_public>
-  </item>
-  <item>
-    <path>civicrm/one-stop-listing-application-confirm</path>
+    <path>civicrm/service-listing-application-confirm</path>
     <page_callback>CRM_Aoservicelisting_Form_ProviderApplicationConfirm</page_callback>
     <title>Autism Ontario Service Listing Application Confirm</title>
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>
   <item>
-    <path>civicrm/one-stop-listing-thankyou</path>
+    <path>civicrm/service-listing-thankyou</path>
     <page_callback>CRM_Aoservicelisting_Page_ProviderApplicationThankYou</page_callback>
     <title>Autism Ontarion Service Listing Application Submitted</title>
     <access_arguments>*always allow*</access_arguments>
