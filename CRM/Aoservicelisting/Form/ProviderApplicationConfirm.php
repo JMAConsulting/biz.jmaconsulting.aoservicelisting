@@ -62,7 +62,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $entryFound = TRUE;
         }
       }
-      if (!$entryFound) {
+      if ($entryFound) {
         $entryCount++;
       }
       $count++;
