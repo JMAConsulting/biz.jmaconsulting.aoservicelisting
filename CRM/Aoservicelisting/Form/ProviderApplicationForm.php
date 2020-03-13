@@ -9,11 +9,7 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
-  public function preProcess() {
-    if (!empty($_POST['hidden_custom'])) {
-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
-    }
-  }
+  public $listingType = 1;
 
   public function setDefaultValues() {
     $defaults = [];
@@ -27,36 +23,31 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $defaults['listing_type'] = 1;
     }
 
-    $loggedInContactId = $this->getLoggedInUserContactID();
-    if (!empty($loggedInContactId)) {
-      $relationship = civicrm_api3('Relationship', 'get', [
-        'contact_id_a' => $loggedInContactId,
-        'relationship_type_id' => 74,
-      ]);
-      if (!empty($relationship['count'])) {
-        $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
-        $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+    if (!empty($this->_loggedInContactID)) {
+      if (!empty($this->organizationId)) {
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
         ]);
-        $primrayContact = civicrm_api3('Contact', 'getsingle', [
-          'id' => $loggedInContactId,
+        $primraryContact = civicrm_api3('Contact', 'getsingle', [
+          'id' => $this->_loggedInContactID,
         ]);
-        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $loggedInContactId, 'is_primary' => 1]);
-        $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
-        $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
+        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
+        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
+        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
         foreach (['organization_name',  'email'] as $field) {
           if ($field === 'organization_name' && stristr($organization[$field], 'self-employed') === FALSE) {
             $defaults['listing_type'] = 2;
+            $this->listingType = 2;
           }
           else {
             $defaults['listing_type'] = 1;
+            $this->listingType = 1;
           }
           if ($field === 'email') {
             $defaults['organization_email'] = $organization[$field];
@@ -73,7 +64,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
-          'contact_id_a' => ['!=' => $loggedInContactId],
+          'contact_id_a' => ['!=' => $this->_loggedInContactID],
           'sequential' => 1,
         ]);
         $staffRowCount = $campRowCount = 1;
@@ -97,16 +88,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function buildQuickForm() {
-
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
 
+    $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
-    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
-    $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
+    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
+    $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'), $attr);
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), TRUE);
-    $this->add('text', 'primary_first_name', E::ts('First Name'));
-    $this->add('text', 'primary_last_name', E::ts('Last Name'));
+    $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
+    $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
+    $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr);
     $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
@@ -123,15 +115,44 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->buildCustom(PRIMARY_PROFILE, 'profile');
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
-    $this->assign('customDataType', 'Organization');
-    $this->assign('customDataSubType', 'service_provider');
-    $this->assign('entityID', $this->organizationId);
-    $this->assign('groupID', CAMP_CG);
 
+    // this part is to render camp fields
+    $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
+    $campFields = $campDefaultValues = $columnNames = [];
+    for ($i = 1; $i <= 21; $i++) {
+      $campFields[$i] = [];
+      foreach ($customFields as $customField) {
+        // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
+        $marker = $this->organizationId ? $i : '-' . $i;
+        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        if ($this->organizationId) {
+          $campDefaultValues[$i][$customField['column_name']] = $key;
+          if ($i == 1) {
+            $columnNames[] = $customField['column_name'];
+          }
+        }
+        $campFields[$i][] = $key;
+        CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
+      }
+    }
+    $this->assign('campFields', $campFields);
 
     if (!empty($this->organizationId)) {
-      $listingTypeField->freeze();
-      $organizationNameField->freeze();
+      // this part is to set default values of camp fields on basis of stored value
+      $defaults = [];
+      $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
+      $results = CRM_Core_DAO::executeQuery("SELECT * FROM $tableName WHERE entity_id = " . $this->organizationId)->fetchAll();
+      foreach ($results as $key => $values) {
+        $count = $key + 1;
+        foreach ($values as $columnName => $value) {
+          if (in_array($columnName, $columnNames)) {
+            $defaults[$campDefaultValues[$count][$columnName]] = $value;
+          }
+        }
+      }
+      if (!empty($defaults)) {
+        $this->setDefaults($defaults);
+      }
     }
 
     $this->addButtons(array(
@@ -142,8 +163,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       ),
     ));
 
-    // export form elements
-    //$this->assign('elementNames', $this->getRenderableElementNames());
+
     $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
@@ -152,34 +172,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = 0;
-    $regulatorUrlMapping = [
-      1 => 'caslpo.com',
-      2 => 'cco.on.ca',
-      3 => 'ontariocampsassociation.ca',
-      4 => 'oacyc.org',
-      5 => 'cdho.org',
-      6 => 'rcdso.org',
-      7 => 'members.dietitians.ca',
-      7 => 'collegeofdietitians.org',
-      8 => 'college-ece.ca',
-      9 => 'collegeoftrades.ca',
-      10 => 'coko.ca',
-      11 => 'cmto.com',
-      12 => 'coto.org',
-      13 => 'collegeoptom.on.ca',
-      14 => 'coptont.org',
-      15 => 'cpso.on.ca',
-      16 => 'collegept.org',
-      17 => 'ccpa-accp.ca',
-      17 => 'psych.on.ca',
-      17 => 'cpo.on.ca',
-      18 => 'eopa.ca',
-      19 => 'findasocialworker.ca',
-      19 => 'ocwssw.org',
-      20 => 'osla.on.ca',
-      20 => 'caslpo.com',
-      21 => 'oct.ca',
-    ];
+    $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
 
     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
       if ($checked) {
@@ -236,12 +229,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $missingRegulators[] = $options[$value];
       }
     }
-    if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
-      $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
+
+    if ($values['listing_type'] == 1 && empty($values[DISPLAY_NAME])) {
+      $errors[DISPLAY_NAME] = E::ts('first name and last name of listing must be publicly displayed');
     }
-    if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
-      $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
+    if ($values['listing_type'] == 1 && empty($values[DISPLAY_EMAIL]) && empty($values[DISPLAY_PHONE])) {
+      $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
     }
+
     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
@@ -302,20 +297,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if (!empty($missingRegulators)) {
       $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
-    if (!empty($missingRegulators)) {
-      $errors['custom_863'] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
-    }
+
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Need to supply the organization name');
     }
     if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
       $errors['organization_email'] = E::ts('Need to supply the organization email');
-    }
-    if (empty($values['primary_first_name'])) {
-      $errors['primary_first_name'] = E::ts('First name of the primary contact is a required field.');
-    }
-    if (empty($values['primary_last_name'])) {
-      $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field.');
     }
     if (empty($values['waiver_field'])) {
       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');
@@ -327,27 +314,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
   }
 
   public static function _getServieOptions() {

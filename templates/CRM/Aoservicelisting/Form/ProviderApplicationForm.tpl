@@ -116,11 +116,22 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
 
-<div id="camp-section">
-  {assign var="groupID" value=$groupID}
-  <div id="customData1"></div>
-  {include file="CRM/Aoservicelisting/Form/customData.tpl"}
-</div>
+{section name='c' start=1 loop=21}
+  {assign var='rowN' value=$smarty.section.c.index}
+  <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
+    {foreach from=$campFields.$rowN item=field}
+    <div class="crm-section">
+      <div class="label">{$form.$field.label}</div>
+      <div class="content">{$form.$field.html}</div>
+      <div class="clear"></div>
+    </div>
+    {/foreach}
+    {if $rowN neq 1}
+       <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+    {/if}
+  </div>
+{/section}
+<span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
 
 {* FOOTER *}
 <div class="crm-public-form-item crm-section waiver-section">
@@ -136,8 +147,8 @@
   <script type="text/javascript">
     CRM.$(function($) {
       $('.crm-profile legend').hide();
-      CRM.buildCustomData('Organization', 'service_provider', 1);
       $('#crm-container.crm-public .label').css('font-size', '16px');
+      $('.crm-clear-link').hide();
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();

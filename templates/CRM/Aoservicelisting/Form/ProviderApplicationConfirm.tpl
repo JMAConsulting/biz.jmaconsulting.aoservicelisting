@@ -94,48 +94,21 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
 
-{if !empty($campValues)}
-  {section name='c' start=1 loop=21}
-    {assign var='rowN' value=$smarty.section.c.index}
-    {if !empty($campValues.$rowN)}
-    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
-      {foreach from=$campValues.$rowN key=customKey item=dontCare}
-        <div class="label">{$campValues.$rowN.$customKey.label}</div>
-        <div class="content">{$campValues.$rowN.$customKey.html}</div>
-        <div class="clear"></div>
-      {/foreach}
-    </div>
-    <div class="clear"></div>
-<!--
+{if !empty($campFields)}
 {section name='c' start=1 loop=21}
   {assign var='rowN' value=$smarty.section.c.index}
-  <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
-    <div class="label">{$form.custom_858.$rowN.label}</div>
-    <div class="content">{$form.custom_858.$rowN.html}</div>
-    <div class="clear"></div>
-    <div class="label">{ts}Camp Session Dates{/ts}</div>
-    <div class="content">
-      <div style="float:left;">{$form.custom_859.$rowN.html}&nbsp;&nbsp;-&nbsp;&nbsp;{$form.custom_860.$rowN.html}</div>
-    </div>
-    <div class="clear"></div>
-  </div>
-{/section}
--->
-
-{if !empty($campValues)}
-  {section name='c' start=1 loop=21}
-    {assign var='rowN' value=$smarty.section.c.index}
-    {if !empty($campValues.$rowN)}
-    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
-      {foreach from=$campValues.$rowN key=customKey item=v}
-        <div class="label">{$campValues.$rowN.$customKey.label}</div>
-        <div class="content">{$campValues.$rowN.$customKey.html}</div>
+  {if !empty($campFields.$rowN)}
+    <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
+      {foreach from=$campFields.$rowN item=field}
+      <div class="crm-section">
+        <div class="label">{$form.$field.label}</div>
+        <div class="content">{$form.$field.html}</div>
         <div class="clear"></div>
+      </div>
       {/foreach}
     </div>
-    <div class="clear"></div>
-    {/if}
-  {/section}
+  {/if}
+{/section}
 {/if}
 
 {* FOOTER *}

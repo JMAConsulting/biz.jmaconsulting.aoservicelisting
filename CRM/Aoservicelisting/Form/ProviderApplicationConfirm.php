@@ -9,12 +9,6 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
-  public function preProcess() {
-    if (!empty($_POST['hidden_custom'])) {
-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
-    }
-  }
-
   public function buildQuickForm() {
     $defaults = $this->get('formValues');
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
@@ -46,46 +40,35 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
     $campValues = [];
     $count = 1;
+    $entryFound = 0;
     $totalCount = 21;
     while($count < $totalCount) {
       $entryFound = FALSE;
-      $campValues[$count] = [];
       foreach ($customFields as $customField) {
         $key = 'custom_' . $customField['id'];
-        $campValues[$count][$key] = [
-          'label' => $customField['label'],
-          'html' => NULL,
-        ];
-        if (!empty($defaults[$key . '_-' . $count])) {
-          $campValues[$count][$key]['html'] = $defaults[$key . '_-' . $count];
-          $entryFound = TRUE;
-        }
-        elseif (!empty($defaults[$key . '_' . $count])) {
-          $campValues[$count][$key]['html'] = $defaults[$key . '_' . $count];
+        if (!empty($defaults[$key . '_-' . $count]) || !empty($defaults[$key . '_' . $count])) {
           $entryFound = TRUE;
         }
       }
       if (!$entryFound) {
-        unset($campValues[$count]);
+        $entryFound++;
       }
       $count++;
     }
 
-    $this->assign('campValues', $campValues);
-
-    $this->setDefaults($defaults);
-    foreach ($this->_elements as $element) {
-      if (strpos($element->getName(), '[') !== FALSE) {
-         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
-         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
-         $element->setValue($defaults[$key][$arrayKey]);
+    // this part is to render camp fields
+    $campFields = [];
+    for ($i = 1; $i <= $entryFound; $i++) {
+      $campFields[$i] = [];
+      foreach ($customFields as $customField) {
+        // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
+        $marker = $this->organizationId ? $i : '-' . $i;
+        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        $campFields[$i][] = $key;
+        CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
       }
-      if (!$entryFound) {
-        unset($campValues[$count]);
-      }
-      $count++;
     }
-    $this->assign('campValues', $campValues);
+    $this->assign('campFields', $campFields);
 
     $this->setDefaults($defaults);
     $this->freeze();
@@ -109,9 +92,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ],
     ]);
 
-    // export form elements
-    $this->assign('elementNames', $this->getRenderableElementNames());
-
     parent::buildQuickForm();
   }
 
@@ -130,14 +110,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'organization_name' => $values['organization_name'],
       'email' => $values['organization_email'],
     ];
-    $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
-    $dedupeParams['check_permission'] = 0;
-    $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
-    $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
-    $organization_params['contact_sub_type'] = 'service_provider';
-    $organization_params['contact_type'] = 'Organization';
+    if (!empty($this->organizationId)) {
+      $organization_params['id'] = $this->organizationId;
+    }
+    else {
+      $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
+      $dedupeParams['check_permission'] = 0;
+      $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
+      $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+      $organization_params['contact_sub_type'] = 'service_provider';
+      $organization_params['contact_type'] = 'Organization';
+    }
     $organization = civicrm_api3('Contact', 'create', $organization_params);
-    $address1Params = [
+
+    $addressParams1 = [
       'street_address' => $values['work_address'][1],
       'postal_code' => $values['postal_code'][1],
       'city' => $values['city'][1],
@@ -147,30 +133,36 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'is_primary' => 1,
       'contact_id' => $organization['id'],
     ];
-    $address1 = civicrm_api3('Address', 'get', $address1Params);
-    if (empty($address1['count'])) {
-      $address1 = civicrm_api3('Address', 'create', $address1Params);
-    }
-    $websiteParams = [
+    $address1 = civicrm_api3('Address' , 'create', array_merge($addressParams1,
+     ['id' => civicrm_api3('Address', 'getvalue', ['contact_id' => $organization['id'], 'is_primary' => TRUE, 'return' => 'id'])]
+    ));
+
+    $id = civicrm_api3('Website', 'getvalue', [
       'contact_id' => $organization['id'],
       'url' => $values['website'],
-      'website_type_id' => 'Work',
-    ];
-    civicrm_api3('Website', 'create', $websiteParams);
-    $addressIds = [0 => [$address1['id'], $address1Params]];
-    $staffMemberIds = [];
+      'return' => 'id',
+      'options' => ['limit' => 1],
+    ]);
+    if ($id) {
+      civicrm_api3('Website', 'create', [
+        'contact_id' => $organization['id'],
+        'url' => $values['website'],
+        'website_type_id' => 'Work',
+      ]);
+    }
 
-    $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE, CRM_Core_Action::VIEW);
-    $values['skip_greeting_processing'] = TRUE;
-    CRM_Contact_BAO_Contact::createProfileContact($values, $fields, $organization['id'], NULL, PRIMARY_PROFILE);
+    $addressIds = [0 => [$address1['id'], $addressParams1]];
+    $staffMemberIds = [];
 
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
     if (!empty($customValues) && is_array($customValues)) {
       CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
     }
 
-    $customFieldParams[WAIVER_FIELD] = $values['waiver_field'];
-    civicrm_api3('CustomValue', 'create', $customFieldParams);
+    civicrm_api3('CustomValue', 'create', [
+      WAIVER_FIELD => $values['waiver_field'],
+      'entity_id' => $organization['id'],
+    ]);
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
       if (!empty($values['phone'][$rowNumber])) {
         civicrm_api3('Phone', 'create', [
@@ -241,7 +233,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           }
         }
         if ($rowNumber === 1) {
-          $relationshipParams['relationship_type_id'] = 74;
+          $relationshipParams['relationship_type_id'] = PRIMARY_CONTACT_REL;
           $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
           if (empty($relationshipCheck['count'])) {
             try {
@@ -264,27 +256,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     // Redirect to thank you page.
     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-listing-thankyou', 'reset=1'));
-  }
-
-  /**
-   * Get the fields/elements defined in this form.
-   *
-   * @return array (string)
-   */
-  public function getRenderableElementNames() {
-    // The _elements list includes some items which should not be
-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
-    // items don't have labels.  We'll identify renderable by filtering on
-    // the 'label'.
-    $elementNames = array();
-    foreach ($this->_elements as $element) {
-      /** @var HTML_QuickForm_Element $element */
-      $label = $element->getLabel();
-      if (!empty($label)) {
-        $elementNames[] = $element->getName();
-      }
-    }
-    return $elementNames;
   }
 
 }
