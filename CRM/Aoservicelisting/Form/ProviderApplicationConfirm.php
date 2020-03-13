@@ -52,7 +52,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
     $campValues = [];
     $count = 1;
-    $entryFound = 0;
+    $entryCount = 0;
     $totalCount = 21;
     while($count < $totalCount) {
       $entryFound = FALSE;
@@ -63,14 +63,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
       }
       if (!$entryFound) {
-        $entryFound++;
+        $entryCount++;
       }
       $count++;
     }
 
     // this part is to render camp fields
     $campFields = [];
-    for ($i = 1; $i <= $entryFound; $i++) {
+    for ($i = 1; $i <= $entryCount; $i++) {
       $campFields[$i] = [];
       foreach ($customFields as $customField) {
         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
