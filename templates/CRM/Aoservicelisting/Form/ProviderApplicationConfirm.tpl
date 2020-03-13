@@ -98,7 +98,7 @@
 {section name='c' start=1 loop=21}
   {assign var='rowN' value=$smarty.section.c.index}
   {if !empty($campFields.$rowN)}
-    <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
+    <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
       {foreach from=$campFields.$rowN item=field}
       <div class="crm-section">
         <div class="label">{$form.$field.label}</div>

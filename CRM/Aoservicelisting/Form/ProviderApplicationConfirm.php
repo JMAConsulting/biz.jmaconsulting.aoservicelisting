@@ -58,7 +58,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $entryFound = FALSE;
       foreach ($customFields as $customField) {
         $key = 'custom_' . $customField['id'];
-        if (!empty($defaults[$key . '_-' . $count]) || !empty($defaults[$key . '_' . $count])) {
+        if (!empty($defaults[$key . '_-' . $count])) {
           $entryFound = TRUE;
         }
       }
@@ -74,8 +74,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $campFields[$i] = [];
       foreach ($customFields as $customField) {
         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
-        $marker = $this->organizationId ? $i : '-' . $i;
-        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        $key = 'custom_' . $customField['id'] . '_-' . $i;
         $campFields[$i][] = $key;
         CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
       }
@@ -120,7 +119,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     $organization_params = [
       'organization_name' => $values['organization_name'],
-      'email' => $values['organization_email'],
+      'email' => $values['organization_email'] ?: $values['email-Primary'],
     ];
     if (!empty($this->organizationId)) {
       $organization_params['id'] = $this->organizationId;

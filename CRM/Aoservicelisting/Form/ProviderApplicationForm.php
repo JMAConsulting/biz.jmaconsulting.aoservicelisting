@@ -125,8 +125,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $campFields[$i] = [];
       foreach ($customFields as $customField) {
         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
-        $marker = $this->organizationId ? $i : '-' . $i;
-        $key = 'custom_' . $customField['id'] . '_' . $marker;
+        $key = 'custom_' . $customField['id'] . '_-' . $i;
         if ($this->organizationId) {
           $campDefaultValues[$i][$customField['column_name']] = $key;
           if ($i == 1) {
