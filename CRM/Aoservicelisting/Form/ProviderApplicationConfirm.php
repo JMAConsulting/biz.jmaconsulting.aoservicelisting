@@ -145,17 +145,23 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'is_primary' => 1,
       'contact_id' => $organization['id'],
     ];
-    $address1 = civicrm_api3('Address' , 'create', array_merge($addressParams1,
-     ['id' => civicrm_api3('Address', 'getvalue', ['contact_id' => $organization['id'], 'is_primary' => TRUE, 'return' => 'id'])]
-    ));
+    $addId = civicrm_api3('Address', 'get', [
+      'contact_id' => $organization['id'],
+      'is_primary' => 1,
+      'return' => 'id',
+    ]);
+    if (!empty($addId['id'])) {
+      $addressParams1['id'] = $addId['id'];
+    }
+    $address1 = civicrm_api3('Address' , 'create', $addressParams1);
 
-    $id = civicrm_api3('Website', 'getvalue', [
+    $id = civicrm_api3('Website', 'get', [
       'contact_id' => $organization['id'],
       'url' => $values['website'],
       'return' => 'id',
       'options' => ['limit' => 1],
     ]);
-    if ($id) {
+    if (empty($id['id'])) {
       civicrm_api3('Website', 'create', [
         'contact_id' => $organization['id'],
         'url' => $values['website'],
