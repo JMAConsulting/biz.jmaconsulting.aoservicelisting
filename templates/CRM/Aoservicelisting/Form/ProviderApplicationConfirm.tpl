@@ -135,18 +135,6 @@
         $('.edit-row-organization_email').show();
       }
 
-      if ($('#custom_863_3').val() == "1") {
-        $('[id^=custom_858]').each(function() {
-          if ($(this).parent().text().length < 2) {
-            $(this).parent().parent().parent().addClass('hiddenElement');
-          }
-        });
-      }
-      else {
-       $('[id^=custom_858]').each(function() {
-          $(this).parent().parent().parent().addClass('hiddenElement');
-        });
-      }
       $('[id^=staff_first_name_]').each(function() {
         if ($(this).parent().text().length < 2) {
           $(this).parent().parent().parent().parent().addClass('hiddenElement');
