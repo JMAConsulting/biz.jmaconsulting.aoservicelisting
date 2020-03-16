@@ -133,6 +133,11 @@ class CRM_Aoservicelisting_ExtensionUtil {
     // Check if the user has a valid email.
     $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1 AND on_hold <> 1", [1 => [$cid, "Integer"]]);
     if (!empty($email)) {
+      // 2nd level check. Check UF table if email exists
+      $emailExists = CRM_Core_DAO::singleValueQuery("SELECT uf_name FROM civicrm_uf_match WHERE uf_name = %1", [1 => [$email, "String"]]);
+      if (!empty($emailExists)) {
+        return TRUE;
+      }
       return FALSE;
     }
     return TRUE;
