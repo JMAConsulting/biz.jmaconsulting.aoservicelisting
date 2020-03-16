@@ -249,7 +249,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
     }
 
-    $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('address'), 'postal_code' => E::ts('postal code'), 'city' =>  E::ts('city/town')];
+    $addressFieldLables = ['phone' => E::ts('phone number'), 'work_address' => E::ts('address'), 'postal_code' => E::ts('postal code'), 'city' =>  E::ts('city/town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
         $errors[$addressField . '[1]'] = E::ts('Primary work location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
