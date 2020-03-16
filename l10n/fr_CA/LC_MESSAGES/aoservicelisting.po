@@ -273,7 +273,5 @@ msgid "Application Submitted"
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Page/ProviderApplicationThankYou.tpl
-msgid ""
-"Thank you for your application. Autism Ontario will be in touch with any "
-"questions in regards to your application"
-msgstr ""
+msgid "We have received your application to be on the Autism Ontario Service Listing.  We are processing applications and hope to provide answers shortly.  Thank you for your patience during this time."
+msgstr "Nous avons reçu votre demande d'inscription au Répertoire des services d'Autisme Ontario. Nous procédons actuellement au traitement des demandes, et espérons vous donner une réponse sous peu. D’ici là, nous vous remercions de votre patience."
