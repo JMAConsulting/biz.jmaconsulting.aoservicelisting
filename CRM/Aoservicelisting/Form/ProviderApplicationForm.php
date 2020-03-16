@@ -91,6 +91,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function buildQuickForm() {
+    if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
+      CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
+    }
+    else {
+      CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
+    }
+
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
@@ -207,10 +214,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffMemberCount++;
         if (stristr($value, 'ontariocampsassociation.ca') === FALSE) {
           if (empty($values['staff_first_name'][$key])) {
-            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('Need to provide the first name of the regulated staff member');
+            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member is required');
           }
           if (empty($values['staff_last_name'][$key])) {
-            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
+            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
           }
         }
         $regulatedUrlValidated = FALSE;
@@ -311,10 +318,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
-      $errors['organization_name'] = E::ts('Need to supply the organization name');
+      $errors['organization_name'] = E::ts('Organization name is a required field');
     }
     if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
-      $errors['organization_email'] = E::ts('Need to supply the organization email');
+      $errors['organization_email'] = E::ts('Organization email is a required field');
     }
     if (empty($values['waiver_field'])) {
       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');
