@@ -238,16 +238,16 @@
       $('#camp_session-1, #camp-section').addClass('hiddenElement');
 
       $('#add-another-camp').hide();
-      if ($('#custom_863_3').prop('checked')) {
+      if ($('#custom_895_3').prop('checked')) {
         $('#camp_session-1, #camp-section').removeClass('hiddenElement');
         $('#add-another-camp').show();
-        $('[id^=custom_859_').each(function() {
+        $('[id^=custom_890_').each(function() {
           if ($(this).val().length) {
             $(this).parent().parent().parent().parent().removeClass('hiddenElement');
           }
         });
       }
-      $('#custom_863_3').on('change', function() {
+      $('#custom_895_3').on('change', function() {
        if ($(this).prop('checked')) {
          $('#camp_session-1, #camp-section').removeClass('hiddenElement');
          $('#add-another-camp').show();
@@ -279,9 +279,9 @@
       $('#primary_last_name').change(function() {
         $('#staff_last_name_1').val($(this).val()).trigger('change');
       });
-      $('[name=custom_862]').change(function() {
+      $('[name=custom_894]').change(function() {
         if ($(this).val() == "1") {
-          $('.editrow_custom_863-section').show();
+          $('.editrow_custom_895-section').show();
           $('[id^=staff_record_regulator]').each(function() {
             if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
               $(this).parent().parent().show();
@@ -290,8 +290,8 @@
           $('#regulated-staff-message').show();
         }
         else {
-          $('.editrow_custom_863-section').hide();
-          $('[id^=custom_863_]').each(function() {
+          $('.editrow_custom_895-section').hide();
+          $('[id^=custom_895_]').each(function() {
              if ($(this).prop('checked')) {
                $(this).prop('checked', false).trigger('change');
              }
@@ -304,12 +304,6 @@
           });
           $('#regulated-staff-message').hide();
         }
-      });
-      var checkboxCustomFIelds = ['863', '865', '866'];
-      $.each(checkboxCustomFIelds, function(index, cfield) {
-        $('[id^=custom_' + cfield + ']').each(function() {
-          $(this).add($(this).prev()).add($(this).next()).wrapAll('<span class="custom-checkbox">');
-        });
       });
     });
   </script>
