@@ -137,6 +137,22 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     $organization = civicrm_api3('Contact', 'create', $organization_params);
 
+    // Set status to submitted for first time this is submitted, else awaiting staff verification if edited.
+    if (empty($this->organizationId) && empty($this->_loggedInContactID) && !empty($organization['id'])) {
+      // Set status to submitted
+      civicrm_api3('Contact', 'create', [
+        'id' => $organization['id'],
+        STATUS => "Submitted",
+      ]);
+    }
+    elseif (!empty($this->organizationId) && !empty($this->_loggedInContactID)) {
+      // Set status to offline verification.
+      civicrm_api3('Contact', 'create', [
+        'id' => $this->organizationId,
+        STATUS => "Awaiting Staff Verification Offline",
+      ]);
+    }
+
     $addressParams1 = [
       'street_address' => $values['work_address'][1],
       'postal_code' => $values['postal_code'][1],
