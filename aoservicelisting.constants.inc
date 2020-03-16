@@ -7,6 +7,7 @@
   define('DISPLAY_EMAIL', 'custom_869');
   define('DISPLAY_PHONE', 'custom_870');
   define('WAIVER_FIELD', 'custom_871');
+  define('IS_REGULATED_SERVICE', 'custom_862');
   define('REGULATED_SERVICE_CF', 'custom_863');
   define('PRIMARY_CONTACT_REL', 74);
   define('STATUS', 'custom_872');

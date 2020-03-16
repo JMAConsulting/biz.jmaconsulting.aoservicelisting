@@ -20,6 +20,9 @@ msgstr "Principale personne-ressource"
 msgid "Accepting new clients"
 msgstr "Accepte de nouveaux clients"
 
+msgid "Language is a required field"
+msgstr "Le champ « Langue » est un champ obligatoire"
+
 msgid "Services are provided"
 msgstr "Fourniture des services"
 
@@ -152,6 +155,9 @@ msgstr ""
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 #msgid "Primary work location phone number is a required field."
 #msgstr "Le numéro de téléphone du lieu de travail principal est un champ obligatoire"
+
+msgid "Regulated services provided is a required field when you say you provide regulated services"
+msgstr "Le champ « Services réglementés fournis » est un champ obligatoire quand vous répondez que vous offrez des services réglementés"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Primary work location address is a required field."

@@ -188,6 +188,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $setValues[] = $value;
       }
     }
+    // Check if no services are checked.
+    if (!empty($values[IS_REGULATED_SERVICE]) && empty($setValues)) {
+      $errors[IS_REGULATED_SERVICE] = E::ts('Regulated services provided is a required field when you say you provide regulated services');
+    }
     $urls = [];
     foreach ($setValues as $serviceValue) {
       if (!empty($regulatorUrlMapping[$serviceValue])) {
