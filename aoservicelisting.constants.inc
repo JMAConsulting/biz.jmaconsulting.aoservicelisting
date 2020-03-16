@@ -10,3 +10,5 @@
   define('REGULATED_SERVICE_CF', 'custom_863');
   define('PRIMARY_CONTACT_REL', 74);
   define('STATUS', 'custom_872');
+  define('RECEIVED_MESSAGE', 90);
+  define('APPROVED_MESSAGE', 91);

@@ -273,6 +273,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           if (empty($this->_loggedInContactID)) {
             E::createActivity($staffMember['id']);
             E::createUserAccount($staffMember['id']);
+            // Send email on confirmation.
+            if (empty($this->_loggedInContactID)) {
+              E::sendMessage($staffMember['id']);
+            }
+          }
+          else {
+            // We need to handle cases of email edit.
+
           }
 
           if (!empty($values['phone-Primary-6'])) {
@@ -319,6 +327,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         civicrm_api3('Address', 'create', $params);
       }
     }
+
     // Redirect to thank you page.
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
       CRM_Utils_System::redirect(CRM_Utils_System::url('fr/civicrm/service-listing-thankyou', 'reset=1'));

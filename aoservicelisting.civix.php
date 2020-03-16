@@ -76,6 +76,34 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
+  public static function sendMessage($contactID) {
+    if (empty($contactID)) {
+      return;
+    }
+    $messageTemplates = new CRM_Core_DAO_MessageTemplate();
+    $messageTemplates->id = RECEIVED_MESSAGE;
+    $messageTemplates->find(TRUE);
+
+    $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
+    $body_text    = $messageTemplates->msg_text;
+    $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
+    $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
+    $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
+
+    $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
+    $mailParams = array(
+      'groupName' => 'Service Application Listing Confirmation',
+      'from' => "<info@autismontario.com>",
+      'toName' =>  $contact['display_name'],
+      'toEmail' => $contact['email'],
+      'subject' => $body_subject,
+      'messageTemplateID' => $messageTemplates->id,
+      'html' => $body_html,
+      'text' => $body_text,
+    );
+    CRM_Utils_Mail::send($mailParams);
+  }
+
   public static function createActivity($cid) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,

@@ -17,7 +17,7 @@
   <item>
     <path>civicrm/service-listing-thankyou</path>
     <page_callback>CRM_Aoservicelisting_Page_ProviderApplicationThankYou</page_callback>
-    <title>Autism Ontarion Service Listing Application Submitted</title>
+    <title>Autism Ontario Service Listing Application Submitted</title>
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>

@@ -23,6 +23,9 @@ msgstr "Accepte de nouveaux clients"
 msgid "Services are provided"
 msgstr "Fourniture des services"
 
+msgid "Website is a required field"
+msgstr "Le site Web est un champ obligatoire"
+
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Individual"
@@ -110,7 +113,7 @@ msgstr "Ville"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Record on Regulator's site"
+msgid "Record on regulator's site"
 msgstr "Mention sur le site de l’organe de réglementation"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
@@ -244,7 +247,7 @@ msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
-msgid "I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario and I understand that failure to comply with the above criteria may result in the removal of my listing"
+msgid "I certify that all of the information contained in my listing is true and I have the authority to add this listing to Autism Ontario. I understand that failure to comply with the above criteria may result in the removal of my listing"
 msgstr "J’atteste de la véracité de tous les renseignements contenus dans ma demande et de mon habilitation à communiquer ces renseignements à Autisme Ontario, et je comprends que le non-respect des critères ci-dessus peut entraîner le retrait du Répertoire"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
