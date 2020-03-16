@@ -114,7 +114,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
   public function submit($values) {
     $this->processCustomValue($values);
-    if (empty($values['organiation_name'])) {
+    if (empty($values['organization_name'])) {
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
     }
     $organization_params = [
@@ -300,6 +300,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     foreach ($staffMemberIds as $staffMemberId) {
       foreach ($addressIds as $key => $details) {
         $params = $details[1];
+        unset($params['id']);
         $params['contact_id'] = $staffMemberId;
         $params['master_id'] = $details[0];
         $params['add_relationship'] = 0;

@@ -151,7 +151,7 @@ public $_loggedInContactID;
         }
         else {
           foreach ($value as $k => $v) {
-            if (trim($value) === '') {
+            if (trim($v) === '') {
               unset($values[$key][$k]);
             }
           }

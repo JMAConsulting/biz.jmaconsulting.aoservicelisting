@@ -148,6 +148,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (self::emailRule($cid)) {
       return FALSE;
     }
+    // Reset $_post.
+    $_POST = [];
     $params = [
       'cms_name' => $name['name'],
       'cms_pass' => 'changeme',

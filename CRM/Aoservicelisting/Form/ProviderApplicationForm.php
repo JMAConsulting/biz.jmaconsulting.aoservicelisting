@@ -180,11 +180,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $setValues[] = $value;
       }
     }
+    $urls = [];
+    foreach ($setValues as $serviceValue) {
+      if (!empty($regulatorUrlMapping[$serviceValue])) {
+        if (array_key_exists($serviceValue, $verifiedURLCounter) === FALSE) {
+          $verifiedURLCounter[$serviceValue] = 0;
+        }
+        $urls[] = $regulatorUrlMapping[$serviceValue];
+      }
+    }
     foreach ($values['staff_record_regulator'] as $key => $value) {
       if (!empty($value)) {
         $regulatorRecordKeys[$key] = 1;
         $staffMemberCount++;
-        if (stristr($value, 'ontariocampassociation.ca') === FALSE) {
+        if (stristr($value, 'ontariocampsassociation.ca') === FALSE) {
           if (empty($values['staff_first_name'][$key])) {
             $errors['staff_first_name' . '[' . $key . ']'] = E::ts('Need to provide the first name of the regulated staff member');
           }
@@ -192,17 +201,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
           }
         }
-        // Check if the content of the record on regulator site matches a given url.
         $regulatedUrlValidated = FALSE;
-        $urls = [];
-        foreach ($setValues as $serviceValue) {
-          if (!empty($regulatorUrlMapping[$serviceValue])) {
-            if (array_key_exists($serviceValue, $verifiedURLCounter) === FALSE) {
-              $verifiedURLCounter[$serviceValue] = 0;
-            }
-            $urls[] = $regulatorUrlMapping[$serviceValue];
-          }
-        }
         if (!empty($urls)) {
           foreach ($urls as $url) {
             if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
@@ -312,6 +311,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function postProcess() {
+    $this->controller->resetPage('ProviderApplicationConfirm');
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
