@@ -16,19 +16,19 @@
   <div class="clear"></div>
 </div>
 <div class="crm-section edit-row-{$form.website.id}">
-  <div class="label">{$form.website.label} <span class="crm-marker" title="This field is required.">*</span></div>
+  <div class="label">{$form.website.label}</div>
   <div class="content">{$form.website.html}</div>
   <div class="clear"></div>
 </div>
 <fieldset>
   <legend><span class="fieldset-legend">{ts}Primary Contact{/ts}</span></legend>
   <div class="crm-section edit-row-{$form.primary_first_name.id}">
-    <div class="label">{$form.primary_first_name.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+    <div class="label">{$form.primary_first_name.label}</div>
     <div class="content">{$form.primary_first_name.html}</div>
     <div class="clear"></div>
   </div>
   <div class="crm-section edit-row-{$form.primary_last_name.id}">
-    <div class="label">{$form.primary_last_name.label}  <span class="crm-marker" title="This field is required.">*</span></div>
+    <div class="label">{$form.primary_last_name.label}</div>
     <div class="content">{$form.primary_last_name.html}</div>
     <div class="clear"></div>
   </div>
