@@ -9,7 +9,12 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
+  public $_changedLog;
+
   public function buildQuickForm() {
+    if (!empty($this->_loggedInContactID)) {
+      $this->_changedLog = $this->get('changedLog');
+    }
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
       CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
     }
@@ -131,6 +136,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   }
 
   public function submit($values) {
+    if (!empty($this->_loggedInContactID)) {
+      // For now, just adding an edit activity to the organization contact.
+      $relationship = civicrm_api3('Relationship', 'get', [
+        'contact_id_a' => $this->_loggedInContactID,
+        'relationship_type_id' => PRIMARY_CONTACT_REL,
+        'return' => 'contact_id_b',
+      ]);
+      if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_b'])) {
+        E::editActivity($relationship['values'][$relationship['id']]['contact_id_b'], $this->_changedLog);
+      }
+    }
     $this->processCustomValue($values);
 
     if (!empty($this->_loggedInContactID)) {

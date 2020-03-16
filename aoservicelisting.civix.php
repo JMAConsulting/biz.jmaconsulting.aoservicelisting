@@ -123,13 +123,14 @@ class CRM_Aoservicelisting_ExtensionUtil {
     self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, $cid);
   }
 
-  public static function editActivity($cid) {
+  public static function editActivity($cid, $description) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
       'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
       'activity_type_id' => "service_listing_edited",
       'sequential' => 0,
+      'description' => $description,
     ]);
   }
 

@@ -181,4 +181,140 @@ public $_loggedInContactID;
     CRM_Custom_Form_CustomData::setDefaultValues($this);
   }
 
+  public getChangeLog($previousValues, $formValues) {
+    $mapFields = [
+      'listing_type' => [
+        1 => ['website'],
+        2 => ['organization_name', 'organization_email', 'website'],
+      ],
+      'primary_section' => [
+        'primary_first_name',
+        'primary_last_name',
+        'custom_900',
+        'email-Primary',
+        'custom_901',
+        'phone-Primary-6',
+        'custom_902',
+      ],
+      'address_section' => [
+        'count' => 10,
+        'phone',
+        'work_address',
+        'city',
+        'postal_code',
+      ],
+      'custom_893',
+      'ABA_section' => [
+        'custom_912',
+        'custom_911',
+        'aba_staff' => [
+          'count' => 20,
+          'aba_first_name',
+          'aba_last_name',
+          CERTIFICATE_NUMBER,
+        ],
+      ],
+      'staff_section' => [
+        'custom_894',
+        'custom_895',
+        'staff' => [
+          'count' => 20,
+          'staff_first_name',
+          'staff_first_name',
+          'staff_record_regulator',
+        ],
+      ],
+      'profile_3' => [
+        'custom_896',
+        'custom_897',
+        'custom_898',
+        'custom_899',
+        'custom_905',
+      ],
+      'camp_section' => [
+        'count' => 20,
+        'custom_890',
+        'custom_891',
+        'custom_892',
+      ],
+      'waiver_field',
+    ];
+    $changedLog = '';
+    foreach ($mapFields as $section => $fields) {
+      $this->_changedLog[$section] = '';
+      if ($section == 'listing_type') {
+        foreach ($fields[$formValues[$section]] as $fieldName) {
+          if ($previousValues[$fieldName] != $formValues[$fieldName]) {
+            $changedLog[$section] .= sprintf('<br/> %s changed from %s to %s', $this->_elementNames[$fieldName], $previousValues[$fieldName], $formValues[$fieldName]);
+          }
+        }
+      }
+      elseif ($section == 'primary_section') {
+        foreach ($fields as $fieldName) {
+          if ($previousValues[$fieldName] != $formValues[$fieldName]) {
+            $changedLog[$section] .= sprintf('<br/> %s changed from %s to %s', $this->_elementNames[$fieldName], $previousValues[$fieldName], $formValues[$fieldName]);
+          }
+        }
+      }
+      elseif ($section == 'address_section') {
+        $count = $fields['count'];
+        unset($fields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count, $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($fields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            if ($formValues[$name][$i] != $previousValues["{$name}[{$i}]"]) {
+              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]]);
+            }
+          }
+        }
+      }
+      elseif ($section == 'ABA_section' || $section == 'staff_section') {
+        $key = $section == 'ABA_section' ? 'aba_staff' : 'staff';
+        $abaFields = $fields[$key];
+        unset($fields[$key]);
+        foreach ($fields as $fieldName) {
+          if (is_array($formValues[$fieldName])) {
+            $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
+            $previousValues[$fieldName] = array_filter($previousValues[$fieldName], 'strlen');
+            $result = array_diff_assoc($formValues[$fieldName], $previousValues[$fieldName]);
+            if (!empty($result)) {
+              $previousValue = implode(', ' array_keys($previousValues[$fieldName]));
+              $newValue = implode(', ' array_keys($formValues[$fieldName]));
+              $changedLog[$section] .= sprintf('<br/> %s changed from %s to %s', $this->_elementNames[$fieldName], $previousValue, $newValue);
+            }
+          }
+          else {
+            if ($previousValues[$fieldName] != $formValues[$fieldName]) {
+              $changedLog[$section] .= sprintf('<br/> %s changed from %s to %s', $this->_elementNames[$fieldName], $previousValues[$fieldName], $formValues[$fieldName]);
+            }
+          }
+        }
+        $count = $abaFields['count'];
+        unset($abaFields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count, $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($abaFields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            if ($formValues[$name][$i] != $previousValues["{$name}[{$i}]"]) {
+              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]]);
+            }
+          }
+        }
+      }
+    }
+
+    return $changedLog;
+  }
+
 }

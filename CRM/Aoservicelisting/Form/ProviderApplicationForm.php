@@ -10,6 +10,8 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
   public $listingType = 1;
+  public $_elementNames;
+  public $_values;
 
   public function setDefaultValues() {
     $defaults = [];
@@ -128,6 +130,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
     }
+
+    if (!empty($this->_loggedInContactID)) {
+      $this->_values = $defaults;
+    }
+
     return $defaults;
   }
 
@@ -224,6 +231,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $this->setDefaults($defaults);
       }
     }
+    $this->_elementNames = $this->getRenderableElementNames();
 
     $this->addButtons(array(
       array(
@@ -237,6 +245,40 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
     parent::buildQuickForm();
   }
+
+  /**
+   * Get the fields/elements defined in this form.
+   *
+   * @return array (string)
+   */
+  public function getRenderableElementNames() {
+    // The _elements list includes some items which should not be
+    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
+    // items don't have labels.  We'll identify renderable by filtering on
+    // the 'label'.
+    $elementNames = array();
+    foreach ($this->_elements as $element) {
+      /** @var HTML_QuickForm_Element $element */
+      $label = $element->getLabel();
+      if (!empty($label) && !strstr($label, 'captcha')) {
+        $name = $element->getName();
+        if (strstr($name, '[')) {
+          $parts = explode('[', str_replace(']', '', $name);
+          if (empty($elementNames[$parts[0]])) {
+            $elementNames[$parts[0]] = [];
+          }
+          if (!empty($parts[1])) {
+            $elementNames[$parts[0]][$parts[1]] = $label . ' ' . $parts[1];
+          }
+        }
+        else {
+          $elementNames[$name] = $label;
+        }
+      }
+    }
+    return $elementNames;
+  }
+
 
   public function providerFormRule($values) {
     $errors = $setValues = [];
@@ -458,7 +500,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     // We recet the page here so that the confirm page always gets the latest data from the submission of the form.
     $this->controller->resetPage('ProviderApplicationConfirm');
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
-    $this->set('formValues', $formValues);
+    $this->set('changedLog', $this->getChangeLog($this->_values, $formValues));
     parent::postProcess();
   }
 
