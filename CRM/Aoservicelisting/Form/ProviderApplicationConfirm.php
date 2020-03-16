@@ -112,7 +112,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->submit($values);
   }
 
-  public function submit($values) {
+  public function submit($values)
+  {
     $this->processCustomValue($values);
     if (empty($values['organization_name'])) {
       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
@@ -126,8 +127,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       // delete all camp session custom values if present
       $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
       CRM_Core_DAO::executeQuery("DELETE FROM $tableName WHERE entity_id = " . $this->organizationId);
-    }
-    else {
+    } else {
       $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
       $dedupeParams['check_permission'] = 0;
       $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
@@ -144,8 +144,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         'id' => $organization['id'],
         STATUS => "Submitted",
       ]);
-    }
-    elseif (!empty($this->organizationId) && !empty($this->_loggedInContactID)) {
+    } elseif (!empty($this->organizationId) && !empty($this->_loggedInContactID)) {
       // Set status to offline verification.
       civicrm_api3('Contact', 'create', [
         'id' => $this->organizationId,
@@ -171,7 +170,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     if (!empty($addId['id'])) {
       $addressParams1['id'] = $addId['id'];
     }
-    $address1 = civicrm_api3('Address' , 'create', $addressParams1);
+    $address1 = civicrm_api3('Address', 'create', $addressParams1);
 
     $id = civicrm_api3('Website', 'get', [
       'contact_id' => $organization['id'],
@@ -250,8 +249,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
                 civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
               }
             }
-          }
-          else {
+          } else {
             $individualParams['id'] = $values['staff_contact_id'][$rowNumber];
           }
         }
@@ -296,8 +294,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         if (empty($relationshipCheck['count'])) {
           try {
             civicrm_api3('Relationship', 'create', $relationshipParams);
-          }
-          catch (Exception $e) {
+          } catch (Exception $e) {
           }
         }
         if ($rowNumber === 1) {
@@ -306,8 +303,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           if (empty($relationshipCheck['count'])) {
             try {
               civicrm_api3('Relationship', 'create', $relationshipParams);
-            }
-            catch (Exception $e) {
+            } catch (Exception $e) {
             }
           }
         }
@@ -324,7 +320,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       }
     }
     // Redirect to thank you page.
-    CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/service-listing-thankyou', 'reset=1'));
+    if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
+      CRM_Utils_System::redirect(CRM_Utils_System::url('fr/civicrm/service-listing-thankyou', 'reset=1'));
+    } else {
+      CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/service-listing-thankyou', 'reset=1'));
+    }
   }
 
 }

@@ -240,7 +240,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
-        $errors[$addressField . '[1]'] = E::ts('Primary Work Location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
+        $errors[$addressField . '[1]'] = E::ts('Primary work location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
       }
     }
     $primaryAddressGeocodeParams = [

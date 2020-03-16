@@ -21,7 +21,7 @@
   <div class="clear"></div>
 </div>
 <fieldset>
-  <legend><span class="fieldset-legend">Primary Contact</span></legend>
+  <legend><span class="fieldset-legend">{ts}Primary Contact{/ts}</span></legend>
   <div class="crm-section edit-row-{$form.primary_first_name.id}">
     <div class="label">{$form.primary_first_name.label}  <span class="crm-marker" title="This field is required.">*</span></div>
     <div class="content">{$form.primary_first_name.html}</div>
