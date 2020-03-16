@@ -98,8 +98,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), NULL, TRUE);
     $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
-    $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr, TRUE);
-    $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr, TRUE);
+    $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
+    $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr);
     $this->add('advcheckbox', 'waiver_field' , E::ts('I agree to the above waiver'));
     for ($rowNumber = 1; $rowNumber <= 11; $rowNumber++) {
       $this->add('text', "phone[$rowNumber]", E::ts('Phone Number'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
@@ -174,6 +174,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = 0;
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
+
+    // Check primary contact first and last name.
+    if (empty($values['primary_first_name'])) {
+      $errors['primary_first_name'] = E::ts('First name of the primary contact is a required field');
+    }
+    if (empty($values['primary_last_name'])) {
+      $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field');
+    }
 
     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
       if ($checked) {
