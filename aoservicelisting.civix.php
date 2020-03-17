@@ -212,7 +212,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       if ($oldStatus) {
         civicrm_api3('Activity', 'create', [
           'source_contact_id' => $cid,
-          'activity_type_id' => "Provider status changed",
+          'activity_type_id' => "provider_status_changed",
           'subject' => sprintf("Application status changed to %s", $oldStatus),
           'activity_status_id' => 'Completed',
           'details' => '<a class="action-item crm-hover-button" href="https://www.autismontario.com/civicrm/contact/view?cid=' . $cid . '">View Applicant</a>',
