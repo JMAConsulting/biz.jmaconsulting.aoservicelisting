@@ -141,6 +141,24 @@ function aoservicelisting_civicrm_themes(&$themes) {
   _aoservicelisting_civix_civicrm_themes($themes);
 }
 
+  /**
+   * Implementation of hook_civicrm_postProcess
+   *
+   * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postProcess
+   */
+  function aoservicelisting_civicrm_postProcess($formName, &$form) {
+    if ($formName == "CRM_Contact_Form_Contact") {
+      if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+        E::setStatus($form->_contactId, $form->_submitValues);
+      }
+    }
+    if ($formName == "CRM_Contact_Form_Inline_CustomData") {
+      if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+        E::setStatus($form->_submitValues['cid'], $form->_submitValues);
+      }
+    }
+  }
+
 // --- Functions below this ship commented out. Uncomment as required. ---
 
 /**

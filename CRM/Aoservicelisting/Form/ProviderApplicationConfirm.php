@@ -281,7 +281,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             E::createUserAccount($staffMember['id']);
             // Send email on confirmation.
             if (empty($this->_loggedInContactID)) {
-              E::sendMessage($staffMember['id']);
+              E::sendMessage($staffMember['id'], RECEIVED_MESSAGE);
             }
           }
           else {
