@@ -324,7 +324,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $flag = TRUE;
     }
     if (!empty($missingRegulators) && !$flag) {
-      $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no urls in the record on regualated site has been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+      $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no URLs have been entered as a record for regulated profession for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
