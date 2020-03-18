@@ -237,7 +237,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // If any urls have not matched show an error.
         if (!empty($regulatorRecordKeys)) {
           foreach ($regulatorRecordKeys as $rowKey => $val) {
-            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
+            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for the regulated profession that you selected');
           }
         }
       }
@@ -256,7 +256,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
     }
 
-    $addressFieldLables = ['phone' => 'phone number', 'work_address' => 'address', 'postal_code' => 'postal code', 'city' =>  'city/town'];
+    $addressFieldLables = ['phone' => E::ts('phone number'), 'work_address' => E::ts('address'), 'postal_code' => E::ts('postal code'), 'city' =>  E::ts('city/town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
         $errors[$addressField . '[1]'] = E::ts('Primary work location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
@@ -314,7 +314,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[REGULATED_SERVICE_CF] = E::ts('Ensure you have entered all the staff members that match the registered services');
     }
     if (!empty($missingRegulators)) {
-      $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+      $errors[REGULATED_SERVICE_CF] = E::ts('No staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
