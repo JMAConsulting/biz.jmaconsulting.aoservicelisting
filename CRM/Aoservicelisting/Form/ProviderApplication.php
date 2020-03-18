@@ -39,8 +39,13 @@ public $_loggedInContactID;
         'contact_id_a' => $loggedInContactId,
         'relationship_type_id' => PRIMARY_CONTACT_REL,
       ]);
-      $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
-      $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+      if (!empty($relationship['values'])) {
+        $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
+        $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+      }
+      else {
+        $this->_loggedInContactID = NULL;
+      }
     }
   }
 
