@@ -283,22 +283,13 @@
             var id = v.getAttribute('id');
             var label = $('label[for="' + id + '"]').html();
             var field = parseInt(id.split('_').pop());
-            if (field) {
-              CRM.api3('OptionValue', 'getvalue', {
-                "sequential": 1,
-                "return": "label",
-                "option_group_id": "regulator_url_mapping",
-                "value": field
-              }).then(function(result) {
-                if (result.result) {
-                  $('#staff_record_regulator_' + count).val('https://www.' + result.result);
-                  $('.crm-label-' + count).remove();
-                  $('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
-                  count++;
-                }
-              }, function(error) {
-                  // Ideally, no error handling required since we will always have a field present.
-              });
+            var regulatorMapping = {/literal}'{$regulator_services}'{literal};
+            regulatorMapping = JSON.parse(regulatorMapping);
+            if (field && regulatorMapping.hasOwnProperty(field)) {
+              $('#staff_record_regulator_' + count).val('https://www.' + regulatorMapping[field].split(',').pop());
+              $('.crm-label-' + count).remove();
+              $('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
+              count++;
             }
           });
         }
