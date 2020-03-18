@@ -264,7 +264,7 @@
 
       // Add domains as default values
       {/literal}{if $isCreate}{literal}
-      var services = $('#editrow-custom_863 input[type=checkbox]');
+      var services = $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + ' input[type=checkbox]');
       showStaff(services.filter(':checked').length, services.filter(':checked'));
       services.change(function() {
         var checked = parseInt(services.filter(':checked').length);
