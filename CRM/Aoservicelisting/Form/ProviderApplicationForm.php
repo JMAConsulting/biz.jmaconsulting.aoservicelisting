@@ -117,6 +117,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->buildCustom(PRIMARY_PROFILE, 'profile');
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
+    $this->assign('REGULATED_SERVICE_CF', REGULATED_SERVICE_CF);
+    $this->assign('IS_REGULATED_SERVICE', IS_REGULATED_SERVICE);
 
     // this part is to render camp fields
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
