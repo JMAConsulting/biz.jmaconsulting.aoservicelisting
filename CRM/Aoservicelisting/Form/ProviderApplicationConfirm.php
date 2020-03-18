@@ -20,6 +20,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   }
 
   public function buildQuickForm() {
+    if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
+      CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
+    }
+    else {
+      CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
+    }
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerconfirmstyle.css');
     $defaults = $this->get('formValues');
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
@@ -275,7 +281,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             E::createUserAccount($staffMember['id']);
             // Send email on confirmation.
             if (empty($this->_loggedInContactID)) {
-              E::sendMessage($staffMember['id']);
+              E::sendMessage($staffMember['id'], RECEIVED_MESSAGE);
             }
           }
           else {

@@ -91,6 +91,18 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function buildQuickForm() {
+    if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
+      CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
+    }
+    else {
+      CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
+    }
+
+    // Prevent setting defaults for URLs on edit mode.
+    if (empty($this->_loggedInContactID)) {
+      $this->assign('isCreate', TRUE);
+    }
+
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
@@ -209,10 +221,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffMemberCount++;
         if (stristr($value, 'ontariocampsassociation.ca') === FALSE) {
           if (empty($values['staff_first_name'][$key])) {
-            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('Need to provide the first name of the regulated staff member');
+            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member is required');
           }
           if (empty($values['staff_last_name'][$key])) {
-            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Need to provide the last name of the regulated staff member');
+            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
           }
         }
         $regulatedUrlValidated = FALSE;
@@ -232,7 +244,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // If any urls have not matched show an error.
         if (!empty($regulatorRecordKeys)) {
           foreach ($regulatorRecordKeys as $rowKey => $val) {
-            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for one of the regulated professions that you selected.');
+            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Record on regulator’s site does not match a known website for one of the regulators for any of the regulated professions that you selected.');
           }
         }
       }
@@ -251,7 +263,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
     }
 
-    $addressFieldLables = ['phone' => 'phone number', 'work_address' => 'address', 'postal_code' => 'postal code', 'city' =>  'city/town'];
+    $addressFieldLables = ['phone' => E::ts('phone number'), 'work_address' => E::ts('address'), 'postal_code' => E::ts('postal code'), 'city' =>  E::ts('city/town')];
     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
       if (empty($values[$addressField][1])) {
         $errors[$addressField . '[1]'] = E::ts('Primary work location %1 is a required field.', [1 => $addressFieldLables[$addressField]]);
@@ -302,21 +314,24 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
     }
+    $flag = FALSE;
     if ($values['listing_type'] == 1 && count($setValues) > 1 ) {
       $errors[REGULATED_SERVICE_CF] = E::ts('You have selected more than one registered service');
+      $flag = TRUE;
     }
     if ($values['listing_type'] == 2 && count($setValues) > $staffMemberCount) {
       $errors[REGULATED_SERVICE_CF] = E::ts('Ensure you have entered all the staff members that match the registered services');
+      $flag = TRUE;
     }
-    if (!empty($missingRegulators)) {
-      $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+    if (!empty($missingRegulators) && !$flag) {
+      $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no urls in the record on regualated site has been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
-      $errors['organization_name'] = E::ts('Need to supply the organization name');
+      $errors['organization_name'] = E::ts('Organization name is a required field');
     }
     if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
-      $errors['organization_email'] = E::ts('Need to supply the organization email');
+      $errors['organization_email'] = E::ts('Organization email is a required field');
     }
     if (empty($values['waiver_field'])) {
       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');

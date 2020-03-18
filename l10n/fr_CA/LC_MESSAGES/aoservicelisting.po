@@ -32,7 +32,7 @@ msgstr "Le site Web est un champ obligatoire"
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Individual"
-msgstr ""
+msgstr "Individu"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -133,12 +133,12 @@ msgid "Previous"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to provide the first name of the regulated staff member"
-msgstr ""
+msgid "First name of the regulated staff member is a required field"
+msgstr "Le prénom de l’employé réglementé est obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to provide the last name of the regulated staff member"
-msgstr ""
+msgid "Last name of the regulated staff member is a required field"
+msgstr "Le nom de l’employé réglementé est obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "first name and last name of listing must be publicly displayed"
@@ -160,16 +160,8 @@ msgid "Regulated services provided is a required field when you say you provide 
 msgstr "Le champ « Services réglementés fournis » est un champ obligatoire quand vous répondez que vous offrez des services réglementés"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Primary work location address is a required field."
-msgstr "L’adresse du lieu de travail principal est un champ obligatoire"
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Primary work location city/town is a required field."
-msgstr "La ville du lieu de travail principal est un champ obligatoire"
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Primary work location postal code is a required field."
-msgstr "Le code postal du lieu de travail principal est un champ obligatoire"
+msgid "Primary work location %1 is a required field."
+msgstr "%1 du lieu de travail principal est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "You need to supply supplemental work location %1 %2"
@@ -186,23 +178,23 @@ msgid ""
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to supply the organization name"
-msgstr ""
+msgid "Organization name is a required field"
+msgstr "Le nom de l’organisation est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to supply the organization email"
-msgstr ""
+msgid "Organization email is a required field"
+msgstr "Le courriel de l’organisation est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "You must select at least one registered service"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "First name of the primary contact is a required field."
+msgid "First name of the primary contact is a required field"
 msgstr "Le prénom de la principale personne-ressource est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Last name of the primary contact is a required field."
+msgid "Last name of the primary contact is a required field"
 msgstr "Le nom de famille de la principale personne-ressource est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -223,6 +215,9 @@ msgstr "Autisme Ontario utilisera le nom, l'adresse courriel et le numéro de t�
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+msgid "Primary Work Location %1"
+msgstr "Lieu de travail principal %1"
+
 msgid "Primary Work Location"
 msgstr "Lieu de travail principal"
 
@@ -234,7 +229,25 @@ msgstr "L’information sur le lieu de travail figure dans le répertoire public
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid "Supplementary Work Location %1"
-msgstr ""
+msgstr "Lieu de travail complémentaire %1"
+
+msgid "Supplementary Work Location"
+msgstr "Lieu de travail complémentaire"
+
+msgid "Supplemental work location %1 %2 is a required field"
+msgstr "%2 du lieu de travail complémentaire %1 est un champ obligatoire"
+
+msgid "phone number"
+msgstr "Le numéro de téléphone"
+
+msgid "address"
+msgstr "L’adresse"
+
+msgid "city/town"
+msgstr "La ville"
+
+msgid "postal code"
+msgstr "Le code postal"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
@@ -263,11 +276,14 @@ msgstr "Veuillez noter qu'Autisme Ontario se réserve le droit de refuser une de
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid "Hide"
-msgstr ""
+msgstr "Cacher"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid "Add another work location"
 msgstr "Ajouter un autre lieu de travail"
+
+msgid "No staff members have been entered for %1 regulated services"
+msgstr "Aucun membre du personnel n’a été ajouté aux services réglementés du %1"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid "Add another staff person who is a regulated professional"
@@ -275,7 +291,10 @@ msgstr "Ajouter un autre membre du personnel qui exerce une profession réglemen
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid "Add another session"
-msgstr ""
+msgstr "Ajouter une autre séance"
+
+msgid "Please ensure that your Record on Regulator’s site matches the regulator’s domain for the regulated profession that you selected"
+msgstr "Veuillez vous assurer que votre mention sur le site de l’organe de réglementation correspond au domaine de l’organe de réglementation pour la profession réglementée que vous avez choisie"
 
 #: templates/CRM/Aoservicelisting/Page/ProviderApplicationThankYou.tpl
 msgid "Application Submitted"

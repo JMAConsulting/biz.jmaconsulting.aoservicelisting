@@ -76,12 +76,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
-  public static function sendMessage($contactID) {
+  public static function sendMessage($contactID, $msgId) {
     if (empty($contactID)) {
       return;
     }
     $messageTemplates = new CRM_Core_DAO_MessageTemplate();
-    $messageTemplates->id = RECEIVED_MESSAGE;
+    $messageTemplates->id = $msgId;
     $messageTemplates->find(TRUE);
 
     $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
@@ -173,7 +173,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
 
   public static function createUserAccount($cid) {
-    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name)) AS name, display_name
+    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', COALESCE(last_name, $cid))) AS name, display_name
           FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
     if (self::usernameRule($cid)) {
       return FALSE;
@@ -193,6 +193,34 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'notify' => TRUE,
     ];
     CRM_Core_BAO_CMSUser::create($params, 'email');
+  }
+
+  function setStatus($cid, $submitValues) {
+    if (!empty($cid)) {
+      $oldStatus = NULL;
+      $oldStatus = civicrm_api3('Contact', 'getvalue', ['return' => STATUS, 'id' => $cid]);
+      $submitKeys = array_keys($submitValues);
+      $key = preg_grep('/^' . STATUS . '_[\d]*/', $submitKeys);
+      $newStatus = reset($key);
+      if (CRM_Utils_Array::value($newStatus, $submitValues) == 'Current Listing') {
+        // Create drupal account if not exists.
+        self::createUserAccount($cid);
+
+        // Send Mail
+        self::sendMessage($cid, APPROVED_MESSAGE);
+      }
+      if ($oldStatus) {
+        civicrm_api3('Activity', 'create', [
+          'source_contact_id' => $cid,
+          'activity_type_id' => "provider_status_changed",
+          'subject' => sprintf("Application status changed to %s", $oldStatus),
+          'activity_status_id' => 'Completed',
+          'details' => '<a class="action-item crm-hover-button" href="https://www.autismontario.com/civicrm/contact/view?cid=' . $cid . '">View Applicant</a>',
+          'target_id' => $cid,
+          'assignee_id' => CRM_Core_Session::singleton()->getLoggedInContactID() ?: NULL,
+        ]);
+      }
+    }
   }
 
 }
