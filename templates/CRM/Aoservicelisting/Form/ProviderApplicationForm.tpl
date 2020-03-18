@@ -238,16 +238,12 @@
       $('#camp_session-1, #camp-section').addClass('hiddenElement');
 
       $('#add-another-camp').hide();
-      if ($('#custom_895_3').prop('checked')) {
+      var rsSelector = '#' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + '_3';
+      if ($(rsSelector).prop('checked')) {
         $('#camp_session-1, #camp-section').removeClass('hiddenElement');
         $('#add-another-camp').show();
-        $('[id^=custom_890_').each(function() {
-          if ($(this).val().length) {
-            $(this).parent().parent().parent().parent().removeClass('hiddenElement');
-          }
-        });
       }
-      $('#custom_895_3').on('change', function() {
+      $(rsSelector).on('change', function() {
        if ($(this).prop('checked')) {
          $('#camp_session-1, #camp-section').removeClass('hiddenElement');
          $('#add-another-camp').show();
@@ -279,9 +275,11 @@
       $('#primary_last_name').change(function() {
         $('#staff_last_name_1').val($(this).val()).trigger('change');
       });
-      $('[name=custom_894]').change(function() {
+      var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
+      $('[name=' + selector + ']').change(function() {
+        var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
         if ($(this).val() == "1") {
-          $('.editrow_custom_895-section').show();
+          $('.editrow_' + rsSelector + '-section').show();
           $('[id^=staff_record_regulator]').each(function() {
             if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
               $(this).parent().parent().show();
@@ -290,8 +288,8 @@
           $('#regulated-staff-message').show();
         }
         else {
-          $('.editrow_custom_895-section').hide();
-          $('[id^=custom_895_]').each(function() {
+          $('.editrow_' + rsSelector + '-section').hide();
+          $('[id^=' + rsSelector + '_]').each(function() {
              if ($(this).prop('checked')) {
                $(this).prop('checked', false).trigger('change');
              }
