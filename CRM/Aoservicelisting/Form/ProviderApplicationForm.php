@@ -244,7 +244,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // If any urls have not matched show an error.
         if (!empty($regulatorRecordKeys)) {
           foreach ($regulatorRecordKeys as $rowKey => $val) {
-            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Please ensure that your Record on Regulator’s site matches the regulator’s domain for the regulated profession that you selected');
+            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Record on regulator’s site does not match a known website for one of the regulators for any of the regulated professions that you selected.');
           }
         }
       }
@@ -324,7 +324,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $flag = TRUE;
     }
     if (!empty($missingRegulators) && !$flag) {
-      $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+      $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no urls in the record on regualated site has been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
