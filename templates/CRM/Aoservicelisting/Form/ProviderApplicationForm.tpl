@@ -261,6 +261,57 @@
           $(this).parent().parent().parent().removeClass('hiddenElement');
         }
       });
+
+      // Add domains as default values.
+      var services = $('#editrow-custom_863 input[type=checkbox]');
+      showStaff(services.filter(':checked').length, services.filter(':checked'));
+      services.change(function() {
+        var checked = parseInt(services.filter(':checked').length);
+        var unchecked = parseInt(services.filter(':not(:checked)').length);
+        showStaff(checked, services.filter(':checked'));
+        hideStaff(unchecked, checked);
+      });
+
+      function showStaff(countcheck, service) {
+        if (countcheck) {
+          for (var i=1; i<=countcheck; i++) {
+            $('#staff_member-' + i).removeClass('hiddenElement');
+          }
+          var count = 1;
+          service.each(function(i, v) {
+            var id = v.getAttribute('id');
+            var label = $('label[for="' + id + '"]').html();
+            var field = parseInt(id.split('_').pop());
+            if (field) {
+              CRM.api3('OptionValue', 'getvalue', {
+                "sequential": 1,
+                "return": "label",
+                "option_group_id": "regulator_url_mapping",
+                "value": field
+              }).then(function(result) {
+                if (result.result) {
+                  $('#staff_record_regulator_' + count).val('https://www.' + result.result);
+                  $('.crm-label-' + count).remove();
+                  $('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
+                  count++;
+                }
+              }, function(error) {
+                  // Ideally, no error handling required since we will always have a field present.
+              });
+            }
+          });
+        }
+      }
+
+      function hideStaff(unchecked, checked) {
+        for (i=checked+1; i<=unchecked; i++) {
+          if (!$('#staff_member-' + i).hasClass('hiddenElement') && i > 1) {
+            $('#staff_member-' + i).addClass('hiddenElement');
+            $('#staff_record_regulator_' + i).val('');
+          }
+        }
+      }
+        // End domain default values
       var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];
       $.each(addressFields, function(index, field) {
         $('[id^=' + field + ']').each(function() {
