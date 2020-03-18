@@ -235,13 +235,13 @@ msgid "Supplementary Work Location"
 msgstr "Lieu de travail complémentaire"
 
 msgid "Supplemental work location %1 %2 is a required field"
-msgid "%2 du lieu de travail complémentaire %1 est un champ obligatoire"
+msgstr "%2 du lieu de travail complémentaire %1 est un champ obligatoire"
 
 msgid "phone number"
 msgstr "Le numéro de téléphone"
 
 msgid "address"
-msgid "L’adresse"
+msgstr "L’adresse"
 
 msgid "city/town"
 msgstr "La ville"
