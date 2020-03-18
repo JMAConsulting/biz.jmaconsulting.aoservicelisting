@@ -98,6 +98,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
     }
 
+    // Prevent setting defaults for URLs on edit mode.
+    if (empty($this->_loggedInContactID)) {
+      $this->assign('isCreate', TRUE);
+    }
+
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
@@ -309,14 +314,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
     }
+    $flag = FALSE;
     if ($values['listing_type'] == 1 && count($setValues) > 1 ) {
       $errors[REGULATED_SERVICE_CF] = E::ts('You have selected more than one registered service');
+      $flag = TRUE;
     }
     if ($values['listing_type'] == 2 && count($setValues) > $staffMemberCount) {
       $errors[REGULATED_SERVICE_CF] = E::ts('Ensure you have entered all the staff members that match the registered services');
+      $flag = TRUE;
     }
-    if (!empty($missingRegulators)) {
-      $errors[REGULATED_SERVICE_CF] = E::ts('No staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+    if (!empty($missingRegulators) && !$flag) {
+      $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
