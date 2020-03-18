@@ -190,11 +190,11 @@ msgid "You must select at least one registered service"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "First name of the primary contact is a required field."
+msgid "First name of the primary contact is a required field"
 msgstr "Le prénom de la principale personne-ressource est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Last name of the primary contact is a required field."
+msgid "Last name of the primary contact is a required field"
 msgstr "Le nom de famille de la principale personne-ressource est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
