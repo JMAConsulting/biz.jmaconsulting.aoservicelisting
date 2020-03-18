@@ -98,6 +98,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
     }
 
+    // Prevent setting defaults for URLs on edit mode.
+    if (empty($this->_loggedInContactID)) {
+      $this->assign('isCreate', TRUE);
+    }
+
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);

@@ -262,7 +262,8 @@
         }
       });
 
-      // Add domains as default values.
+      // Add domains as default values
+      {/literal}{if $isCreate}{literal}
       var services = $('#editrow-custom_863 input[type=checkbox]');
       showStaff(services.filter(':checked').length, services.filter(':checked'));
       services.change(function() {
@@ -311,7 +312,9 @@
           }
         }
       }
-        // End domain default values
+
+      {/literal}{/if}{literal}
+      // End domain default values
       var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];
       $.each(addressFields, function(index, field) {
         $('[id^=' + field + ']').each(function() {
