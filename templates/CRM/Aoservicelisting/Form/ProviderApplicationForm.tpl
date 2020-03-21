@@ -325,12 +325,13 @@
         $('#staff_last_name_1').val($(this).val()).trigger('change');
       });
       var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
-      selectorVal = $('[name=' + selector + ']:checked').val();
+      var selectorVal = $('[name=' + selector + ']:checked').val();
+      var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
-        servies.show();
+        regulatedServices.show();
       }
       else {
-        services.hide();
+        regulatedServices.hide();
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
