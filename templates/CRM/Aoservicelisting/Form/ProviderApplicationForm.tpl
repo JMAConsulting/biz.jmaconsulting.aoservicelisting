@@ -360,6 +360,23 @@
           $('#regulated-staff-message').hide();
         }
       });
+      var otherLanguageField = $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal});
+      var languageField = $({/literal}'{$LANGUAGES}'{literal});
+      var languageValues = languageField.val();
+      if ($.inArray('Other Language', languageValues) !== -1) {
+        otherLanguageField.show();
+      }
+      else {
+        otherLanguageField.hide();
+      }
+      languageField.change(function() {
+        if (.inArray('Other Language', $(this).val()) !== -1) {
+          otherLanguageField.show();
+        }
+        else {
+          otherLanguageField.hide();
+        }
+      });
     });
   </script>
 {/literal}
