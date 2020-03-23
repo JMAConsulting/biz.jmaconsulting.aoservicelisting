@@ -5,11 +5,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: aoservicelisting\n"
-"POT-Creation-Date: 2020-03-06 16:41+1100\n"
+"POT-Creation-Date: 2020-03-20 17:32+1100\n"
 "Language-Team: CiviCRM Translators <civicrm-translators@lists.civicrm.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: CRM/Aoservicelisting/Form/ProviderApplication.php
+msgid "Some of the profile fields cannot be configured for this page."
+msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -53,32 +57,12 @@ msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Email address"
+msgid "I agree to the above waiver"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Phone Number"
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Display First Name and Last Name in public listing?"
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Display email address in public listing?"
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Display phone number in public listing?"
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "I agree to the above waiver"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
@@ -97,7 +81,6 @@ msgid "City/Town"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Record on Regulator's site"
 msgstr ""
 
@@ -115,11 +98,35 @@ msgid "Previous"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to provide the first name of the regulated staff member"
+msgid "Record on regulator's site"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to provide the last name of the regulated staff member"
+msgid "First name of the primary contact is a required field"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "Last name of the primary contact is a required field"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid ""
+"Regulated services provided is a required field when you say you provide "
+"regulated services"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "First name of the regulated staff member is required"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "Last name of the regulated staff member is required"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid ""
+"The link you provided for “record on regulator’s site” does not match any "
+"listed regulated professions on file."
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -131,15 +138,27 @@ msgid "At least one of email or phone must be provided and made public"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Work Phone Number"
+msgid "phone number"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Primary Work Location %1 is a required field."
+msgid "address"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "You need to supply supplemental work location %1 %2"
+msgid "postal code"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "city/town"
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "Primary work location %1 is a required field."
+msgstr ""
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "Supplemental work location %1 %2 is a required field"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -153,31 +172,21 @@ msgid ""
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to supply the organization name"
+msgid ""
+"Either no staff members have been entered or no URLs have been entered as a "
+"record for regulated profession for %1 regulated services"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to supply the organization email"
+msgid "Organization name is a required field"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "You must select at least one registered service"
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "First name of the primary contact is a required field."
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Last name of the primary contact is a required field."
+msgid "Organization email is a required field"
 msgstr ""
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "You must agree to the waivers in order to submit the application."
-msgstr ""
-
-#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
-msgid "Need to supply a website"
 msgstr ""
 
 #: CRM/Aoservicelisting/Page/ProviderApplicationThankYou.php
@@ -186,8 +195,20 @@ msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 msgid ""
+"Please confirm the Service Listing Application information that you have "
+"entered and click Submit."
+msgstr ""
+
+#: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+msgid "Primary Contact"
+msgstr ""
+
+#: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
+#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+msgid ""
 "The primary contact's name, email and phone will be used by Autism Ontario "
-"to communicate about the is application/listing"
+"to communicate about the Service Listing and application"
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
@@ -215,24 +236,18 @@ msgstr ""
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid ""
 "For each staff person who is a regulated professional, add a link to their "
-"listing on their College's site showing their status. If a url directly to "
-"the record is not available a link to the regulator's site is sufficient. "
+"listing on their College's site showing their status. If a URL directly to "
+"the record is not available, a link to the regulator's site is sufficient. "
 "For a camp, link to the camp's accreditation. Staff information is used by "
 "Autism Ontario for verification purposes and is not displayed to the public"
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
-msgid "Camp Session Dates"
-msgstr ""
-
-#: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
-#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
 msgid ""
 "I certify that all of the information contained in my listing is true and I "
-"have the authority to add this listing to Autism Ontario Service Listing and "
-"I understand that failure to comply with the above criteria, may result in "
-"the removal of my listing"
+"have the authority to add this listing to Autism Ontario and I understand "
+"that failure to comply with the above criteria may result in the removal of "
+"my listing"
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
@@ -240,12 +255,6 @@ msgstr ""
 msgid ""
 "Please note Autism Ontario reserves the right to refuse, suspend, or remove "
 "an applicant or previously approved member of Autism Ontario Listing Service"
-msgstr ""
-
-#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
-msgid ""
-"The primary contact's name, email and phone will be used by Autism Ontario "
-"to communicate about the Service Listing and application."
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
@@ -264,12 +273,21 @@ msgstr ""
 msgid "Add another session"
 msgstr ""
 
+#: templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+msgid ""
+"I certify that all of the information contained in my listing is true and I "
+"have the authority to add this listing to Autism Ontario. I understand that "
+"failure to comply with the above criteria may result in the removal of my "
+"listing"
+msgstr ""
+
 #: templates/CRM/Aoservicelisting/Page/ProviderApplicationThankYou.tpl
 msgid "Application Submitted"
 msgstr ""
 
 #: templates/CRM/Aoservicelisting/Page/ProviderApplicationThankYou.tpl
 msgid ""
-"Thank you for your application. Autism Ontario will be in touch with any "
-"questions in regards to your application"
+"We have received your application to be on the Autism Ontario Service "
+"Listing.  We are processing applications and hope to provide answers "
+"shortly.  Thank you for your patience during this time."
 msgstr ""

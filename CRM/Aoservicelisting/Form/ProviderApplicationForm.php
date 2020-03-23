@@ -247,7 +247,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         // If any urls have not matched show an error.
         if (!empty($regulatorRecordKeys)) {
           foreach ($regulatorRecordKeys as $rowKey => $val) {
-            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('Record on regulator’s site does not match a known website for one of the regulators for any of the regulated professions that you selected.');
+            $errors['staff_record_regulator[' . $rowKey . ']'] = E::ts('The link you provided for “record on regulator’s site” does not match any listed regulated professions on file.');
           }
         }
       }
