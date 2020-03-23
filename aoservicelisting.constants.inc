@@ -13,3 +13,5 @@
   define('STATUS', 'custom_904');
   define('RECEIVED_MESSAGE', 90);
   define('APPROVED_MESSAGE', 91);
+  define('OTHER_LANGUAGE', 'custom_905');
+  define('LANGUAGES', 'custom_899');

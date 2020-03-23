@@ -153,14 +153,16 @@
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
-          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
-          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
+        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
+        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
+        $('#add-another-staff').hide();
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
+        $('#add-another-staff').show();
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
@@ -168,12 +170,14 @@
           $('.edit-row-organization_email').hide();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
+          $('#add-another-staff').hide();
         }
         else {
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
+          $('#add-another-staff').show();
         }
       });
 
@@ -278,20 +282,20 @@
           for (var i=1; i<=countcheck; i++) {
             $('#staff_member-' + i).removeClass('hiddenElement');
           }
-          var count = 1;
-          service.each(function(i, v) {
-            var id = v.getAttribute('id');
-            var label = $('label[for="' + id + '"]').html();
-            var field = parseInt(id.split('_').pop());
-            var regulatorMapping = {/literal}'{$regulator_services}'{literal};
-            regulatorMapping = JSON.parse(regulatorMapping);
-            if (field && regulatorMapping.hasOwnProperty(field)) {
-              $('#staff_record_regulator_' + count).val('https://www.' + regulatorMapping[field].split(',').pop());
-              $('.crm-label-' + count).remove();
-              $('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
-              count++;
-            }
-          });
+          //var count = 1;
+          //service.each(function(i, v) {
+            //var id = v.getAttribute('id');
+            //var label = $('label[for="' + id + '"]').html();
+            //var field = parseInt(id.split('_').pop());
+            //var regulatorMapping = {/literal}'{$regulator_services}'{literal};
+            //regulatorMapping = JSON.parse(regulatorMapping);
+            //if (field && regulatorMapping.hasOwnProperty(field)) {
+              //$('#staff_record_regulator_' + count).val('https://www.' + regulatorMapping[field].split(',').pop());
+              //$('.crm-label-' + count).remove();
+              //$('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
+              //count++;
+            //}
+          //});
         }
       }
 
@@ -321,6 +325,14 @@
         $('#staff_last_name_1').val($(this).val()).trigger('change');
       });
       var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
+      var selectorVal = $('[name=' + selector + ']:checked').val();
+      var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
+      if (selectorVal == "1") {
+        regulatedServices.show();
+      }
+      else {
+        regulatedServices.hide();
+      }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
         if ($(this).val() == "1") {
@@ -346,6 +358,23 @@
             }
           });
           $('#regulated-staff-message').hide();
+        }
+      });
+      var otherLanguageField = $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal});
+      var languageField = $('#' + {/literal}'{$LANGUAGES}'{literal});
+      var languageValues = languageField.val();
+      if ($.inArray('Other Language', languageValues) !== -1) {
+        otherLanguageField.show();
+      }
+      else {
+        otherLanguageField.hide();
+      }
+      languageField.change(function() {
+        if ($.inArray('Other Language', $(this).val()) !== -1) {
+          otherLanguageField.show();
+        }
+        else {
+          otherLanguageField.hide();
         }
       });
     });
