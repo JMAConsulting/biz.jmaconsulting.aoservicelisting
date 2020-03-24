@@ -177,7 +177,7 @@ msgstr "%2 du lieu de travail complémentaire %1 est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "You have selected more than one registered service"
-msgstr ""
+msgstr "Vous avez choisi plus qu’un service"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid ""
