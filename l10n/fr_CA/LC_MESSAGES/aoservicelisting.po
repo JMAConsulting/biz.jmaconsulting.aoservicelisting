@@ -37,17 +37,17 @@ msgstr "Type de service"
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Organization Name"
-msgstr ""
+msgstr "Organisation Nom"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Organization Email"
-msgstr ""
+msgstr "Courriel Organisation"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Website"
-msgstr ""
+msgstr "Site Web"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
@@ -207,7 +207,7 @@ msgstr "Vous devez accepter les renonciations pour soumettre la demande."
 
 #: CRM/Aoservicelisting/Page/ProviderApplicationThankYou.php
 msgid "Thank you for submitting your application"
-msgstr ""
+msgstr "Merci pour votre candidature"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 msgid ""
@@ -338,38 +338,38 @@ msgstr ""
 "et espérons vous donner une réponse sous peu. D’ici là, nous vous remercions "
 "de votre patience."
 
-#~ msgid "Autism Ontario Service Listing Application"
-#~ msgstr "Demande d'inscription au Répertoire des services d'Autisme Ontario"
+msgid "Autism Ontario Service Listing Application"
+msgstr "Demande d'inscription au Répertoire des services d'Autisme Ontario"
 
-#~ msgid "Accepting new clients"
-#~ msgstr "Accepte de nouveaux clients"
+msgid "Accepting new clients"
+msgstr "Accepte de nouveaux clients"
 
-#~ msgid "Language is a required field"
-#~ msgstr "Le champ « Langue » est un champ obligatoire"
+msgid "Language is a required field"
+msgstr "Le champ « Langue » est un champ obligatoire"
 
-#~ msgid "Services are provided"
-#~ msgstr "Fourniture des services"
+msgid "Services are provided"
+msgstr "Fourniture des services"
 
-#~ msgid "Website is a required field"
-#~ msgstr "Le site Web est un champ obligatoire"
+msgid "Website is a required field"
+msgstr "Le site Web est un champ obligatoire"
 
-#~ msgid "Email address"
-#~ msgstr "Adresse courriel"
+msgid "Email address"
+msgstr "Adresse courriel"
 
-#~ msgid "Display First Name and Last Name in public listing?"
-#~ msgstr "Afficher le nom et le prénom dans le répertoire public?"
+msgid "Display First Name and Last Name in public listing?"
+msgstr "Afficher le nom et le prénom dans le répertoire public?"
 
-#~ msgid "Display email address in public listing?"
-#~ msgstr "Afficher l'adresse courriel dans le répertoire public?"
+msgid "Display email address in public listing?"
+msgstr "Afficher l'adresse courriel dans le répertoire public?"
 
-#~ msgid "Display phone number in public listing?"
-#~ msgstr "Afficher le numéro de téléphone dans le répertoire public?"
+msgid "Display phone number in public listing?"
+msgstr "Afficher le numéro de téléphone dans le répertoire public?"
 
-#~ msgid "Need to supply a website"
-#~ msgstr "Le site Web est un champ obligatoire"
+msgid "Need to supply a website"
+msgstr "Le site Web est un champ obligatoire"
 
-#~ msgid "Primary Work Location %1"
-#~ msgstr "Lieu de travail principal %1"
+msgid "Primary Work Location %1"
+msgstr "Lieu de travail principal %1"
 
-#~ msgid "Supplementary Work Location"
-#~ msgstr "Lieu de travail complémentaire"
+msgid "Supplementary Work Location"
+msgstr "Lieu de travail complémentaire"
