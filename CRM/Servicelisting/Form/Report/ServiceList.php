@@ -136,6 +136,24 @@ WHERE cg.extends IN ('" . implode("','", $this->_customGroupExtends) . "') AND
     $dateFormat = CRM_Core_Config::singleton()->dateformatTime;
     $entryFound = FALSE;
 
+    $columnOrder = $columnHeaders = [];
+
+    foreach ([SERVICELISTING_CG, CAMP_CG] as $customGroupID) {
+      $customGroup = civicrm_api3('CustomGroup', 'getsingle', ['custom_group_id' => $customGroupID]);
+      $tableName = $customGroup['table_name'];
+      $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => $customGroupID], 'options' => ['sort' => "weight ASC"])['values'];
+      foreach ($customFields as $customField) {
+        $columnOrder[] = $tableName . '_custom_' . $customField['id'];
+      }
+    }
+    foreach ($columnOrder as $name) {
+      if (array_key_exists($name, $this->_columnHeaders)) {
+        $columnHeaders[$name] = $this->_columnHeaders[$name];
+        unset($this->_columnHeaders[$name]);
+      }
+    }
+    $this->_columnHeaders = array_merge($this->_columnHeaders, $columnHeaders);
+
     foreach ($rows as $rowNum => $row) {
 
       foreach ([
