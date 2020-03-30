@@ -76,7 +76,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
-  public static function sendMessage($contactID, $msgId) {
+  public static function sendMessage($contactID, $msgId, $cc = NULL) {
     if (empty($contactID)) {
       return;
     }
@@ -87,8 +87,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
     $body_text    = $messageTemplates->msg_text;
     $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
-    $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
-    $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
 
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
 
@@ -97,6 +95,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $body_text  = str_replace('{url}', sprintf('<a href="%s">%s</a>', CRM_Utils_Array::value('display_name', $contact, $url), $url), $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
     }
+    $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
+    $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
     $mailParams = array(
       'groupName' => 'Service Application Listing Confirmation',
       'from' => "<info@autismontario.com>",
@@ -107,6 +107,9 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'html' => $body_html,
       'text' => $body_text,
     );
+    if ($cc) {
+      $mailParams['cc'] = $cc;
+    }
     CRM_Utils_Mail::send($mailParams);
   }
 
@@ -115,10 +118,11 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'source_contact_id' => $cid,
       'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
+      'target_id' => $cid,
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
-    E::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE);
+    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, 'servicelisting@autismontario.com');
   }
 
   public static function editActivity($cid) {
