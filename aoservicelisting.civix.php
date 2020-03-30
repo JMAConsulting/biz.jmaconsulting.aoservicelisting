@@ -87,7 +87,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
     $body_text    = $messageTemplates->msg_text;
     $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
-
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
 
     if ($msgId == ACKNOWLEDGE_MESSAGE) {
@@ -117,7 +116,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
       'assignee_id' => SPECIALIST_ID,
-      'status_id' => 'Completed',
+      'status_id' => 'Scheduled',
       'target_id' => $cid,
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
@@ -221,6 +220,19 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
         // Send Mail
         self::sendMessage($cid, APPROVED_MESSAGE);
+
+        $activityID = civicrm_api3('Activity', 'get', [
+          'source_contact_id' => $cid,
+          'activity_type_id' => "service_listing_created",
+          'status_id' => 'Scheduled',
+          'sequential' => 1,
+        ])['values'][0]['id'];
+        if ($activityID) {
+          civicrm_api3('Activity', 'create', [
+            'id' => $activityID,
+            'status_id' => 'Completed',
+          ]);
+        }
       }
       if ($oldStatus) {
         civicrm_api3('Activity', 'create', [
