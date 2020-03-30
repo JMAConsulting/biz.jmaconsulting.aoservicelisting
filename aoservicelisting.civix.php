@@ -91,6 +91,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
 
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
+
+    if ($msgId == ACKNOWLEDGE_MESSAGE) {
+      $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $contactID);
+      $body_text  = str_replace('{url}', sprintf('<a href="%s">%s</a>', CRM_Utils_Array::value('display_name', $contact, $url), $url), $messageTemplates->msg_text);
+      $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
+    }
     $mailParams = array(
       'groupName' => 'Service Application Listing Confirmation',
       'from' => "<info@autismontario.com>",
@@ -107,15 +113,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function createActivity($cid) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
+      'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
+    E::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE);
   }
 
   public static function editActivity($cid) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
+      'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
       'activity_type_id' => "service_listing_edited",
       'sequential' => 0,
