@@ -110,7 +110,7 @@
     </div>
   {/section}
 </div>
-<span id="add-another-aba" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
+<span id="add-another-aba" class="crm-hover-button"><a href=#>{ts}Add another ABA certified staff person{/ts}</a></span>
 
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
@@ -249,14 +249,14 @@
         $('.edit-row-organization_email').hide();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
-        $('#add-another-staff').hide();
+        $('#add-another-staff, #add-another-aba').hide();
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-        $('#add-another-staff').show();
+        $('#add-another-staff, #add-another-aba').show();
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
@@ -264,14 +264,14 @@
           $('.edit-row-organization_email').hide();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
-          $('#add-another-staff').hide();
+          $('#add-another-staff, #add-another-aba').hide();
         }
         else {
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-          $('#add-another-staff').show();
+          $('#add-another-staff, #add-another-aba').show();
         }
       });
 
@@ -307,6 +307,7 @@
           $(this).find('input').val('').trigger('change');
         });
       });
+      // Hide/show staff
       $('#add-another-staff').on('click', function(e) {
         e.preventDefault();
         if ($('[id^="staff_member-"]').hasClass("hiddenElement")) {
@@ -321,6 +322,23 @@
           $(this).find('input').val('').trigger('change');
         });
       });
+
+      // Hide/show ABA staff
+      $('#add-another-aba').on('click', function(e) {
+          e.preventDefault();
+          if ($('[id^="aba_staff_member-"]').hasClass("hiddenElement")) {
+              $('[id^="aba_staff_member-"].hiddenElement:first').removeClass('hiddenElement');
+          }
+      });
+      $('.remove_item_aba').on('click', function(e) {
+          e.preventDefault();
+          var row = $(this).closest('[id^="aba_staff_member-"]');
+          row.addClass('hiddenElement');
+          row.find('div.content').each(function() {
+              $(this).find('input').val('').trigger('change');
+          });
+      });
+
       $('#add-another-camp').on('click', function(e) {
         e.preventDefault();
         if ($('[id^="camp_session-"]').hasClass("hiddenElement")) {
