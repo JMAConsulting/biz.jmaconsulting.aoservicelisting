@@ -76,7 +76,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
-  public static function sendMessage($contactID, $msgId) {
+  public static function sendMessage($contactID, $msgId, $cc = NULL, $applicantID = NULL) {
     if (empty($contactID)) {
       return;
     }
@@ -87,10 +87,15 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
     $body_text    = $messageTemplates->msg_text;
     $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
+    $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
+
+    if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
+      $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
+      $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
+      $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
+    }
     $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
-
-    $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
     $mailParams = array(
       'groupName' => 'Service Application Listing Confirmation',
       'from' => "<info@autismontario.com>",
@@ -101,21 +106,28 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'html' => $body_html,
       'text' => $body_text,
     );
+    if ($cc) {
+      $mailParams['cc'] = $cc;
+    }
     CRM_Utils_Mail::send($mailParams);
   }
 
   public static function createActivity($cid) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
-      'status_id' => 'Completed',
+      'assignee_id' => SPECIALIST_ID,
+      'status_id' => 'Scheduled',
+      'target_id' => $cid,
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
+    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, 'servicelisting@autismontario.com', $cid);
   }
 
   public static function editActivity($cid) {
     civicrm_api3('Activity', 'create', [
       'source_contact_id' => $cid,
+      'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
       'activity_type_id' => "service_listing_edited",
       'sequential' => 0,
@@ -208,6 +220,19 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
         // Send Mail
         self::sendMessage($cid, APPROVED_MESSAGE);
+
+        $activityID = civicrm_api3('Activity', 'get', [
+          'source_contact_id' => $cid,
+          'activity_type_id' => "service_listing_created",
+          'status_id' => 'Scheduled',
+          'sequential' => 1,
+        ])['values'][0]['id'];
+        if ($activityID) {
+          civicrm_api3('Activity', 'create', [
+            'id' => $activityID,
+            'status_id' => 'Completed',
+          ]);
+        }
       }
       if ($oldStatus) {
         civicrm_api3('Activity', 'create', [
