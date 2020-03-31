@@ -94,6 +94,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
+      $contact['email'] = $cc;
     }
     $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
@@ -107,9 +108,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'html' => $body_html,
       'text' => $body_text,
     );
-    if ($cc) {
-      $mailParams['cc'] = $cc;
-    }
     CRM_Utils_Mail::send($mailParams);
   }
 

@@ -279,6 +279,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
+          'contact_type' => 'Individual',
+          'contact_sub_type' => 'Provider',
         ];
         E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
         $abaMember = civicrm_api3('Contact', 'create', $individualParams);
