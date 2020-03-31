@@ -15,7 +15,7 @@
   <div class="content">{$form.organization_email.html}</div>
   <div class="clear"></div>
 </div>
-<div class="crm-section edit-row-{$form.website.id}">
+<div class="crm-section edit-row-{$form .website.id}">
   <div class="label">{$form.website.label}</div>
   <div class="content">{$form.website.html}</div>
   <div class="clear"></div>
@@ -439,9 +439,11 @@
       });
       $('#primary_first_name').change(function() {
         $('#staff_first_name_1').val($(this).val()).trigger('change');
+        $('#aba_first_name_1').val($(this).val()).trigger('change');
       });
       $('#primary_last_name').change(function() {
         $('#staff_last_name_1').val($(this).val()).trigger('change');
+        $('#aba_last_name_1').val($(this).val()).trigger('change');
       });
       var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
       var selectorVal = $('[name=' + selector + ']:checked').val();
