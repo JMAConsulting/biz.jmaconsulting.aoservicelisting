@@ -25,20 +25,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (!empty($this->_loggedInContactID)) {
       if (!empty($this->organizationId)) {
-        $saffMemberIds = [$this->_loggedInContactID];
+        $staffMemberIds = [$this->_loggedInContactID];
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
           'return' => ['organization_name'],
         ]);
-        $primraryContact = civicrm_api3('Contact', 'getsingle', [
+        $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
-        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
+        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
+        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
         $defaults['staff_contact_id[1]'] = $this->_loggedInContactID;
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primaryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
@@ -57,10 +57,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
           $defaults[$field] = $organization[$field];
         }
-        $primrayWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
-        $defaults['work_address[1]'] = $primrayWorkAddress['street_address'];
-        $defaults['postal_code[1]'] = $primrayWorkAddress['postal_code'];
-        $defaults['city[1]'] = $primrayWorkAddress['city'];
+        $primaryWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
+        $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
+        $defaults['city[1]'] = $primaryWorkAddress['city'];
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
         $defaults['website'] = $primaryWebsite['values'][0]['url'];
         // Get details of the other staff members
@@ -75,7 +75,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId]);
-            $saffMemberIds[] = $staffMemberContactId;
+            $staffMemberIds[] = $staffMemberContactId;
             $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
             $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
             $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
@@ -87,9 +87,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           }
         }
         $abaStaffCount = 1;
-        foreach ($saffMemberIdsas as $contact_id) {
+        foreach ($staffMemberIds as $contact_id) {
           $staffDetails = civicrm_api3('Contact', 'get', ['id' => $contact_id, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
-          if (!empty($staffDetails['values'][$staffDetails['id'][CERTIFICATE_NUMBER])) {
+          if (!empty($staffDetails['values'][$staffDetails['id'][CERTIFICATE_NUMBER]])) {
             $details = $staffDetails['values'][$staffDetails['id'];
             $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $contact_id;
             $defaults['aba_first_name[' . $abaStaffCount . ']'] = $defaults['first_name'];
