@@ -150,7 +150,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->assign('IS_REGULATED_SERVICE', IS_REGULATED_SERVICE);
     $this->assign('OTHER_LANGUAGE', OTHER_LANGUAGE);
     $this->assign('LANGUAGES', LANGUAGES);
-    $this->assign('regulator_services', json_encode(CRM_Core_OptionGroup::values('regulator_url_mapping')));
+    // Commented out since we are not pre populating URLs
+    // $this->assign('regulator_services', json_encode(CRM_Core_OptionGroup::values('regulator_url_mapping')));
     $this->assign('ABA_SERVICES', ABA_SERVICES);
     $this->assign('ABA_CREDENTIALS', ABA_CREDENTIALS); 
     $this->assign('CERTIFICATE_NUMBER', CERTIFICATE_NUMBER);

@@ -194,7 +194,6 @@
           $(abacredentialsSectionID).hide();
         }
       });
-      var serviceProvider = $('[name=listing_type]:checked').val();
 
       var servicecheckedcount=0;
       var serviceunchekecount=0;
@@ -226,8 +225,9 @@
 
       function showABA(countcheck, service) {
         if (countcheck) {
+          $('#aba_staff_member-1').removeClass('hiddenElement');
           for (var i=1; i<=countcheck; i++) {
-              if (serviceProvider == "2") {
+              if ($('[name=listing_type]:checked').val() == "2") {
                   $('#aba_staff_member-' + i).removeClass('hiddenElement');
               }
           }
@@ -248,6 +248,7 @@
       $('#crm-container.crm-public .label').css('font-size', '16px');
       $('.crm-clear-link').hide();
 
+      var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
@@ -396,7 +397,7 @@
       function showStaff(countcheck, service) {
         if (countcheck) {
           for (var i=1; i<=countcheck; i++) {
-              if (serviceProvider == "2") {
+              if ($('[name=listing_type]:checked').val() == "2") {
                   $('#staff_member-' + i).removeClass('hiddenElement');
               }
           }
