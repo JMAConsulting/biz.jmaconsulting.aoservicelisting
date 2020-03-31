@@ -85,7 +85,7 @@
     {assign var='rowa' value=$smarty.section.a.index}
     <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
-        <legend>
+        <legend class="aba-legend">
           <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
         </legend>
         <div class="crm-section">
@@ -115,7 +115,7 @@
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
-    <div id="staff_member-{$rowNum}" class="{if $rowNum > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
+    <div id="staff_member-{$rowNum}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend>
           <span class="fieldset-legend">{ts 1=$rowNum}Staff Person %1{/ts}</span>
@@ -178,6 +178,7 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function($) {
+      $('.aba_staff_member').insertAfter($('#aba-separator'));
       var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
       var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
       if (abaServices == "1") {
@@ -188,9 +189,11 @@
       }
       $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
         if ($(this).val() == "1") {
+          $('#aba_staff_member-1').addClass('hiddenElement');
           $(abacredentialsSectionID).show();
         }
         else {
+          $('#aba_staff_member-1').removeClass('hiddenElement');
           $(abacredentialsSectionID).hide();
         }
       });
@@ -244,7 +247,7 @@
           }
         }
       }
-      $('.crm-profile legend').hide();
+      $('.crm-profile legend:not(.aba-legend)').hide();
       $('#crm-container.crm-public .label').css('font-size', '16px');
       $('.crm-clear-link').hide();
 
@@ -457,6 +460,7 @@
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
         if ($(this).val() == "1") {
+          $('#staff_member-1').removeClass('hiddenElement');
           $('.editrow_' + rsSelector + '-section').show();
           $('[id^=staff_record_regulator]').each(function() {
             if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
@@ -466,6 +470,7 @@
           $('#regulated-staff-message').show();
         }
         else {
+          $('#staff_member-1').addClass('hiddenElement');
           $('.editrow_' + rsSelector + '-section').hide();
           $('[id^=' + rsSelector + '_]').each(function() {
              if ($(this).prop('checked')) {
