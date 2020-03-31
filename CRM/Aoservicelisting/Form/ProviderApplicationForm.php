@@ -210,7 +210,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   public function providerFormRule($values) {
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
-    $staffMemberCount = 0;
+    $staffMemberCount = $abaStaffMemberCount = 0;
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
 
     // Check primary contact first and last name.
@@ -219,6 +219,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     if (empty($values['primary_last_name'])) {
       $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field');
+    }
+
+    // ABA Services
+    foreach ($values[ABA_CREDENTIALS] as $value => $checked) {
+      if ($checked) {
+        $setAbaValues[] = $value;
+      }
+    }
+    // Check if no aba credentials are checked.
+    if (!empty($values[ABA_CREDENTIALS]) && empty($setAbaValues)) {
+      $errors[ABA_CREDENTIALS] = E::ts('ABA credentials held is a required field when you say you provide ABA services');
     }
 
     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
@@ -349,6 +360,28 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     if (!empty($missingRegulators) && !$flag) {
       $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no URLs have been entered as a record for regulated profession for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+    }
+
+    // Check ABA credentials
+    foreach ($values[CERTIFICATE_NUMBER] as $key => $value) {
+      if (!empty($value)) {
+        $abaStaffMemberCount++;
+        if (empty($values['aba_first_name'][$key])) {
+          $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the ABA staff member is required');
+        }
+        if (empty($values['aba_last_name'][$key])) {
+          $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the ABA staff member is required');
+        }
+        if (empty($values[CERTIFICATE_NUMBER][$key])) {
+          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
+        }
+      }
+    }
+    if ($values['listing_type'] == 1 && count($setAbaValues) > 1 ) {
+      $errors[ABA_CREDENTIALS] = E::ts('You have selected more than one ABA credential');
+    }
+    if ($values['listing_type'] == 2 && count($setAbaValues) > $abaStaffMemberCount) {
+      $errors[ABA_CREDENTIALS] = E::ts('Ensure you have entered all the staff members that match the ABA credentials');
     }
 
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
