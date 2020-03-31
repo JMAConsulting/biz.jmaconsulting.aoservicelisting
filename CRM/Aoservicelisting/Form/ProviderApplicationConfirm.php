@@ -168,25 +168,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ]);
     }
 
-    $addressParams1 = [
-      'street_address' => $values['work_address'][1],
-      'postal_code' => $values['postal_code'][1],
-      'city' => $values['city'][1],
-      'state_province_id' => 'Ontario',
-      'country_id' => 'CA',
-      'location_type_id' => 'Work',
-      'is_primary' => 1,
-      'contact_id' => $organization['id'],
-    ];
     $addId = civicrm_api3('Address', 'get', [
       'contact_id' => $organization['id'],
       'is_primary' => 1,
       'return' => 'id',
     ]);
-    if (!empty($addId['id'])) {
-      $addressParams1['id'] = $addId['id'];
-    }
-    $address1 = civicrm_api3('Address', 'create', $addressParams1);
+
+    list($add1Id, $addressParams1) = E::createAddress($values, 1, $organization['id'], CRM_Utils_Array::value('id', $addId));
+
+    $addressIds = [0 => [$add1Id, $addressParams1]];
 
     $id = civicrm_api3('Website', 'get', [
       'contact_id' => $organization['id'],
@@ -195,14 +185,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'options' => ['limit' => 1],
     ]);
     if (empty($id['id'])) {
-      civicrm_api3('Website', 'create', [
-        'contact_id' => $organization['id'],
-        'url' => $values['website'],
-        'website_type_id' => 'Work',
-      ]);
+      E::createWebsite($organization['id'], $values['website']);
     }
 
-    $addressIds = [0 => [$address1['id'], $addressParams1]];
     $staffMemberIds = [];
 
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
@@ -215,38 +200,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'entity_id' => $organization['id'],
     ]);
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
-      if (!empty($values['phone'][$rowNumber])) {
-        civicrm_api3('Phone', 'create', [
-          'phone' => $values['phone'][$rowNumber],
-          'location_type_id' => 'Work',
-          'contact_id' => $organization['id'],
-          'phone_type_id' => 'Phone',
-        ]);
-      }
+
+      E::createPhone($organization['id'], $values['phone'][$rowNumber]);
+
       if ($rowNumber !== 1 && !empty($values['work_address'][$rowNumber])) {
-        $addressParams = [
-          'street_address' => $values['work_address'][$rowNumber],
-          'city' => $values['city'][$rowNumber],
-          'postal_code' => $values['city'][$rowNumber],
-          'contact_id' => $organization['id'],
-          'country_id' => 'CA',
-          'state_province_id' => 'Ontario',
-          'location_type_id' => 'Work',
-        ];
-        $address = civicrm_api3('Address', 'create', $addressParams);
-        $addressIds[] = [$address['id'], $addressParams];
+        list($addressId, $addressParams) = E::createAddress($values, $rowNumber, $organization['id']);
+
+        $addressIds[] = [$addressId, $addressParams];
       }
-      if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_first_name'][$rowNumber])
-        && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
-        // We had a staff record but it is gone now
-        $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $organization['id'], 'is_active' => 1]);
-        if (!empty($relationships['values'])) {
-          // End Date all relationships as they have either overwritten the data or not.
-          foreach ($relationships['values'] as $relationship) {
-            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
-          }
-        }
-      }
+      E::endRelationship($values, $rowNumber, $organization['id']);
+
       if (!empty($values['staff_first_name'][$rowNumber])) {
         $individualParams = [
           'first_name' => $values['staff_first_name'][$rowNumber],
@@ -256,27 +219,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
         if (!empty($values['staff_contact_id'][$rowNumber])) {
-          $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $values['staff_contact_id'][$rowNumber]]);
-          if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
-            $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $organization['id'], 'is_active' => 1]);
-            if (!empty($relationships['values'])) {
-              // End Date all relationships as they have either overwritten the data or not.
-              foreach ($relationships['values'] as $relationship) {
-                civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
-              }
-            }
-          } else {
-            $individualParams['id'] = $values['staff_contact_id'][$rowNumber];
-          }
+          E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'],$individualParams);
         }
-        $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
-        $dedupeParams['check_permission'] = 0;
-        $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 9);
-        $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+
         $individualParams['contact_type'] = 'Individual';
         if (empty($individualParams['contact_id'])) {
           $individualParams['contact_sub_type'] = 'Provider';
         }
+
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
           // Check that we have found the same combination of first and last names
           if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) == array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name'])) {
@@ -287,11 +237,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
         $staffMemberIds[] = $staffMember['id'];
-        civicrm_api3('Website', 'create', [
-          'website_type_id' => 'Work',
-          'url' => $values['staff_record_regulator'][$rowNumber],
-          'contact_id' => $staffMember['id'],
-        ]);
+
+        E::createWebsite($staffMember['id'], $values['staff_record_regulator'][$rowNumber]);
+
         if ($rowNumber == 1) {
           // Create activity
           if (empty($this->_loggedInContactID)) {
@@ -304,37 +252,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
           }
 
-          if (!empty($values['phone-Primary-6'])) {
-            civicrm_api3('Phone', 'create', [
-              'phone' => $values['phone-Primary-6'],
-              'location_type_id' => 'Work',
-              'contact_id' => $staffMember['id'],
-              'phone_type_id' => 'Phone',
-              'is_primary' => 1,
-            ]);
-          }
+          E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
         }
-        $relationshipParams = [
-          'contact_id_a' => $staffMember['id'],
-          'contact_id_b' => $organization['id'],
-          'relationship_type_id' => 5,
-        ];
-        $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
-        if (empty($relationshipCheck['count'])) {
-          try {
-            civicrm_api3('Relationship', 'create', $relationshipParams);
-          } catch (Exception $e) {
-          }
-        }
+
+        E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
+
         if ($rowNumber === 1) {
-          $relationshipParams['relationship_type_id'] = PRIMARY_CONTACT_REL;
-          $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
-          if (empty($relationshipCheck['count'])) {
-            try {
-              civicrm_api3('Relationship', 'create', $relationshipParams);
-            } catch (Exception $e) {
-            }
-          }
+          E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
         }
       }
     }
@@ -351,6 +275,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
       if (!empty($certificateNumber) && in_array($key, $abaStaffDone) === FALSE) {
+        // TODO: We save the rest of the ABA staff along with website, address, etc.
+        // TODO: ABA Staff 1 should be treated like Staff 1
+        $individualParams = [
+          'first_name' => $values['aba_first_name'][$key],
+          'last_name' => $values['aba_last_name'][$key],
+          CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
+        ];
       } 
     }
     // Redirect to thank you page.

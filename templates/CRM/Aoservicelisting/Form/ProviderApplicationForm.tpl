@@ -86,7 +86,7 @@
     <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend>
-          <span class="fieldset-legend">{ts 1=$rowa}ABA Staff Person %1{/ts}</span>
+          <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
         </legend>
         <div class="crm-section">
           <div class="label">{$form.aba_first_name.$rowa.label}</div>

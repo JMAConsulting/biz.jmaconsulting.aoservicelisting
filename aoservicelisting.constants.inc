@@ -11,6 +11,7 @@
   define('IS_REGULATED_SERVICE', 'custom_862');
   define('REGULATED_SERVICE_CF', 'custom_863');
   define('PRIMARY_CONTACT_REL', 74);
+  define('EMPLOYER_CONTACT_REL', 5);
   define('STATUS', 'custom_904');
   define('RECEIVED_MESSAGE', 90);
   define('APPROVED_MESSAGE', 91);
@@ -21,3 +22,4 @@
   define('ABA_SERVICES', 'custom_885');
   define('ABA_CREDENTIALS', 'custom_884');
   define('CERTIFICATE_NUMBER', 'custom_883');
+  define('ABA_REL', 'custom_886');
