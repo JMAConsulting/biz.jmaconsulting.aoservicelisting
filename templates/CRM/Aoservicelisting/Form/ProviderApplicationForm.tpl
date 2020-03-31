@@ -196,8 +196,8 @@
       });
       var servicecheckedcount=0;
       var serviceunchekecount=0;
-      var services = $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]');
-      services.each(function() {
+      var abservices = $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]');
+      abservices.each(function() {
         if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
           servicecheckedcount++;
         }
@@ -206,10 +206,10 @@
         }
       });
       showABA(servicecheckedcount, serviceunchekecount);
-      services.change(function() {
+      abservices.change(function() {
           var checked = 0;
           var unchecked = 0;
-          services.each(function() {
+          abservices.each(function() {
             if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
               checked++;
             }
@@ -218,7 +218,7 @@
             }
           });
           console.log(checked);
-          showABA(checked, services.filter(':checked'));
+          showABA(checked, abservices.filter(':checked'));
           hideABA(unchecked, checked);
       });
 
