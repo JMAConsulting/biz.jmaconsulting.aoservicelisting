@@ -90,7 +90,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         foreach ($staffMemberIds as $contact_id) {
           $staffDetails = civicrm_api3('Contact', 'get', ['id' => $contact_id, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
           if (!empty($staffDetails['values'][$staffDetails['id'][CERTIFICATE_NUMBER]])) {
-            $details = $staffDetails['values'][$staffDetails['id'];
+            $details = $staffDetails['values'][$staffDetails['id']];
             $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $contact_id;
             $defaults['aba_first_name[' . $abaStaffCount . ']'] = $defaults['first_name'];
             $defaults['aba_last_name[' . $abaStaffCount . ']'] = $defaults['last_name'];
