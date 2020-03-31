@@ -80,6 +80,38 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
 
+<div class="aba_staff_members crm-section">
+  {section name='a' start=1 loop=21}
+    {assign var='rowa' value=$smarty.section.a.index}
+    <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
+      <fieldset>
+        <legend>
+          <span class="fieldset-legend">{ts 1=$rowa}ABA Staff Person %1{/ts}</span>
+        </legend>
+        <div class="crm-section">
+          <div class="label">{$form.aba_first_name.$rowa.label}</div>
+          <div class="content">{$form.aba_first_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.aba_last_name.$rowa.label}</div>
+          <div class="content">{$form.aba_last_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
+          <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        {if $rowNum neq 1}
+          <div><a href=# class="remove_item_aba crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+        {/if}
+      </fieldset>
+    </div>
+  {/section}
+</div>
+<span id="add-another-aba" class="crm-hover-button"><a href=#>{ts}Add another staff person who is a regulated professional{/ts}</a></span>
+
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
@@ -146,6 +178,68 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function($) {
+      var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
+      var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
+      if (abaServices == "1") {
+        $(abacredentialsSectionID).show();
+      }
+      else {
+        $(abacredentialsSectionID).hide();
+      }
+      $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
+        if ($(this).val() == "1") {
+          $(abacredentialsSectionID).show();
+        }
+        else {
+          $(abacredentialsSectionID).hide();
+        }
+      });
+      var servicecheckedcount=0;
+      var serviceunchekecount=0;
+      var services = $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]');
+      services.each(function() {
+        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+          servicecheckedcount++;
+        }
+        if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+          serviceunchekecount++;
+        }
+      });
+      showABA(servicecheckedcount, serviceunchekecount);
+      services.change(function() {
+          var checked = 0;
+          var unchecked = 0;
+          services.each(function() {
+            if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+              checked++;
+            }
+            if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+              unchecked++;
+            }
+          });
+          console.log(checked);
+          showABA(checked, services.filter(':checked'));
+          hideABA(unchecked, checked);
+      });
+
+      function showABA(countcheck, service) {
+        if (countcheck) {
+          for (var i=1; i<=countcheck; i++) {
+            $('#aba_staff_member-' + i).removeClass('hiddenElement');
+          }
+        }
+      }
+
+      function hideABA(unchecked, checked) {
+        for (i=checked+1; i<=unchecked; i++) {
+          console.log(i);
+          console.log($('#aba_staff_member-' + i).hasClass('hiddenElement'));
+          if (!$('#aba_staff_member-' + i).hasClass('hiddenElement') && i > 1) {
+            $('#aba_staff_member-' + i).addClass('hiddenElement');
+            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + i).val('');
+          }
+        }
+      }
       $('.crm-profile legend').hide();
       $('#crm-container.crm-public .label').css('font-size', '16px');
       $('.crm-clear-link').hide();

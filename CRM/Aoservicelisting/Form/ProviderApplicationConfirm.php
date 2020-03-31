@@ -55,6 +55,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
+      $this->add('text', "aba_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      $this->add('text', "aba_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, CERTIFICATE_NUMBER . "[$rowNumber]", str_replace('custom_', '', CERTIFICATE_NUMBER), FALSE);
     }
 
     $this->buildCustom(PRIMARY_PROFILE, 'profile', TRUE);
@@ -274,6 +277,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         if (empty($individualParams['contact_id'])) {
           $individualParams['contact_sub_type'] = 'Provider';
         }
+        if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
+          // Check that we have found the same combination of first and last names
+          if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) == array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name'])) {
+            $arrayKey = array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']);
+            $individualParams[CERTIFICATE_NUMBER] = $values[CERTIFICATE_NUMBER][$arrayKey];
+            $abaStaffDone[] = $arrayKey;
+          }
+        }
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
         $staffMemberIds[] = $staffMember['id'];
         civicrm_api3('Website', 'create', [
@@ -337,6 +348,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         civicrm_api3('Address', 'create', $params);
       }
     }
+
+    foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
+      if (!empty($certificateNumber) && in_array($key, $abaStaffDone) === FALSE) {
+        
 
     // Redirect to thank you page.
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {

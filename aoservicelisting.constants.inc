@@ -1,15 +1,15 @@
 <?php
-  define('PRIMARY_PROFILE', 151);
-  define('SERVICELISTING_PROFILE1', 152);
-  define('SERVICELISTING_PROFILE2', 153);
-  define('SERVICELISTING_CG', 71);
-  define('CAMP_CG', 72);
-  define('DISPLAY_NAME', 'custom_900');
-  define('DISPLAY_EMAIL', 'custom_901');
-  define('DISPLAY_PHONE', 'custom_902');
-  define('WAIVER_FIELD', 'custom_903');
-  define('IS_REGULATED_SERVICE', 'custom_894');
-  define('REGULATED_SERVICE_CF', 'custom_895');
+  define('PRIMARY_PROFILE', 148);
+  define('SERVICELISTING_PROFILE1', 146);
+  define('SERVICELISTING_PROFILE2', 147);
+  define('SERVICELISTING_CG', 69);
+  define('CAMP_CG', 70);
+  define('DISPLAY_NAME', 'custom_868');
+  define('DISPLAY_EMAIL', 'custom_869');
+  define('DISPLAY_PHONE', 'custom_870');
+  define('WAIVER_FIELD', 'custom_871');
+  define('IS_REGULATED_SERVICE', 'custom_862');
+  define('REGULATED_SERVICE_CF', 'custom_863');
   define('PRIMARY_CONTACT_REL', 74);
   define('STATUS', 'custom_904');
   define('RECEIVED_MESSAGE', 90);
@@ -18,3 +18,6 @@
   define('OTHER_LANGUAGE', 'custom_905');
   define('LANGUAGES', 'custom_899');
   define('SPECIALIST_ID', 404318);
+  define('ABA_SERVICES', 'custom_885');
+  define('ABA_CREDENTIALS', 'custom_884');
+  define('CERTIFICATE_NUMBER', 'custom_883');
