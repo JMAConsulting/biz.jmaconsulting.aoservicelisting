@@ -373,3 +373,9 @@ msgstr "Lieu de travail principal %1"
 
 msgid "Supplementary Work Location"
 msgstr "Lieu de travail complémentaire"
+
+msgid "Certificate number is a required field"
+msgstr "Le numéro de certificat est un champ obligatoire"
+
+msgid "Please ensure that you have entered all the staff members that match the ABA credentials"
+msgstr "Assurez-vous d’avoir inscrit tous les membres du personnel qui possèdent les titres de compétence en ACA"
