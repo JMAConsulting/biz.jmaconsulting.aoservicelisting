@@ -31,7 +31,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $staffMemberIds = [$this->_loggedInContactID];
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
-          'return' => ['organization_name'],
+          'return' => ['organization_name', 'email'],
         ]);
         $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
@@ -53,13 +53,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
         foreach (['organization_name',  'email'] as $field) {
-          if ($field === 'organization_name' && stristr($organization[$field], 'self-employed') === FALSE) {
-            $defaults['listing_type'] = 2;
-            $this->listingType = 2;
-          }
-          else {
-            $defaults['listing_type'] = 1;
-            $this->listingType = 1;
+          if ($field === 'organization_name') {
+            if (stristr($organization[$field], 'self-employed') === FALSE) {
+              $defaults['listing_type'] = 2;
+              $this->listingType = 2;
+            }
+            else {
+              $defaults['listing_type'] = 1;
+              $this->listingType = 1;
+            }
           }
           if ($field === 'email') {
             $defaults['organization_email'] = $organization[$field];
@@ -91,7 +93,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
-            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
+            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
             if (empty($staffMember[ABA_REL])) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
