@@ -214,13 +214,13 @@
       showABA(servicecheckedcount, serviceunchekecount);
       abservices.change(function() {
           var checked = 0;
-          var unchecked = 0;
+          var unchecked = 5;
           abservices.each(function() {
             if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
               checked++;
             }
             if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
-              unchecked++;
+              unchecked--;
             }
           });
           showABA(checked, abservices.filter(':checked'));
@@ -240,11 +240,11 @@
 
       function hideABA(unchecked, checked) {
         for (i=checked+1; i<=unchecked; i++) {
-          console.log(i);
-          console.log($('#aba_staff_member-' + i).hasClass('hiddenElement'));
           if (!$('#aba_staff_member-' + i).hasClass('hiddenElement') && i > 1) {
             $('#aba_staff_member-' + i).addClass('hiddenElement');
-            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + i).val('');
+            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + i).val('').trigger('change');
+            $('#aba_last_name_' + i).val('').trigger('change');
+            $('#aba_first_name_' + i).val('').trigger('change');
           }
         }
       }
@@ -417,24 +417,10 @@
       function showStaff(countcheck, service) {
         if (countcheck) {
           for (var i=1; i<=countcheck; i++) {
-              if ($('[name=listing_type]:checked').val() == "2") {
-                  $('#staff_member-' + i).removeClass('hiddenElement');
-              }
+            if ($('[name=listing_type]:checked').val() == "2") {
+              $('#staff_member-' + i).removeClass('hiddenElement');
+            }
           }
-          //var count = 1;
-          //service.each(function(i, v) {
-            //var id = v.getAttribute('id');
-            //var label = $('label[for="' + id + '"]').html();
-            //var field = parseInt(id.split('_').pop());
-            //var regulatorMapping = {/literal}'{$regulator_services}'{literal};
-            //regulatorMapping = JSON.parse(regulatorMapping);
-            //if (field && regulatorMapping.hasOwnProperty(field)) {
-              //$('#staff_record_regulator_' + count).val('https://www.' + regulatorMapping[field].split(',').pop());
-              //$('.crm-label-' + count).remove();
-              //$('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
-              //count++;
-            //}
-          //});
         }
       }
 
