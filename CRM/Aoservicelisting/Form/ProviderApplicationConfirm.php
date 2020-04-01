@@ -153,6 +153,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $organization_params['contact_sub_type'] = 'service_provider';
       $organization_params['contact_type'] = 'Organization';
     }
+    $organization_params[ABA_SERVICES] = $values[ABA_SERVICES];
+    $organization_params[ABA_CREDENTIALS] = $values[ABA_CREDENTIALS];
     $organization = civicrm_api3('Contact', 'create', $organization_params);
 
     // Set status to submitted for first time this is submitted, else awaiting staff verification if edited.
@@ -220,9 +222,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         if ($rowNumber === 1) {
           $individualParams['email'] = $values['email-Primary'];
         }
-        if (!empty($values['staff_contact_id'][$rowNumber])) {
-          E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'],$individualParams);
-        }
+
+        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
 
         $individualParams['contact_type'] = 'Individual';
         if (empty($individualParams['contact_id'])) {
@@ -251,7 +252,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           }
           else {
             // We need to handle cases of email edit.
-
           }
 
           E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
@@ -277,14 +277,29 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
       if (!empty($certificateNumber) && in_array($key, $abaStaffDone) === FALSE) {
-        // TODO: We save the rest of the ABA staff along with website, address, etc.
-        // TODO: ABA Staff 1 should be treated like Staff 1
         $individualParams = [
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
         ];
-      } 
+        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
+        $abaMember = civicrm_api3('Contact', 'create', $individualParams);
+
+        E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL, TRUE);
+
+        // create address
+        $addressKey = $key - 1;
+        if (!empty($addressIds[$addressKey])) {
+          $params = $addressIds[$addressKey][1];
+          unset($params['id']);
+          $params['contact_id'] = $abaMember['id'];
+          $params['master_id'] = $addressIds[$addressKey][0];
+          $params['add_relationship'] = 0;
+          civicrm_api3('Address', 'create', $params);
+        }
+
+        // TODO :create website, Do we need to inherit website from the Staff N to ABA Staff N?
+      }
     }
     // Redirect to thank you page.
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {

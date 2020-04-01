@@ -149,18 +149,24 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
   }
 
-  public static function findDupes($cid, $orgId, &$individualParams) {
-    $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
-    if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+  public static function findDupes($cid, $orgId, &$individualParams, $checkABARel = FALSE) {
+    if (!empty($cid)) {
+      $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
+      if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
+        $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
+        if ($checkABARel) {
+          $params[ABA_REL] = 1;
         }
+        $relationships = civicrm_api3('Relationship', 'get', $params);
+        if (!empty($relationships['values'])) {
+          // End Date all relationships as they have either overwritten the data or not.
+          foreach ($relationships['values'] as $relationship) {
+            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+          }
+        }
+      } else {
+        $individualParams['contact_id'] = $cid;
       }
-    } else {
-      $individualParams['contact_id'] = $cid;
     }
     if (empty($individualParams['contact_id'])) {
       $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
@@ -191,18 +197,20 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
-  public static function createRelationship($cid, $orgId, $relType) {
+  public static function createRelationship($cid, $orgId, $relType, $isABA = FALSE) {
     $relationshipParams = [
       'contact_id_a' => $cid,
       'contact_id_b' => $orgId,
       'relationship_type_id' => $relType,
     ];
+    if ($isABA) {
+      $relationshipParams[ABA_REL] = 1;
+    }
     $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
     if (empty($relationshipCheck['count'])) {
       try {
         civicrm_api3('Relationship', 'create', $relationshipParams);
-      } catch (Exception $e) {
-      }
+      } catch (Exception $e) {}
     }
   }
 
