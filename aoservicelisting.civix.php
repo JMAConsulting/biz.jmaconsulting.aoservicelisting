@@ -98,7 +98,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
     $mailParams = array(
       'groupName' => 'Service Application Listing Confirmation',
-      'from' => "<info@autismontario.com>",
+      'from' => '"Autism Ontario" <servicelisting@autismontario.com>',
       'toName' =>  $contact['display_name'],
       'toEmail' => $contact['email'],
       'subject' => $body_subject,
@@ -214,7 +214,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $submitKeys = array_keys($submitValues);
       $key = preg_grep('/^' . STATUS . '_[\d]*/', $submitKeys);
       $newStatus = reset($key);
-      if (CRM_Utils_Array::value($newStatus, $submitValues) == 'Current Listing') {
+      if (CRM_Utils_Array::value($newStatus, $submitValues) == 'Approved') {
         // Create drupal account if not exists.
         self::createUserAccount($cid);
 
