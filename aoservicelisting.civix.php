@@ -186,7 +186,19 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
 
   public static function createUserAccount($cid) {
-    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', COALESCE(last_name, $cid))) AS name, display_name
+    // We create the user account for the primary contact.
+    $relationship = civicrm_api3('Relationship', 'get', [
+      'contact_id_b' => $cid,
+      'relationship_type_id' => PRIMARY_CONTACT_REL,
+      'return' => 'contact_id_a',
+    ]);
+    if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
+      $cid = $relationship['values'][$relationship['id']]['contact_id_a'];
+    }
+    else {
+      return;
+    }
+    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name, $cid)) AS name, display_name
           FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
     if (self::usernameRule($cid)) {
       return FALSE;
@@ -239,7 +251,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
         civicrm_api3('Activity', 'create', [
           'source_contact_id' => $cid,
           'activity_type_id' => "provider_status_changed",
-          'subject' => sprintf("Application status changed to %s", $oldStatus),
+          'subject' => sprintf("Application status changed to %s", $newStatus),
           'activity_status_id' => 'Completed',
           'details' => '<a class="action-item crm-hover-button" href="https://www.autismontario.com/civicrm/contact/view?cid=' . $cid . '">View Applicant</a>',
           'target_id' => $cid,
