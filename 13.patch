@@ -1,0 +1,39 @@
+From e2ef40973e246479584e072c5c10d7dcefc5767d Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Fri, 13 Mar 2020 16:04:23 +0530
+Subject: [PATCH] AOSL-5: camp values doesn't get saved
+
+---
+ CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index 9404515..8a4cc2c 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -40,7 +40,7 @@ public function buildQuickForm() {
+     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
+     $campValues = [];
+     $count = 1;
+-    $entryFound = 0;
++    $entryCount = 0;
+     $totalCount = 21;
+     while($count < $totalCount) {
+       $entryFound = FALSE;
+@@ -51,14 +51,14 @@ public function buildQuickForm() {
+         }
+       }
+       if (!$entryFound) {
+-        $entryFound++;
++        $entryCount++;
+       }
+       $count++;
+     }
+ 
+     // this part is to render camp fields
+     $campFields = [];
+-    for ($i = 1; $i <= $entryFound; $i++) {
++    for ($i = 1; $i <= $entryCount; $i++) {
+       $campFields[$i] = [];
+       foreach ($customFields as $customField) {
+         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id

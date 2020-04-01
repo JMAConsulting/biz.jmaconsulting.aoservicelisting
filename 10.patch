@@ -1,0 +1,904 @@
+From ed2c23e1f627cd15494effe295f97fb981d1805a Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Thu, 12 Mar 2020 09:06:11 +0530
+Subject: [PATCH 1/5] AOSL-5 handle camp fields
+
+---
+ .../Form/ProviderApplicationForm.php          | 64 +++++++------
+ .../Form/ProviderApplicationForm.tpl          | 18 ++--
+ .../CRM/Aoservicelisting/Form/customData.tpl  | 96 -------------------
+ 3 files changed, 49 insertions(+), 129 deletions(-)
+ delete mode 100644 templates/CRM/Aoservicelisting/Form/customData.tpl
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+index cd0fb23..20196f8 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+@@ -123,15 +123,47 @@ public function buildQuickForm() {
+     $this->buildCustom(PRIMARY_PROFILE, 'profile');
+     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
+     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
+-    $this->assign('customDataType', 'Organization');
+-    $this->assign('customDataSubType', 'service_provider');
+-    $this->assign('entityID', $this->organizationId);
+-    $this->assign('groupID', CAMP_CG);
+ 
++    // this part is to render camp fields
++    $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
++    $campFields = $campDefaultValues = $columnNames = [];
++    for ($i = 1; $i <= 21; $i++) {
++      $campFields[$i] = [];
++      foreach ($customFields as $customField) {
++        // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
++        $marker = $this->organization ? $i : '-' . $i;
++        if ($this->organization) {
++          $campDefaultValues[$i] = [$customField['column_name'] => $marker];
++          if ($i == 1) {
++            $columnNames[] = $customField['column_name'];
++          }
++        }
++        $key = 'custom_' . $customField['id'] . '_' . $marker;
++        $campFields[$i][] = $key
++        CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
++      }
++    }
++    $this->assign('campFields', $campFields);
+ 
+     if (!empty($this->organizationId)) {
+       $listingTypeField->freeze();
+       $organizationNameField->freeze();
++
++      // this part is to set default values of camp fields on basis of stored value
++      $defaults = [];
++      $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
++      $results = CRM_Core_DAO::executeQuery("SELECT * FROM $tableName WHERE entity_id = " . $this->organizationId)->fetchAll();
++      foreach ($results as $key => $values) {
++        $count = $key + 1;
++        foreach ($values as $columnName => $value) {
++          if (in_array($columnName, $columnNames)) {
++            $defaults[$campDefaultValues[$count][$columnName]] = $value;
++          }
++        }
++      }
++      if (!empty($defaults)) {
++        $this->setDefaults($defaults);
++      }
+     }
+ 
+     $this->addButtons(array(
+@@ -142,8 +174,7 @@ public function buildQuickForm() {
+       ),
+     ));
+ 
+-    // export form elements
+-    //$this->assign('elementNames', $this->getRenderableElementNames());
++
+     $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
+     parent::buildQuickForm();
+   }
+@@ -329,27 +360,6 @@ public function postProcess() {
+     parent::postProcess();
+   }
+ 
+-  /**
+-   * Get the fields/elements defined in this form.
+-   *
+-   * @return array (string)
+-   */
+-  public function getRenderableElementNames() {
+-    // The _elements list includes some items which should not be
+-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
+-    // items don't have labels.  We'll identify renderable by filtering on
+-    // the 'label'.
+-    $elementNames = array();
+-    foreach ($this->_elements as $element) {
+-      /** @var HTML_QuickForm_Element $element */
+-      $label = $element->getLabel();
+-      if (!empty($label)) {
+-        $elementNames[] = $element->getName();
+-      }
+-    }
+-    return $elementNames;
+-  }
+-
+   public static function _getServieOptions() {
+     $options = [];
+     $customFieldAPI = civicrm_api3('Custom Field', 'getsingle', ['name' => 'Regulated_Services_Provided']);
+diff --git a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+index d1e3b2b..859c49b 100644
+--- a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
++++ b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+@@ -116,11 +116,18 @@
+   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
+ </div>
+ 
+-<div id="camp-section">
+-  {assign var="groupID" value=$groupID}
+-  <div id="customData1"></div>
+-  {include file="CRM/Aoservicelisting/Form/customData.tpl"}
+-</div>
++{section name='c' start=1 loop=21}
++  {assign var='rowN' value=$smarty.section.c.index}
++  <div id="camp_session-{$rowN}" class="camp-section camp-section-{$rowN} {if $rowN > 1}hiddenElement{/if} {cycle values="odd-row,even-row"}">
++    {foreach from=$campFields.$rowN item=field}
++    <div class="crm-section">
++      <div class="label">{$form.$field.label}</div>
++      <div class="content">{$form.$field.html}</div>
++      <div class="clear"></div><br/>
++    </div>
++    {/foreach}
++  </div>
++{/section}
+ 
+ {* FOOTER *}
+ <div class="crm-public-form-item crm-section waiver-section">
+@@ -136,7 +143,6 @@
+   <script type="text/javascript">
+     CRM.$(function($) {
+       $('.crm-profile legend').hide();
+-      CRM.buildCustomData('Organization', 'service_provider', 1);
+       $('#crm-container.crm-public .label').css('font-size', '16px');
+       var serviceProvider = $('[name=listing_type]:checked').val();
+       if (serviceProvider == "1") {
+diff --git a/templates/CRM/Aoservicelisting/Form/customData.tpl b/templates/CRM/Aoservicelisting/Form/customData.tpl
+deleted file mode 100644
+index 6739a6e..0000000
+--- a/templates/CRM/Aoservicelisting/Form/customData.tpl
++++ /dev/null
+@@ -1,96 +0,0 @@
+-{*
+- +--------------------------------------------------------------------+
+- | CiviCRM version 5                                                  |
+- +--------------------------------------------------------------------+
+- | Copyright CiviCRM LLC (c) 2004-2019                                |
+- +--------------------------------------------------------------------+
+- | This file is a part of CiviCRM.                                    |
+- |                                                                    |
+- | CiviCRM is free software; you can copy, modify, and distribute it  |
+- | under the terms of the GNU Affero General Public License           |
+- | Version 3, 19 November 2007 and the CiviCRM Licensing Exception.   |
+- |                                                                    |
+- | CiviCRM is distributed in the hope that it will be useful, but     |
+- | WITHOUT ANY WARRANTY; without even the implied warranty of         |
+- | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.               |
+- | See the GNU Affero General Public License for more details.        |
+- |                                                                    |
+- | You should have received a copy of the GNU Affero General Public   |
+- | License and the CiviCRM Licensing Exception along                  |
+- | with this program; if not, contact CiviCRM LLC                     |
+- | at info[AT]civicrm[DOT]org. If you have questions about the        |
+- | GNU Affero General Public License or the licensing of CiviCRM,     |
+- | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
+- +--------------------------------------------------------------------+
+-*}
+-{literal}
+-<script type="text/javascript">
+-  (function($) {
+-    CRM.buildCustomData = function (type, subType, subName, cgCount, groupID, isMultiple, onlySubtype) {
+-      var dataUrl = CRM.url('civicrm/custom', {type: type}),
+-        prevCount = 1,
+-        fname = '#customData',
+-        storage = {};
+-
+-      if (subType) {
+-        dataUrl += '&subType=' + subType;
+-      }
+-
+-      if (onlySubtype) {
+-        dataUrl += '&onlySubtype=' + onlySubtype;
+-      }
+-
+-      if (subName) {
+-        $('#customData' + subName).show();
+-      }
+-      else {
+-        $('#customData').show();
+-      }
+-      if (groupID) {
+-        dataUrl += '&groupID=' + groupID;
+-      }
+-
+-      {/literal}
+-      {if $groupID}
+-        dataUrl += '&groupID=' + '{$groupID}';
+-      {/if}
+-      {if $entityID}
+-        dataUrl += '&entityID=' + '{$entityID}';
+-      {/if}
+-      {if $qfKey}
+-        dataUrl += '&qf=' + '{$qfKey}';
+-      {/if}
+-      {if $action}
+-      dataUrl += '&action=' + '{$action}';
+-      {/if}
+-      {literal}
+-
+-      if (!cgCount) {
+-        cgCount = 1;
+-      }
+-      else if (cgCount >= 1) {
+-        prevCount = cgCount;
+-        cgCount++;
+-      }
+-
+-      dataUrl += '&cgcount=' + cgCount;
+-
+-
+-      if (isMultiple) {
+-        fname = '#custom_group_' + groupID + '_' + prevCount;
+-        if ($(".add-more-link-" + groupID + "-" + prevCount).length) {
+-          $(".add-more-link-" + groupID + "-" + prevCount).hide();
+-        }
+-        else {
+-          $("#add-more-link-" + prevCount).hide();
+-        }
+-      }
+-      else if (subName && subName != 'null') {
+-        fname += subName;
+-      }
+-
+-      return CRM.loadPage(dataUrl, {target: fname});
+-    };
+-  })(CRM.$);
+-</script>
+-{/literal}
+
+From b92450d7ba36cf0e6843ecd70e62f7aba963445e Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Thu, 12 Mar 2020 09:56:24 +0530
+Subject: [PATCH 2/5] additional fixes
+
+---
+ .../Form/ProviderApplication.php              | 14 ++++++
+ .../Form/ProviderApplicationConfirm.php       | 46 +------------------
+ .../Form/ProviderApplicationForm.php          | 37 ++++-----------
+ aoservicelisting.constants.inc                |  1 +
+ .../Form/ProviderApplicationConfirm.tpl       | 43 +++--------------
+ .../Form/ProviderApplicationForm.tpl          |  7 ++-
+ 6 files changed, 39 insertions(+), 109 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplication.php b/CRM/Aoservicelisting/Form/ProviderApplication.php
+index 41a9539..05efd1f 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplication.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplication.php
+@@ -26,6 +26,20 @@ class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
+ public $formValues = [];
+ 
+ public $organizationId;
++public $_loggedInContactID;
++
++  public function preProcess() {
++    $loggedInContactId = $this->getLoggedInUserContactID();
++    if (!empty($loggedInContactId)) {
++      $relationship = civicrm_api3('Relationship', 'get', [
++        'contact_id_a' => $loggedInContactId,
++        'relationship_type_id' => PRIMARY_CONTACT_REL,
++      ]);
++      $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
++      $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
++    }
++    parent::preProcess();
++  }
+ 
+   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
+     if ($id) {
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index cbda70a..22f9c2a 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -9,12 +9,6 @@
+  */
+ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
+ 
+-  public function preProcess() {
+-    if (!empty($_POST['hidden_custom'])) {
+-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
+-    }
+-  }
+-
+   public function buildQuickForm() {
+     $defaults = $this->get('formValues');
+     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
+@@ -73,20 +67,6 @@ public function buildQuickForm() {
+ 
+     $this->assign('campValues', $campValues);
+ 
+-    $this->setDefaults($defaults);
+-    foreach ($this->_elements as $element) {
+-      if (strpos($element->getName(), '[') !== FALSE) {
+-         $key = substr($element->getName(), 0, strpos($element->getName(), '['));
+-         $arrayKey = substr($element->getName(), strpos($element->getName(), '[') + 1, -1);
+-         $element->setValue($defaults[$key][$arrayKey]);
+-      }
+-      if (!$entryFound) {
+-        unset($campValues[$count]);
+-      }
+-      $count++;
+-    }
+-    $this->assign('campValues', $campValues);
+-
+     $this->setDefaults($defaults);
+     $this->freeze();
+     $this->addButtons(array(
+@@ -109,9 +89,6 @@ public function buildQuickForm() {
+       ],
+     ]);
+ 
+-    // export form elements
+-    $this->assign('elementNames', $this->getRenderableElementNames());
+-
+     parent::buildQuickForm();
+   }
+ 
+@@ -241,7 +218,7 @@ public function submit($values) {
+           }
+         }
+         if ($rowNumber === 1) {
+-          $relationshipParams['relationship_type_id'] = 74;
++          $relationshipParams['relationship_type_id'] = PRIMARY_CONTACT_REL;
+           $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
+           if (empty($relationshipCheck['count'])) {
+             try {
+@@ -266,25 +243,4 @@ public function submit($values) {
+     CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/one-stop-listing-thankyou', 'reset=1'));
+   }
+ 
+-  /**
+-   * Get the fields/elements defined in this form.
+-   *
+-   * @return array (string)
+-   */
+-  public function getRenderableElementNames() {
+-    // The _elements list includes some items which should not be
+-    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
+-    // items don't have labels.  We'll identify renderable by filtering on
+-    // the 'label'.
+-    $elementNames = array();
+-    foreach ($this->_elements as $element) {
+-      /** @var HTML_QuickForm_Element $element */
+-      $label = $element->getLabel();
+-      if (!empty($label)) {
+-        $elementNames[] = $element->getName();
+-      }
+-    }
+-    return $elementNames;
+-  }
+-
+ }
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+index 20196f8..addca56 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+@@ -9,12 +9,6 @@
+  */
+ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
+ 
+-  public function preProcess() {
+-    if (!empty($_POST['hidden_custom'])) {
+-      $this->applyCustomData('Organization', 'service_provider', $this->organizationId);
+-    }
+-  }
+-
+   public function setDefaultValues() {
+     $defaults = [];
+     $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE);
+@@ -27,23 +21,16 @@ public function setDefaultValues() {
+       $defaults['listing_type'] = 1;
+     }
+ 
+-    $loggedInContactId = $this->getLoggedInUserContactID();
+-    if (!empty($loggedInContactId)) {
+-      $relationship = civicrm_api3('Relationship', 'get', [
+-        'contact_id_a' => $loggedInContactId,
+-        'relationship_type_id' => 74,
+-      ]);
++    if (!empty($this->_loggedInContactID)) {
+       if (!empty($relationship['count'])) {
+-        $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
+-        $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+         $organization = civicrm_api3('Contact', 'getsingle', [
+           'id' => $this->organizationId,
+           'return' => ['organization_name'],
+         ]);
+         $primrayContact = civicrm_api3('Contact', 'getsingle', [
+-          'id' => $loggedInContactId,
++          'id' => $this->_loggedInContactID,
+         ]);
+-        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $loggedInContactId, 'is_primary' => 1]);
++        $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
+         $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
+         $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
+         $defaults['phone[1]'] = $primaryContactPhone['phone'];
+@@ -73,7 +60,7 @@ public function setDefaultValues() {
+         // Get details of the other staff members
+         $staffMembers = civicrm_api3('Relationship', 'get', [
+           'contact_id_b' => $this->organizationId,
+-          'contact_id_a' => ['!=' => $loggedInContactId],
++          'contact_id_a' => ['!=' => $this->_loggedInContactID],
+           'sequential' => 1,
+         ]);
+         $staffRowCount = $campRowCount = 1;
+@@ -139,7 +126,7 @@ public function buildQuickForm() {
+           }
+         }
+         $key = 'custom_' . $customField['id'] . '_' . $marker;
+-        $campFields[$i][] = $key
++        $campFields[$i][] = $key;
+         CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
+       }
+     }
+@@ -267,12 +254,16 @@ public function providerFormRule($values) {
+         $missingRegulators[] = $options[$value];
+       }
+     }
++    /**
++     * TODO: display_name_public , display_email and display_phone are now replaced by custom field, so use appropriate field key to apply these validation rule
++
+     if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
+       $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
+     }
+     if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
+       $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
+     }
++    */
+     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
+     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
+       if (empty($values[$addressField][1])) {
+@@ -333,21 +324,13 @@ public function providerFormRule($values) {
+     if (!empty($missingRegulators)) {
+       $errors[REGULATED_SERVICE_CF] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+     }
+-    if (!empty($missingRegulators)) {
+-      $errors['custom_863'] = E::ts('No Staff members have been entered for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
+-    }
++
+     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
+       $errors['organization_name'] = E::ts('Need to supply the organization name');
+     }
+     if ($values['listing_type'] == 2 && empty($values['organization_email'])) {
+       $errors['organization_email'] = E::ts('Need to supply the organization email');
+     }
+-    if (empty($values['primary_first_name'])) {
+-      $errors['primary_first_name'] = E::ts('First name of the primary contact is a required field.');
+-    }
+-    if (empty($values['primary_last_name'])) {
+-      $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field.');
+-    }
+     if (empty($values['waiver_field'])) {
+       $errors['waiver_field'] = E::ts('You must agree to the waivers in order to submit the application.');
+     }
+diff --git a/aoservicelisting.constants.inc b/aoservicelisting.constants.inc
+index 5553856..a34bfdf 100644
+--- a/aoservicelisting.constants.inc
++++ b/aoservicelisting.constants.inc
+@@ -5,3 +5,4 @@
+   define('CAMP_CG', 70);
+   define('WAIVER_FIELD', 'custom_871');
+   define('REGULATED_SERVICE_CF', 'custom_863');
++  define('PRIMARY_CONTACT_REL', 74);
+diff --git a/templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl b/templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
+index ad44183..be465dc 100644
+--- a/templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
++++ b/templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
+@@ -98,42 +98,13 @@
+   {section name='c' start=1 loop=21}
+     {assign var='rowN' value=$smarty.section.c.index}
+     {if !empty($campValues.$rowN)}
+-    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
+-      {foreach from=$campValues.$rowN key=customKey item=dontCare}
+-        <div class="label">{$campValues.$rowN.$customKey.label}</div>
+-        <div class="content">{$campValues.$rowN.$customKey.html}</div>
+-        <div class="clear"></div>
+-      {/foreach}
+-    </div>
+-    <div class="clear"></div>
+-<!--
+-{section name='c' start=1 loop=21}
+-  {assign var='rowN' value=$smarty.section.c.index}
+-  <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
+-    <div class="label">{$form.custom_858.$rowN.label}</div>
+-    <div class="content">{$form.custom_858.$rowN.html}</div>
+-    <div class="clear"></div>
+-    <div class="label">{ts}Camp Session Dates{/ts}</div>
+-    <div class="content">
+-      <div style="float:left;">{$form.custom_859.$rowN.html}&nbsp;&nbsp;-&nbsp;&nbsp;{$form.custom_860.$rowN.html}</div>
+-    </div>
+-    <div class="clear"></div>
+-  </div>
+-{/section}
+--->
+-
+-{if !empty($campValues)}
+-  {section name='c' start=1 loop=21}
+-    {assign var='rowN' value=$smarty.section.c.index}
+-    {if !empty($campValues.$rowN)}
+-    <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
+-      {foreach from=$campValues.$rowN key=customKey item=v}
+-        <div class="label">{$campValues.$rowN.$customKey.label}</div>
+-        <div class="content">{$campValues.$rowN.$customKey.html}</div>
+-        <div class="clear"></div>
+-      {/foreach}
+-    </div>
+-    <div class="clear"></div>
++      <div id="camp_session-{$rowN}" class="crm-section camp-section camp-section-{$rowN} {cycle values="odd-row,even-row"}">
++        {foreach from=$campValues.$rowN key=customKey item=dontCare}
++          <div class="label">{$campValues.$rowN.$customKey.label}</div>
++          <div class="content">{$campValues.$rowN.$customKey.html}</div>
++          <div class="clear"></div>
++        {/foreach}
++      </div>
+     {/if}
+   {/section}
+ {/if}
+diff --git a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+index 859c49b..acf00ad 100644
+--- a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
++++ b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+@@ -123,11 +123,15 @@
+     <div class="crm-section">
+       <div class="label">{$form.$field.label}</div>
+       <div class="content">{$form.$field.html}</div>
+-      <div class="clear"></div><br/>
++      <div class="clear"></div>
+     </div>
+     {/foreach}
++    {if $rowN neq 1}
++       <div><a href=# class="remove_item_camp crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
++    {/if}
+   </div>
+ {/section}
++<span id="add-another-camp" class="crm-hover-button"><a href=#>{ts}Add another session{/ts}</a></span>
+ 
+ {* FOOTER *}
+ <div class="crm-public-form-item crm-section waiver-section">
+@@ -144,6 +148,7 @@
+     CRM.$(function($) {
+       $('.crm-profile legend').hide();
+       $('#crm-container.crm-public .label').css('font-size', '16px');
++      $('.crm-clear-link').hide();
+       var serviceProvider = $('[name=listing_type]:checked').val();
+       if (serviceProvider == "1") {
+         $('.edit-row-organization_name').hide();
+
+From 03a3198aba7fa768a9275e05ab3c0f893ada028b Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Thu, 12 Mar 2020 12:27:15 +0530
+Subject: [PATCH 3/5] handle default values of camp
+
+---
+ .../Form/ProviderApplication.php                 |  6 ++++--
+ .../Form/ProviderApplicationForm.php             | 16 +++++++---------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplication.php b/CRM/Aoservicelisting/Form/ProviderApplication.php
+index 05efd1f..041484a 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplication.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplication.php
+@@ -29,8 +29,11 @@ class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
+ public $_loggedInContactID;
+ 
+   public function preProcess() {
+-    $loggedInContactId = $this->getLoggedInUserContactID();
++    parent::preProcess();
++    // for testing purpose consider cid value from url
++    $loggedInContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE) ?: $this->getLoggedInUserContactID();
+     if (!empty($loggedInContactId)) {
++      $this->_loggedInContactID = $loggedInContactId;
+       $relationship = civicrm_api3('Relationship', 'get', [
+         'contact_id_a' => $loggedInContactId,
+         'relationship_type_id' => PRIMARY_CONTACT_REL,
+@@ -38,7 +41,6 @@ public function preProcess() {
+       $this->organizationId = $relationship['values'][$relationship['id']]['contact_id_b'];
+       $this->set('organizationId', $relationship['values'][$relationship['id']]['contact_id_b']);
+     }
+-    parent::preProcess();
+   }
+ 
+   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+index addca56..1e90656 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+@@ -22,7 +22,7 @@ public function setDefaultValues() {
+     }
+ 
+     if (!empty($this->_loggedInContactID)) {
+-      if (!empty($relationship['count'])) {
++      if (!empty($this->organizationId)) {
+         $organization = civicrm_api3('Contact', 'getsingle', [
+           'id' => $this->organizationId,
+           'return' => ['organization_name'],
+@@ -87,8 +87,9 @@ public function buildQuickForm() {
+ 
+     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
+ 
++    $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
+     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
+-    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
++    $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
+     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'));
+     $this->add('email', 'organization_email', E::ts('Organization Email'));
+     $this->add('text', 'website', E::ts('Website'), TRUE);
+@@ -118,14 +119,14 @@ public function buildQuickForm() {
+       $campFields[$i] = [];
+       foreach ($customFields as $customField) {
+         // when we insert new value for multi-valued custom field the key is suppose to be in custom_xx_-1 otherwise custom_xx_1 where xx is the custom field id
+-        $marker = $this->organization ? $i : '-' . $i;
+-        if ($this->organization) {
+-          $campDefaultValues[$i] = [$customField['column_name'] => $marker];
++        $marker = $this->organizationId ? $i : '-' . $i;
++        $key = 'custom_' . $customField['id'] . '_' . $marker;
++        if ($this->organizationId) {
++          $campDefaultValues[$i][$customField['column_name'] = $key;
+           if ($i == 1) {
+             $columnNames[] = $customField['column_name'];
+           }
+         }
+-        $key = 'custom_' . $customField['id'] . '_' . $marker;
+         $campFields[$i][] = $key;
+         CRM_Core_BAO_CustomField::addQuickFormElement($this, $key, $customField['id'], FALSE);
+       }
+@@ -133,9 +134,6 @@ public function buildQuickForm() {
+     $this->assign('campFields', $campFields);
+ 
+     if (!empty($this->organizationId)) {
+-      $listingTypeField->freeze();
+-      $organizationNameField->freeze();
+-
+       // this part is to set default values of camp fields on basis of stored value
+       $defaults = [];
+       $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
+
+From f3dd3de849a470c7e983fe3acff2c798f13fbf11 Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Thu, 12 Mar 2020 13:40:33 +0530
+Subject: [PATCH 4/5] fix formrule, add more constants
+
+---
+ .../Form/ProviderApplicationConfirm.php       | 18 ++++---
+ .../Form/ProviderApplicationForm.php          | 54 +++++--------------
+ aoservicelisting.constants.inc                |  3 ++
+ css/providerformstyle.css                     |  5 ++
+ 4 files changed, 33 insertions(+), 47 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index 22f9c2a..6423981 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -107,12 +107,18 @@ public function submit($values) {
+       'organization_name' => $values['organization_name'],
+       'email' => $values['organization_email'],
+     ];
+-    $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
+-    $dedupeParams['check_permission'] = 0;
+-    $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
+-    $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+-    $organization_params['contact_sub_type'] = 'service_provider';
+-    $organization_params['contact_type'] = 'Organization';
++    if (!empty($this->organizationId)) {
++      $organization_params['id'] = $this->organizationId;
++    }
++    else {
++      $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
++      $dedupeParams['check_permission'] = 0;
++      $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
++      $organization_params['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
++      $organization_params['contact_sub_type'] = 'service_provider';
++      $organization_params['contact_type'] = 'Organization';
++    }
++
+     $organization = civicrm_api3('Contact', 'create', $organization_params);
+     $address1Params = [
+       'street_address' => $values['work_address'][1],
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+index 1e90656..c02893d 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+@@ -23,18 +23,20 @@ public function setDefaultValues() {
+ 
+     if (!empty($this->_loggedInContactID)) {
+       if (!empty($this->organizationId)) {
++        // isn't it obvious that a person is only allowed to submit the application only after agreeing to the waiver it is a required field to proceed
++        $defaults['waiver_field'] = 1;
+         $organization = civicrm_api3('Contact', 'getsingle', [
+           'id' => $this->organizationId,
+           'return' => ['organization_name'],
+         ]);
+-        $primrayContact = civicrm_api3('Contact', 'getsingle', [
++        $primraryContact = civicrm_api3('Contact', 'getsingle', [
+           'id' => $this->_loggedInContactID,
+         ]);
+         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
+-        $defaults['staff_first_name[1]'] = $primrayContact['first_name'];
+-        $defaults['staff_last_name[1]'] = $primrayContact['last_name'];
++        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
++        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
+         $defaults['phone[1]'] = $primaryContactPhone['phone'];
+-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primrayContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
++        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
+         if (!empty($primaryStaffWebsite['count'])) {
+           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
+         }
+@@ -84,7 +86,6 @@ public function setDefaultValues() {
+   }
+ 
+   public function buildQuickForm() {
+-
+     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
+ 
+     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
+@@ -122,7 +123,7 @@ public function buildQuickForm() {
+         $marker = $this->organizationId ? $i : '-' . $i;
+         $key = 'custom_' . $customField['id'] . '_' . $marker;
+         if ($this->organizationId) {
+-          $campDefaultValues[$i][$customField['column_name'] = $key;
++          $campDefaultValues[$i][$customField['column_name']] = $key;
+           if ($i == 1) {
+             $columnNames[] = $customField['column_name'];
+           }
+@@ -168,34 +169,7 @@ public function providerFormRule($values) {
+     $errors = $setValues = [];
+     $regulatorRecordKeys = $verifiedURLCounter = [];
+     $staffMemberCount = 0;
+-    $regulatorUrlMapping = [
+-      1 => 'caslpo.com',
+-      2 => 'cco.on.ca',
+-      3 => 'ontariocampsassociation.ca',
+-      4 => 'oacyc.org',
+-      5 => 'cdho.org',
+-      6 => 'rcdso.org',
+-      7 => 'members.dietitians.ca',
+-      7 => 'collegeofdietitians.org',
+-      8 => 'college-ece.ca',
+-      9 => 'collegeoftrades.ca',
+-      10 => 'coko.ca',
+-      11 => 'cmto.com',
+-      12 => 'coto.org',
+-      13 => 'collegeoptom.on.ca',
+-      14 => 'coptont.org',
+-      15 => 'cpso.on.ca',
+-      16 => 'collegept.org',
+-      17 => 'ccpa-accp.ca',
+-      17 => 'psych.on.ca',
+-      17 => 'cpo.on.ca',
+-      18 => 'eopa.ca',
+-      19 => 'findasocialworker.ca',
+-      19 => 'ocwssw.org',
+-      20 => 'osla.on.ca',
+-      20 => 'caslpo.com',
+-      21 => 'oct.ca',
+-    ];
++    $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
+ 
+     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
+       if ($checked) {
+@@ -252,16 +226,14 @@ public function providerFormRule($values) {
+         $missingRegulators[] = $options[$value];
+       }
+     }
+-    /**
+-     * TODO: display_name_public , display_email and display_phone are now replaced by custom field, so use appropriate field key to apply these validation rule
+ 
+-    if ($values['listing_type'] == 1 && empty($values['display_name_public'])) {
+-      $errors['display_name_public'] = E::ts('first name and last name of listing must be publicly displayed');
++    if ($values['listing_type'] == 1 && empty($values[DISPLAY_NAME])) {
++      $errors[DISPLAY_NAME] = E::ts('first name and last name of listing must be publicly displayed');
+     }
+-    if ($values['listing_type'] == 1 && empty($values['display_email']) && empty($values['display_phone'])) {
+-      $errors['display_email'] = E::ts('At least one of email or phone must be provided and made public');
++    if ($values['listing_type'] == 1 && empty($values[DISPLAY_EMAIL]) && empty($values[DISPLAY_PHONE])) {
++      $errors[DISPLAY_EMAIL] = E::ts('At least one of email or phone must be provided and made public');
+     }
+-    */
++
+     $addressFieldLables = ['phone' => E::ts('Phone Number'), 'work_address' => E::ts('Address'), 'postal_code' => E::ts('Postal code'), 'city' =>  E::ts('City/Town')];
+     foreach (['phone', 'work_address', 'postal_code', 'city', 'postal_code'] as $addressField) {
+       if (empty($values[$addressField][1])) {
+diff --git a/aoservicelisting.constants.inc b/aoservicelisting.constants.inc
+index a34bfdf..d81e633 100644
+--- a/aoservicelisting.constants.inc
++++ b/aoservicelisting.constants.inc
+@@ -3,6 +3,9 @@
+   define('SERVICELISTING_PROFILE1', 146);
+   define('SERVICELISTING_PROFILE2', 147);
+   define('CAMP_CG', 70);
++  define('DISPLAY_NAME', 'custom_868');
++  define('DISPLAY_EMAIL', 'custom_869');
++  define('DISPLAY_PHONE', 'custom_870');
+   define('WAIVER_FIELD', 'custom_871');
+   define('REGULATED_SERVICE_CF', 'custom_863');
+   define('PRIMARY_CONTACT_REL', 74);
+diff --git a/css/providerformstyle.css b/css/providerformstyle.css
+index 79ce05a..5a70538 100644
+--- a/css/providerformstyle.css
++++ b/css/providerformstyle.css
+@@ -23,6 +23,11 @@ input[type="checkbox"][readonly] {
+   pointer-events: none;
+ }
+ 
++input[type="radio"][readonly] {
++  pointer-events: none;
++}
++
++
+ @media (min-width: 768px) {
+   .custom-checkbox {
+     margin-left: initial;
+
+From 2321f8409c7271ea861dfe416703bbeb07c4bd49 Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Thu, 12 Mar 2020 21:35:59 +0530
+Subject: [PATCH 5/5] postprocess fixes
+
+---
+ .../Form/ProviderApplicationConfirm.php       | 40 +++++++++++--------
+ 1 file changed, 23 insertions(+), 17 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index 6423981..0a223a8 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -118,9 +118,9 @@ public function submit($values) {
+       $organization_params['contact_sub_type'] = 'service_provider';
+       $organization_params['contact_type'] = 'Organization';
+     }
+-
+     $organization = civicrm_api3('Contact', 'create', $organization_params);
+-    $address1Params = [
++
++    $addressParams1 = [
+       'street_address' => $values['work_address'][1],
+       'postal_code' => $values['postal_code'][1],
+       'city' => $values['city'][1],
+@@ -130,30 +130,36 @@ public function submit($values) {
+       'is_primary' => 1,
+       'contact_id' => $organization['id'],
+     ];
+-    $address1 = civicrm_api3('Address', 'get', $address1Params);
+-    if (empty($address1['count'])) {
+-      $address1 = civicrm_api3('Address', 'create', $address1Params);
+-    }
+-    $websiteParams = [
++    $address1 = civicrm_api3('Address' , 'create', array_merge($addressParams1,
++     ['id' => civicrm_api3('Address', 'getvalue', ['contact_id' => $organization['id'], 'is_primary' => TRUE, 'return' => 'id'])]
++    ));
++
++    $id = civicrm_api3('Website', 'getvalue', [
+       'contact_id' => $organization['id'],
+       'url' => $values['website'],
+-      'website_type_id' => 'Work',
+-    ];
+-    civicrm_api3('Website', 'create', $websiteParams);
+-    $addressIds = [0 => [$address1['id'], $address1Params]];
+-    $staffMemberIds = [];
++      'return' => 'id',
++      'options' => ['limit' => 1],
++    ]);
++    if ($id) {
++      civicrm_api3('Website', 'create', [
++        'contact_id' => $organization['id'],
++        'url' => $values['website'],
++        'website_type_id' => 'Work',
++      ]);
++    }
+ 
+-    $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE, CRM_Core_Action::VIEW);
+-    $values['skip_greeting_processing'] = TRUE;
+-    CRM_Contact_BAO_Contact::createProfileContact($values, $fields, $organization['id'], NULL, PRIMARY_PROFILE);
++    $addressIds = [0 => [$address1['id'], $addressParams1]];
++    $staffMemberIds = [];
+ 
+     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
+     if (!empty($customValues) && is_array($customValues)) {
+       CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
+     }
+ 
+-    $customFieldParams[WAIVER_FIELD] = $values['waiver_field'];
+-    civicrm_api3('CustomValue', 'create', $customFieldParams);
++    civicrm_api3('CustomValue', 'create', [
++      WAIVER_FIELD => $values['waiver_field'],
++      'entity_id' => $organization['id'],
++    ]);
+     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
+       if (!empty($values['phone'][$rowNumber])) {
+         civicrm_api3('Phone', 'create', [

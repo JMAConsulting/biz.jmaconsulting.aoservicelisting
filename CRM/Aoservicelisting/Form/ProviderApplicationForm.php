@@ -387,7 +387,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $credentials = [];
     if (!empty($values[ABA_CREDENTIALS])) {
       foreach ($values[ABA_CREDENTIALS] as $value => $set) {
-        if (!empty($value)) {
+        if (!empty($set)) {
           if ($value !== 'None') {
             $credentials[] = $value;
           }

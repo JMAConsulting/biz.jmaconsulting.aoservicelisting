@@ -1,0 +1,47 @@
+From 2db43424e39a1e3664674e7cdf3066a0b7803d02 Mon Sep 17 00:00:00 2001
+From: Monish Deb <deb.monish@gmail.com>
+Date: Mon, 16 Mar 2020 17:03:43 +0530
+Subject: [PATCH] AOSL-5 Update edit activity content
+
+---
+ CRM/Aoservicelisting/Form/ProviderApplication.php     | 1 +
+ CRM/Aoservicelisting/Form/ProviderApplicationForm.php | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplication.php b/CRM/Aoservicelisting/Form/ProviderApplication.php
+index 9076251..565189e 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplication.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplication.php
+@@ -27,6 +27,7 @@ class CRM_Aoservicelisting_Form_ProviderApplication extends CRM_Core_Form {
+ 
+ public $organizationId;
+ public $_loggedInContactID;
++public $_values;
+ 
+   public function preProcess() {
+     parent::preProcess();
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+index fdf1570..52a2f4a 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+@@ -87,6 +87,10 @@ public function setDefaultValues() {
+       }
+     }
+ 
++    if (!empty($this->_loggedInContactID)) {
++      $this->_values = $defaults;
++    }
++
+     return $defaults;
+   }
+ 
+@@ -314,6 +318,9 @@ public function postProcess() {
+     $this->controller->resetPage('ProviderApplicationConfirm');
+     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
+     $this->set('formValues', $formValues);
++    if (!empty($this->_values)) {
++      $diff = array_diff_assoc($this->_values, $formValues);
++    }
+     parent::postProcess();
+   }
+ 

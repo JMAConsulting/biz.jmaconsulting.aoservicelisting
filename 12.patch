@@ -1,0 +1,429 @@
+From 1b39a25fd0bd5da9eee7d329c4fab74e7dff7698 Mon Sep 17 00:00:00 2001
+From: Edsel Lopez <edsel.lopez@jmaconsulting.biz>
+Date: Tue, 10 Mar 2020 18:35:13 +0530
+Subject: [PATCH 1/4] Create activities on submission
+
+---
+ .idea/.gitignore                              |  2 +
+ .idea/biz.jmaconsulting.aoservicelisting.iml  |  8 ++
+ .idea/misc.xml                                |  6 ++
+ .idea/modules.xml                             |  8 ++
+ .idea/vcs.xml                                 |  6 ++
+ .../Form/ProviderApplicationConfirm.php       | 11 +++
+ aoservicelisting.civix.php                    | 84 +++++++++++++++++++
+ .../service_listing_activity_types.mgd.php    |  4 +-
+ .../Form/ProviderApplicationForm.tpl          | 12 ++-
+ 9 files changed, 135 insertions(+), 6 deletions(-)
+ create mode 100644 .idea/.gitignore
+ create mode 100644 .idea/biz.jmaconsulting.aoservicelisting.iml
+ create mode 100644 .idea/misc.xml
+ create mode 100644 .idea/modules.xml
+ create mode 100644 .idea/vcs.xml
+
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+index 0000000..e7e9d11
+--- /dev/null
++++ b/.idea/.gitignore
+@@ -0,0 +1,2 @@
++# Default ignored files
++/workspace.xml
+diff --git a/.idea/biz.jmaconsulting.aoservicelisting.iml b/.idea/biz.jmaconsulting.aoservicelisting.iml
+new file mode 100644
+index 0000000..c956989
+--- /dev/null
++++ b/.idea/biz.jmaconsulting.aoservicelisting.iml
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="WEB_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$" />
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
+\ No newline at end of file
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+new file mode 100644
+index 0000000..28a804d
+--- /dev/null
++++ b/.idea/misc.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="JavaScriptSettings">
++    <option name="languageLevel" value="ES6" />
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+index 0000000..d5d7b84
+--- /dev/null
++++ b/.idea/modules.xml
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/biz.jmaconsulting.aoservicelisting.iml" filepath="$PROJECT_DIR$/.idea/biz.jmaconsulting.aoservicelisting.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+index 0000000..94a25f7
+--- /dev/null
++++ b/.idea/vcs.xml
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index 9404515..b99da2c 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -104,6 +104,7 @@ public function postProcess() {
+   public function submit($values) {
+     $this->processCustomValue($values);
+     if (empty($values['organiation_name'])) {
++
+       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
+     }
+     $organization_params = [
+@@ -124,6 +125,7 @@ public function submit($values) {
+     $organization = civicrm_api3('Contact', 'create', $organization_params);
+ 
+     $addressParams1 = [
++
+       'street_address' => $values['work_address'][1],
+       'postal_code' => $values['postal_code'][1],
+       'city' => $values['city'][1],
+@@ -209,6 +211,15 @@ public function submit($values) {
+           'contact_id' => $staffMember['id'],
+         ]);
+         if ($rowNumber == 1) {
++          // Create activity
++          if (empty($this->_loggedInContactID)) {
++            E::createActivity($staffMember['id']);
++            E::createUserAccount($staffMember['id']);
++          }
++          else {
++            E::editActivity($this->_loggedInContactID);
++          }
++
+           if (!empty($values['phone-Primary-6'])) {
+             civicrm_api3('Phone', 'create', [
+               'phone' => $values['phone-Primary-6'],
+diff --git a/aoservicelisting.civix.php b/aoservicelisting.civix.php
+index 4fbefa4..f8e0e91 100644
+--- a/aoservicelisting.civix.php
++++ b/aoservicelisting.civix.php
+@@ -76,6 +76,90 @@ public static function findClass($suffix) {
+     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
+   }
+ 
++  public static function createActivity($cid) {
++    civicrm_api3('Activity', 'create', [
++      'source_contact_id' => $cid,
++      'status_id' => 'Completed',
++      'activity_type_id' => "service_listing_created",
++      'sequential' => 0,
++    ]);
++  }
++
++  public static function editActivity($cid) {
++    civicrm_api3('Activity', 'create', [
++      'source_contact_id' => $cid,
++      'status_id' => 'Completed',
++      'activity_type_id' => "service_listing_edited",
++      'sequential' => 0,
++    ]);
++  }
++
++  /**
++   * Validation Rule.
++   *
++   * @param array $params
++   *
++   * @return array|bool
++   */
++  public static function usernameRule($cid) {
++    // Check if there is a UFMatch, if there is, that means there is a CMS ID associated the account.
++    $ufId = CRM_Core_DAO::singleValueQuery("SELECT uf_id FROM civicrm_uf_match WHERE contact_id = %1", [1 => [$cid, "Integer"]]);
++    if (!empty($ufId)) {
++      return TRUE;
++    }
++    // Check if the CMS has an account with the same email.
++    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]);
++    if (!empty($email)) {
++      $config = CRM_Core_Config::singleton();
++      $errors = array();
++      $check_params = array(
++        'mail' => $email,
++      );
++      $config->userSystem->checkUserNameEmailExists($check_params, $errors, 'mail');
++
++      return !empty($errors) ? TRUE : FALSE;
++    }
++    return FALSE;
++  }
++
++  /**
++   * Validation Rule.
++   *
++   * @param array $params
++   *
++   * @return array|bool
++   */
++  public static function emailRule($cid) {
++    // Check if the user has a valid email.
++    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1 AND on_hold <> 1", [1 => [$cid, "Integer"]]);
++    if (!empty($email)) {
++      return FALSE;
++    }
++    return TRUE;
++  }
++
++
++  public static function createUserAccount($cid) {
++    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name)) AS name, display_name
++          FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
++    if (self::usernameRule($cid)) {
++      return FALSE;
++    }
++    if (self::emailRule($cid)) {
++      return FALSE;
++    }
++    $params = [
++      'cms_name' => $name['name'],
++      'cms_pass' => 'changeme',
++      'cms_confirm_pass' => 'changeme',
++      'email' => CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]),
++      'contactID' => $cid,
++      'name' => $name['display_name'],
++      'notify' => TRUE,
++    ];
++    CRM_Core_BAO_CMSUser::create($params, 'email');
++  }
++
+ }
+ 
+ use CRM_Aoservicelisting_ExtensionUtil as E;
+diff --git a/managed/service_listing_activity_types.mgd.php b/managed/service_listing_activity_types.mgd.php
+index 290a566..9f85977 100644
+--- a/managed/service_listing_activity_types.mgd.php
++++ b/managed/service_listing_activity_types.mgd.php
+@@ -5,7 +5,7 @@
+     'entity' => 'OptionValue',
+     'params' => [
+       'option_group_id' => 'activty_type',
+-      'lable' => 'Service listing created',
++      'label' => 'Service listing created',
+       'name' => 'service_listing_created',
+     ],
+   ],
+@@ -14,7 +14,7 @@
+     'entity' => 'OptionValue',
+     'params' => [
+       'option_group_id' => 'activty_type',
+-      'lable' => 'Service listing Edited',
++      'label' => 'Service listing Edited',
+       'name' => 'service_listing_edited',
+     ],
+   ],
+diff --git a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+index acf00ad..3c46655 100644
+--- a/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
++++ b/templates/CRM/Aoservicelisting/Form/ProviderApplicationForm.tpl
+@@ -153,23 +153,27 @@
+       if (serviceProvider == "1") {
+         $('.edit-row-organization_name').hide();
+         $('.edit-row-organization_email').hide();
+-        $('#display_name_public').prop({'checked': true, 'readonly': true});
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
+       }
+       else {
+         $('.edit-row-organization_name').show();
+         $('.edit-row-organization_email').show();
+-        $('#display_name_public').removeAttr('readonly');
++        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
++        $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
+       }
+       $('[name=listing_type]').on('change', function() {
+         if ($(this).val() == "1") {
+           $('.edit-row-organization_name').hide();
+           $('.edit-row-organization_email').hide();
+-          $('#display_name_public').prop({'checked': true, 'readonly': true});
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
+         }
+         else {
+-          $('#display_name_public').removeAttr('readonly');
+           $('.edit-row-organization_name').show();
+           $('.edit-row-organization_email').show();
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
++          $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
+         }
+       });
+ 
+
+From 9d7ab989c08c9d4e17d22f66f1f80831b26f27a4 Mon Sep 17 00:00:00 2001
+From: Edsel Lopez <edsel.lopez@jmaconsulting.biz>
+Date: Fri, 13 Mar 2020 12:06:39 +0530
+Subject: [PATCH 2/4] Removed cruft
+
+---
+ .idea/.gitignore                             | 2 --
+ .idea/biz.jmaconsulting.aoservicelisting.iml | 8 --------
+ .idea/misc.xml                               | 6 ------
+ .idea/modules.xml                            | 8 --------
+ .idea/vcs.xml                                | 6 ------
+ 5 files changed, 30 deletions(-)
+ delete mode 100644 .idea/.gitignore
+ delete mode 100644 .idea/biz.jmaconsulting.aoservicelisting.iml
+ delete mode 100644 .idea/misc.xml
+ delete mode 100644 .idea/modules.xml
+ delete mode 100644 .idea/vcs.xml
+
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+deleted file mode 100644
+index e7e9d11..0000000
+--- a/.idea/.gitignore
++++ /dev/null
+@@ -1,2 +0,0 @@
+-# Default ignored files
+-/workspace.xml
+diff --git a/.idea/biz.jmaconsulting.aoservicelisting.iml b/.idea/biz.jmaconsulting.aoservicelisting.iml
+deleted file mode 100644
+index c956989..0000000
+--- a/.idea/biz.jmaconsulting.aoservicelisting.iml
++++ /dev/null
+@@ -1,8 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<module type="WEB_MODULE" version="4">
+-  <component name="NewModuleRootManager">
+-    <content url="file://$MODULE_DIR$" />
+-    <orderEntry type="inheritedJdk" />
+-    <orderEntry type="sourceFolder" forTests="false" />
+-  </component>
+-</module>
+\ No newline at end of file
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+deleted file mode 100644
+index 28a804d..0000000
+--- a/.idea/misc.xml
++++ /dev/null
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="JavaScriptSettings">
+-    <option name="languageLevel" value="ES6" />
+-  </component>
+-</project>
+\ No newline at end of file
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+deleted file mode 100644
+index d5d7b84..0000000
+--- a/.idea/modules.xml
++++ /dev/null
+@@ -1,8 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="ProjectModuleManager">
+-    <modules>
+-      <module fileurl="file://$PROJECT_DIR$/.idea/biz.jmaconsulting.aoservicelisting.iml" filepath="$PROJECT_DIR$/.idea/biz.jmaconsulting.aoservicelisting.iml" />
+-    </modules>
+-  </component>
+-</project>
+\ No newline at end of file
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+deleted file mode 100644
+index 94a25f7..0000000
+--- a/.idea/vcs.xml
++++ /dev/null
+@@ -1,6 +0,0 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<project version="4">
+-  <component name="VcsDirectoryMappings">
+-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+-  </component>
+-</project>
+\ No newline at end of file
+
+From af7cfeb53c3d68d82809db38979409cc75c371e0 Mon Sep 17 00:00:00 2001
+From: Edsel Lopez <edsel.lopez@jmaconsulting.biz>
+Date: Fri, 13 Mar 2020 12:07:32 +0530
+Subject: [PATCH 3/4] Removed extra spaces
+
+---
+ CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index b99da2c..8cc7bb1 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -104,7 +104,6 @@ public function postProcess() {
+   public function submit($values) {
+     $this->processCustomValue($values);
+     if (empty($values['organiation_name'])) {
+-
+       $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
+     }
+     $organization_params = [
+@@ -125,7 +124,6 @@ public function submit($values) {
+     $organization = civicrm_api3('Contact', 'create', $organization_params);
+ 
+     $addressParams1 = [
+-
+       'street_address' => $values['work_address'][1],
+       'postal_code' => $values['postal_code'][1],
+       'city' => $values['city'][1],
+
+From 3e75f670067ec65391c2aea001e627f9e318c4c9 Mon Sep 17 00:00:00 2001
+From: Edsel Lopez <edsel.lopez@jmaconsulting.biz>
+Date: Fri, 13 Mar 2020 12:25:46 +0530
+Subject: [PATCH 4/4] Shifted edit activity to preProcess
+
+---
+ .../Form/ProviderApplicationConfirm.php             | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+index 8cc7bb1..da61833 100644
+--- a/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
++++ b/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.php
+@@ -9,6 +9,16 @@
+  */
+ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
+ 
++  public function preProcess()
++  {
++    parent::preProcess(); // TODO: Change the autogenerated stub
++    if (!empty($this->_loggedInContactID)) {
++      // This is an edit, record before and after values here TODO.
++      // For now, just adding an edit activity.
++      E::editActivity($this->_loggedInContactID);
++    }
++  }
++
+   public function buildQuickForm() {
+     $defaults = $this->get('formValues');
+     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
+@@ -214,9 +224,6 @@ public function submit($values) {
+             E::createActivity($staffMember['id']);
+             E::createUserAccount($staffMember['id']);
+           }
+-          else {
+-            E::editActivity($this->_loggedInContactID);
+-          }
+ 
+           if (!empty($values['phone-Primary-6'])) {
+             civicrm_api3('Phone', 'create', [
