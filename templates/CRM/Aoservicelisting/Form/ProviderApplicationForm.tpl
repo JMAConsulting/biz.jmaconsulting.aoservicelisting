@@ -86,7 +86,7 @@
     <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend class="aba-legend">
-          <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
+          <span class="fieldset-legend">{ts 1=$rowa}ABA Certified Staff Person %1{/ts}</span>
         </legend>
         <div class="crm-section">
           <div class="label">{$form.aba_first_name.$rowa.label}</div>
@@ -103,7 +103,7 @@
           <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
           <div class="clear"></div>
         </div>
-        {if $rowNum neq 1}
+        {if $rowa neq 1}
           <div><a href=# class="remove_item_aba crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
         {/if}
       </fieldset>
@@ -189,11 +189,11 @@
       }
       $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
         if ($(this).val() == "1") {
-          $('#aba_staff_member-1').addClass('hiddenElement');
+          $('#aba_staff_member-1').removeClass('hiddenElement');
           $(abacredentialsSectionID).show();
         }
         else {
-          $('#aba_staff_member-1').removeClass('hiddenElement');
+          $('#aba_staff_member-1').addClass('hiddenElement');
           $(abacredentialsSectionID).hide();
         }
       });
@@ -221,7 +221,6 @@
               unchecked++;
             }
           });
-          console.log(checked);
           showABA(checked, abservices.filter(':checked'));
           hideABA(unchecked, checked);
       });
@@ -258,6 +257,10 @@
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
         $('#add-another-staff, #add-another-aba').hide();
+        $('#aba_first_name_1').parent().parent().hide();
+        $('#aba_last_name_1').parent().parent().hide();
+        $('#staff_first_name_1').parent().parent().hide();
+        $('#staff_last_name_1').parent().parent().hide();
       }
       else {
         $('.edit-row-organization_name').show();
@@ -265,6 +268,10 @@
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
         $('#add-another-staff, #add-another-aba').show();
+        $('#aba_first_name_1').parent().parent().show();
+        $('#aba_last_name_1').parent().parent().show();
+        $('#staff_first_name_1').parent().parent().show();
+        $('#staff_last_name_1').parent().parent().show();
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
@@ -273,6 +280,10 @@
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
           $('#add-another-staff, #add-another-aba').hide();
+          $('#aba_first_name_1').parent().parent().hide();
+          $('#aba_last_name_1').parent().parent().hide();
+          $('#staff_first_name_1').parent().parent().hide();
+          $('#staff_last_name_1').parent().parent().hide();
         }
         else {
           $('.edit-row-organization_name').show();
@@ -280,6 +291,10 @@
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
           $('#add-another-staff, #add-another-aba').show();
+          $('#aba_first_name_1').parent().parent().show();
+          $('#aba_last_name_1').parent().parent().show();
+          $('#staff_first_name_1').parent().parent().show();
+          $('#staff_last_name_1').parent().parent().show();
         }
       });
 
@@ -456,6 +471,7 @@
       }
       else {
         regulatedServices.hide();
+        
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
@@ -467,6 +483,8 @@
               $(this).parent().parent().show();
             }
           });
+          $('#staff_first_name_1').val($('#primary_first_name').val()).trigger('change');
+          $('#staff_last_name_1').val($('#primary_last_name').val()).trigger('change');
           $('#regulated-staff-message').show();
         }
         else {
@@ -478,12 +496,16 @@
              }
           });
           $('[id^=staff_record_regulator]').each(function() {
-            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
-              $(this).val('').trigger('change');
-              $(this).parent().parent().hide();
-            }
+            $(this).val('').trigger('change');
+            $(this).parent().parent().hide();
           });
           $('#regulated-staff-message').hide();
+          $('[id^=staff_first_name]').each(function() {
+            $(this).val('').trigger('change');
+          });
+          $('[id^=staff_last_name]').each(function() {
+            $(this).val('').trigger('change');
+          });
         }
       });
       var otherLanguageField = $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal});

@@ -173,6 +173,12 @@
           $(this).parent().parent().parent().parent().addClass('hiddenElement');
         }
       });
+      
+      $('[id^=' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_]').each(function() {
+        if ($(this).parent().text().length >= 2) {
+          $(this).parent().parent().parent().parent().parent().removeClass('hiddenElement');
+        }
+      });
     });
   </script>
 {/literal}
