@@ -2,6 +2,7 @@
   define('PRIMARY_PROFILE', 148);
   define('SERVICELISTING_PROFILE1', 146);
   define('SERVICELISTING_PROFILE2', 147);
+  define('SERVICELISTING_PROFILE3', 149);
   define('SERVICELISTING_CG', 69);
   define('CAMP_CG', 70);
   define('DISPLAY_NAME', 'custom_868');

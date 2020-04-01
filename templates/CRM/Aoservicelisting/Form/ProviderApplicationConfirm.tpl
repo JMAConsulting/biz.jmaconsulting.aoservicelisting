@@ -69,33 +69,36 @@
 <div class="crm-public-form-item crm-section listing1">
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
-    <div class="crm-public-form-item crm-section">
-        {section name='a' start=1 loop=21}
-            {assign var='rowa' value=$smarty.section.a.index}
-            <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
-                <fieldset>
-                    <legend>
-                        <span class="fieldset-legend">{ts 1=$rowa}ABA Staff Person %1{/ts}</span>
-                    </legend>
-                    <div class="crm-section">
-                        <div class="label">{$form.aba_first_name.$rowa.label}</div>
-                        <div class="content">{$form.aba_first_name.$rowa.html}</div>
-                        <div class="clear"></div>
-                    </div>
-                    <div class="crm-section">
-                        <div class="label">{$form.aba_last_name.$rowa.label}</div>
-                        <div class="content">{$form.aba_last_name.$rowa.html}</div>
-                        <div class="clear"></div>
-                    </div>
-                    <div class="crm-section">
-                        <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
-                        <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
-                        <div class="clear"></div>
-                    </div>
-                </fieldset>
-            </div>
-        {/section}
+<div class="crm-public-form-item crm-section">
+  {section name='a' start=1 loop=21}
+    {assign var='rowa' value=$smarty.section.a.index}
+    <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
+      <fieldset>
+        <legend>
+          <span class="fieldset-legend">{ts 1=$rowa}ABA Staff Person %1{/ts}</span>
+        </legend>
+        <div class="crm-section">
+          <div class="label">{$form.aba_first_name.$rowa.label}</div>
+          <div class="content">{$form.aba_first_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.aba_last_name.$rowa.label}</div>
+          <div class="content">{$form.aba_last_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
+          <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+      </fieldset>
     </div>
+  {/section}
+</div>
+<div class="crm-public-form-item crm-section listing3">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile3}
+</div>
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=22}
     {assign var='rowNum' value=$smarty.section.s.index}

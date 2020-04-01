@@ -63,6 +63,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->buildCustom(PRIMARY_PROFILE, 'profile', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
+    $this->buildCustom(SERVICELISTING_PROFILE3, 'profile3', TRUE);
     $this->assign('CERTIFICATE_NUMBER', CERTIFICATE_NUMBER);
 
     // populating camp values

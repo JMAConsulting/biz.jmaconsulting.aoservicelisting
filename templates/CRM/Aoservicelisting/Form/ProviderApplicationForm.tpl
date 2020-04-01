@@ -111,6 +111,9 @@
   {/section}
 </div>
 <span id="add-another-aba" class="crm-hover-button"><a href=#>{ts}Add another ABA certified staff person{/ts}</a></span>
+<div class="crm-public-form-item crm-section listing3">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile3}
+</div>
 
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
@@ -178,7 +181,6 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function($) {
-      $('.aba_staff_member').insertAfter($('#aba-separator'));
       var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
       var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
       if (abaServices == "1") {
