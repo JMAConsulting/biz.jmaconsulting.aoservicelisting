@@ -220,14 +220,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
     CRM_Core_BAO_CMSUser::create($params, 'email');
   }
 
-  function setStatus($cid, $submitValues) {
+  function setStatus($oldStatus = NULL, $cid, $submitValues) {
     if (!empty($cid)) {
-      $oldStatus = NULL;
-      $oldStatus = civicrm_api3('Contact', 'getvalue', ['return' => STATUS, 'id' => $cid]);
       $submitKeys = array_keys($submitValues);
       $key = preg_grep('/^' . STATUS . '_[\d]*/', $submitKeys);
       $newStatus = reset($key);
-      if (CRM_Utils_Array::value($newStatus, $submitValues) == 'Approved') {
+      if ($oldStatus != "Approved" && CRM_Utils_Array::value($newStatus, $submitValues) == 'Approved') {
         // Create drupal account if not exists.
         self::createUserAccount($cid);
 
@@ -251,7 +249,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
         civicrm_api3('Activity', 'create', [
           'source_contact_id' => $cid,
           'activity_type_id' => "provider_status_changed",
-          'subject' => sprintf("Application status changed to %s", $newStatus),
+          'subject' => sprintf("Application status changed to %s", CRM_Utils_Array::value($newStatus, $submitValues)),
           'activity_status_id' => 'Completed',
           'details' => '<a class="action-item crm-hover-button" href="https://www.autismontario.com/civicrm/contact/view?cid=' . $cid . '">View Applicant</a>',
           'target_id' => $cid,

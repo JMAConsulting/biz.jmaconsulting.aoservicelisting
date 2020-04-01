@@ -141,6 +141,19 @@ function aoservicelisting_civicrm_themes(&$themes) {
   _aoservicelisting_civix_civicrm_themes($themes);
 }
 
+function aoservicelisting_civicrm_preProcess($formName, &$form) {
+  if ($formName == "CRM_Contact_Form_Contact") {
+    if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+      $form->_oldStatus = civicrm_api3('Contact', 'getvalue', ['return' => STATUS, 'id' => $form->_contactId]);
+    }
+  }
+  if ($formName == "CRM_Contact_Form_Inline_CustomData") {
+    if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+      $form->_oldStatus = civicrm_api3('Contact', 'getvalue', ['return' => STATUS, 'id' => $form->_contactId]);
+    }
+  }
+}
+
   /**
    * Implementation of hook_civicrm_postProcess
    *
@@ -149,14 +162,14 @@ function aoservicelisting_civicrm_themes(&$themes) {
   function aoservicelisting_civicrm_postProcess($formName, &$form) {
     if ($formName == "CRM_Contact_Form_Contact") {
       if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
-        E::setStatus($form->_contactId, $form->_submitValues);
+        E::setStatus($form->_oldStatus, $form->_contactId, $form->_submitValues);
         $index = \Drupal\search_api\Entity\Index::load('default');
         $index->trackItemsUpdated('entity:civicrm_contact', [$form->_contactId . ':und']);
       }
     }
     if ($formName == "CRM_Contact_Form_Inline_CustomData") {
       if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
-        E::setStatus($form->_submitValues['cid'], $form->_submitValues);
+        E::setStatus($form->_oldStatus, $form->_submitValues['cid'], $form->_submitValues);
         $index = \Drupal\search_api\Entity\Index::load('default');
         $index->trackItemsUpdated('entity:civicrm_contact', [$form->_submitValues['cid'] . ':und']);
       }
