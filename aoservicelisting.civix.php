@@ -169,10 +169,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
       }
     }
     if (empty($individualParams['contact_id'])) {
-      $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
-      $dedupeParams['check_permission'] = 0;
-      $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 9);
-      $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+      // Check for dupes.
+      $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
+         FROM civicrm_relationship r
+         INNER JOIN civicrm_contact cb ON c.id = r.contact_id_b
+         LEFT JOIN civicrm_contact ca ON cc.id = r.contact_id_a
+         WHERE r.contact_id_b = %1 AND r.relationship_type_id = 5 AND r.is_active = 1", [1 => [$orgId, "Integer"]])->fetchAll()[0]; // We expect only a single contact
+      if (!empty($staffDetails)) {
+        if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
+          // Dupe found
+          $individualParams["contact_id"] = $staffDetails['contact_id_a'];
+        }
+      }
     }
   }
 
