@@ -384,7 +384,19 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if ($values['listing_type'] == 2 && count($setAbaValues) > $abaStaffMemberCount) {
       $errors[ABA_CREDENTIALS] = E::ts('Ensure you have entered all the staff members that match the ABA credentials');
     }
-
+    $credentials = [];
+    if (!empty($values[ABA_CREDENTIALS])) {
+      foreach ($values[ABA_CREDENTIALS] as $value => $set) {
+        if (!empty($value)) {
+          if ($value !== 'None') {
+            $credentials[] = $value;
+          }
+          elseif (!empty($credentials)) {
+            $errors[ABA_CREDENTIALS] = E::ts('\'None of the above\' must be the only option selected');
+          }
+        }
+      }
+    }
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Organization name is a required field');
     }
