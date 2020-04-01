@@ -17,8 +17,8 @@
   define('RECEIVED_MESSAGE', 90);
   define('APPROVED_MESSAGE', 91);
   define('ACKNOWLEDGE_MESSAGE', 92);
-  define('OTHER_LANGUAGE', 'custom_905');
-  define('LANGUAGES', 'custom_899');
+  define('OTHER_LANGUAGE', 'custom_882');
+  define('LANGUAGES', 'custom_867');
   define('SPECIALIST_ID', 404318);
   define('ABA_SERVICES', 'custom_885');
   define('ABA_CREDENTIALS', 'custom_884');

@@ -86,7 +86,7 @@
     <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend class="aba-legend">
-          <span class="fieldset-legend">{ts 1=$rowa}ABA Certified Staff Person %1{/ts}</span>
+          <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
         </legend>
         <div class="crm-section">
           <div class="label">{$form.aba_first_name.$rowa.label}</div>
@@ -269,7 +269,9 @@
         $('.edit-row-organization_email').show();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-        $('#add-another-staff, #add-another-aba').show();
+        if (abaServices == "1") {
+            $('#add-another-staff, #add-another-aba').show();
+        }
         $('#aba_first_name_1').parent().parent().show();
         $('#aba_last_name_1').parent().parent().show();
         $('#staff_first_name_1').parent().parent().show();
@@ -292,7 +294,9 @@
           $('.edit-row-organization_email').show();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-          $('#add-another-staff, #add-another-aba').show();
+          if ($('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val() == "1") {
+              $('#add-another-staff, #add-another-aba').show();
+          }
           $('#aba_first_name_1').parent().parent().show();
           $('#aba_last_name_1').parent().parent().show();
           $('#staff_first_name_1').parent().parent().show();

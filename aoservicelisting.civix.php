@@ -172,7 +172,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       // Check for dupes.
       $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
          FROM civicrm_relationship r
-         INNER JOIN civicrm_contact cb ON c.id = r.contact_id_b
+         INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
          LEFT JOIN civicrm_contact ca ON cc.id = r.contact_id_a
          WHERE r.contact_id_b = %1 AND r.relationship_type_id = 5 AND r.is_active = 1", [1 => [$orgId, "Integer"]])->fetchAll()[0]; // We expect only a single contact
       if (!empty($staffDetails)) {
