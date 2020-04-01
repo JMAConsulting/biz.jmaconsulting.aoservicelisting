@@ -90,6 +90,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
 
     if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
+      $contact['email'] = "servicelisting@autismontario.com";
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
@@ -121,7 +122,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
-    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, 'servicelisting@autismontario.com', $cid);
+    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, NULL, $cid);
   }
 
   public static function editActivity($cid) {
