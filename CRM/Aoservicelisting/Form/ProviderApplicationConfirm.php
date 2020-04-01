@@ -153,8 +153,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $organization_params['contact_sub_type'] = 'service_provider';
       $organization_params['contact_type'] = 'Organization';
     }
-    $organization_params[ABA_SERVICES] = $values[ABA_SERVICES];
-    $organization_params[ABA_CREDENTIALS] = $values[ABA_CREDENTIALS];
     $organization = civicrm_api3('Contact', 'create', $organization_params);
 
     // Set status to submitted for first time this is submitted, else awaiting staff verification if edited.
