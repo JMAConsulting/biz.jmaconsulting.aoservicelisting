@@ -187,21 +187,33 @@
       if (abaServices == "1") {
         $(abacredentialsSectionID).show();
         $(abastaffSectionID).show();
+        if ($('[name=listing_type]:checked').val() == 2) {
+          $('#add-another-aba').show();
+        }
       }
       else {
         $(abacredentialsSectionID).hide();
         $(abastaffSectionID).hide();
+        if ($('[name=listing_type]:checked').val() == 2) {
+          $('#add-another-aba').hide();
+        }
       }
       $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
         if ($(this).val() == "1") {
           $('#aba_staff_member-1').removeClass('hiddenElement');
           $(abacredentialsSectionID).show();
           $(abastaffSectionID).show();
+          if ($('[name=listing_type]:checked').val() == 2) {
+            $('#add-another-aba').show();
+          }
         }
         else {
           $('#aba_staff_member-1').addClass('hiddenElement');
           $(abacredentialsSectionID).hide();
           $(abastaffSectionID).hide();
+          if ($('[name=listing_type]:checked').val() == 2) {
+            $('#add-another-aba').hide();
+          }
         }
       });
 
@@ -465,11 +477,11 @@
       var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
         regulatedServices.show();
-        $('#regulated-staff-message, .staff_members, #add-another-aba').show();
+        $('#regulated-staff-message, .staff_members').show();
       }
       else {
         regulatedServices.hide();
-        $('#regulated-staff-message, .staff_members, #add-another-aba').hide();
+        $('#regulated-staff-message, .staff_members').hide();
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
