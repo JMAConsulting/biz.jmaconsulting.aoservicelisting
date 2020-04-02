@@ -19,36 +19,49 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
     $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE2, FALSE);
     CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
+    $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE3, FALSE);
+    CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
+
     if (empty($this->organizationId)) {
       $defaults['listing_type'] = 1;
     }
 
     if (!empty($this->_loggedInContactID)) {
       if (!empty($this->organizationId)) {
+        $staffMemberIds = [$this->_loggedInContactID];
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
-          'return' => ['organization_name'],
+          'return' => ['organization_name', 'email'],
         ]);
-        $primraryContact = civicrm_api3('Contact', 'getsingle', [
+        $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
+          'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER]
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primraryContact['first_name'];
-        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primraryContact['last_name'];
+        $defaults['staff_first_name[1]'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
+        $defaults['staff_last_name[1]'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
         $defaults['staff_contact_id[1]'] = $this->_loggedInContactID;
+        if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
+          $defaults['aba_first_name[1]'] = $primaryContact['first_name'];
+          $defaults['aba_last_name[1]'] = $primaryContact['last_name'];
+          $defaults['aba_contact_id[1]'] = $this->_loggedInContactID;
+          $defaults[CERTIFICATE_NUMBER . '[1]'] = $primaryContact[CERTIFICATE_NUMBER];
+        }
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primraryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
+        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primaryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
         if (!empty($primaryStaffWebsite['count'])) {
           $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
         }
         foreach (['organization_name',  'email'] as $field) {
-          if ($field === 'organization_name' && stristr($organization[$field], 'self-employed') === FALSE) {
-            $defaults['listing_type'] = 2;
-            $this->listingType = 2;
-          }
-          else {
-            $defaults['listing_type'] = 1;
-            $this->listingType = 1;
+          if ($field === 'organization_name') {
+            if (stristr($organization[$field], 'self-employed') === FALSE) {
+              $defaults['listing_type'] = 2;
+              $this->listingType = 2;
+            }
+            else {
+              $defaults['listing_type'] = 1;
+              $this->listingType = 1;
+            }
           }
           if ($field === 'email') {
             $defaults['organization_email'] = $organization[$field];
@@ -56,32 +69,49 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
           $defaults[$field] = $organization[$field];
         }
-        $primrayWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
-        $defaults['work_address[1]'] = $primrayWorkAddress['street_address'];
-        $defaults['postal_code[1]'] = $primrayWorkAddress['postal_code'];
-        $defaults['city[1]'] = $primrayWorkAddress['city'];
+        $primaryWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
+        $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
+        $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
+        $defaults['city[1]'] = $primaryWorkAddress['city'];
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
-        $defaults['website'] = $primaryWebsite['values'][0]['url'];
+        if (!empty($primaryWebsite['values'][0]['url'])) {
+          $defaults['website'] = $primaryWebsite['values'][0]['url'];
+        }
+        else {
+          $defaults['website'] = "http://";
+        }
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
           'contact_id_a' => ['!=' => $this->_loggedInContactID],
           'is_active'  => 1,
           'sequential' => 1,
+          'relationship_type_id' => EMPLOYER_CONTACT_REL,
+          'return' => ['contact_id_a', ABA_REL],
         ]);
-        $staffRowCount = 2;
+        $staffRowCount = $abaStaffCount = 2;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
-            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId]);
-            $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
-            $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
-            $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
-            if (!empty($website['count'])) {
-              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
+            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
+            if (empty($staffMember[ABA_REL])) {
+              $staffMemberIds[] = $staffMemberContactId;
+              $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
+              $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
+              $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
+              $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
+              if (!empty($website['count'])) {
+                $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
+              }
+              $staffRowCount++;
             }
-            $staffRowCount++;
+            else {
+              $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $staffMember['contact_id_a'];
+              $defaults['aba_first_name[' . $abaStaffCount . ']'] = $staffDetails['first_name'];
+              $defaults['aba_last_name[' . $abaStaffCount . ']'] = $staffDetails['last_name'];
+              $defaults[CERTIFICATE_NUMBER . '[' . $abaStaffCount . ']'] = $staffDetails[CERTIFICATE_NUMBER];
+              $abaStaffCount++;
+            }
           }
         }
       }
@@ -124,16 +154,25 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
+      $this->add('hidden', "aba_contact_id[$rowNumber]", NULL);
+      $this->add('text', "aba_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      $this->add('text', "aba_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
+      CRM_Core_BAO_CustomField::addQuickFormElement($this, CERTIFICATE_NUMBER . "[$rowNumber]", str_replace('custom_', '', CERTIFICATE_NUMBER), FALSE);
     }
 
     $this->buildCustom(PRIMARY_PROFILE, 'profile');
     $this->buildCustom(SERVICELISTING_PROFILE1, 'profile1');
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2');
+    $this->buildCustom(SERVICELISTING_PROFILE3, 'profile3');
     $this->assign('REGULATED_SERVICE_CF', REGULATED_SERVICE_CF);
     $this->assign('IS_REGULATED_SERVICE', IS_REGULATED_SERVICE);
     $this->assign('OTHER_LANGUAGE', OTHER_LANGUAGE);
     $this->assign('LANGUAGES', LANGUAGES);
-    $this->assign('regulator_services', json_encode(CRM_Core_OptionGroup::values('regulator_url_mapping')));
+    // Commented out since we are not pre populating URLs
+    // $this->assign('regulator_services', json_encode(CRM_Core_OptionGroup::values('regulator_url_mapping')));
+    $this->assign('ABA_SERVICES', ABA_SERVICES);
+    $this->assign('ABA_CREDENTIALS', ABA_CREDENTIALS);
+    $this->assign('CERTIFICATE_NUMBER', CERTIFICATE_NUMBER);
 
     // this part is to render camp fields
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
@@ -189,7 +228,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   public function providerFormRule($values) {
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
-    $staffMemberCount = 0;
+    $staffMemberCount = $abaStaffMemberCount = 0;
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
 
     // Check primary contact first and last name.
@@ -198,6 +237,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
     if (empty($values['primary_last_name'])) {
       $errors['primary_last_name'] = E::ts('Last name of the primary contact is a required field');
+    }
+
+    // ABA Services
+    foreach ($values[ABA_CREDENTIALS] as $value => $checked) {
+      if ($checked) {
+        $setAbaValues[] = $value;
+      }
+    }
+    // Check if no aba credentials are checked.
+    if (empty($values[ABA_CREDENTIALS]) && !empty($setAbaValues)) {
+      $errors[ABA_CREDENTIALS] = E::ts('ABA credentials held is a required field when you say you provide ABA services');
     }
 
     foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
@@ -223,11 +273,19 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $regulatorRecordKeys[$key] = 1;
         $staffMemberCount++;
         if (stristr($value, 'ontariocampsassociation.ca') === FALSE) {
-          if (empty($values['staff_first_name'][$key])) {
-            $errors['staff_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member is required');
+          if (empty($values['staff_first_name'][$key]) || empty($values['staff_last_name'][$key])) {
+            if (empty($values['staff_first_name'][$key])) {
+              $errors['staff_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member is required');
+            }
+            if (empty($values['staff_last_name'][$key])) {
+              $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
+            }
           }
-          if (empty($values['staff_last_name'][$key])) {
-            $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
+          elseif (!empty($values['aba_first_name'][$key]) && !empty($values['aba_last_name'][$key]) && $key > 1) {
+            if (($values['aba_first_name'][$key] == $values['staff_first_name'][$key]) && ($values['aba_last_name'][$key] == $values['staff_last_name'][$key])) {
+              $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member and ABA staff member cannot be same');
+              $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member and ABA staff member cannot be same');
+            }
           }
         }
         $regulatedUrlValidated = FALSE;
@@ -330,6 +388,43 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[REGULATED_SERVICE_CF] = E::ts('Either no staff members have been entered or no URLs have been entered as a record for regulated profession for %1 regulated services', [1 => implode(', ', $missingRegulators)]);
     }
 
+    // Check ABA credentials
+    foreach ($values[CERTIFICATE_NUMBER] as $key => $value) {
+      if (!empty($value)) {
+        $abaStaffMemberCount++;
+        if (empty($values['aba_first_name'][$key])) {
+          $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the ABA staff member is required');
+        }
+        if (empty($values['aba_last_name'][$key])) {
+          $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the ABA staff member is required');
+        }
+        if (empty($values[CERTIFICATE_NUMBER][$key])) {
+          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
+        }
+        if (!preg_match('/^[0-9 \-]+$/m', $values[CERTIFICATE_NUMBER][$key])) {
+          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is invalid');
+        }
+      }
+    }
+    if ($values['listing_type'] == 1 && count($setAbaValues) > 1 ) {
+      $errors[ABA_CREDENTIALS] = E::ts('You have selected more than one ABA credential');
+    }
+    if ($values['listing_type'] == 2 && count($setAbaValues) > $abaStaffMemberCount) {
+      $errors[ABA_CREDENTIALS] = E::ts('Ensure you have entered all the staff members that match the ABA credentials');
+    }
+    $credentials = [];
+    if (!empty($values[ABA_CREDENTIALS])) {
+      foreach ($values[ABA_CREDENTIALS] as $value => $set) {
+        if (!empty($set)) {
+          if ($value !== 'None') {
+            $credentials[] = $value;
+          }
+          elseif (!empty($credentials)) {
+            $errors[ABA_CREDENTIALS] = E::ts('\'None of the above\' must be the only option selected');
+          }
+        }
+      }
+    }
     if ($values['listing_type'] == 2 && empty($values['organization_name'])) {
       $errors['organization_name'] = E::ts('Organization name is a required field');
     }

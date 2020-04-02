@@ -94,6 +94,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
+      $contact['email'] = $cc;
     }
     $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
@@ -107,9 +108,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'html' => $body_html,
       'text' => $body_text,
     );
-    if ($cc) {
-      $mailParams['cc'] = $cc;
-    }
     CRM_Utils_Mail::send($mailParams);
   }
 
@@ -133,6 +131,113 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'activity_type_id' => "service_listing_edited",
       'sequential' => 0,
     ]);
+  }
+
+  public static function endRelationship($values, $rowNumber, $orgId) {
+    if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_first_name'][$rowNumber])
+      && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
+      // We had a staff record but it is gone now
+      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
+      if (!empty($relationships['values'])) {
+        // End Date all relationships as they have either overwritten the data or not.
+        foreach ($relationships['values'] as $relationship) {
+          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+        }
+      }
+    }
+  }
+
+  public static function findDupes($cid, $orgId, &$individualParams, $checkABARel = FALSE) {
+    if (!empty($cid)) {
+      $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
+      if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
+        $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
+        if ($checkABARel) {
+          $params[ABA_REL] = 1;
+        }
+        $relationships = civicrm_api3('Relationship', 'get', $params);
+        if (!empty($relationships['values'])) {
+          // End Date all relationships as they have either overwritten the data or not.
+          foreach ($relationships['values'] as $relationship) {
+            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+          }
+        }
+      } else {
+        $individualParams['contact_id'] = $cid;
+      }
+    }
+    if (empty($individualParams['contact_id'])) {
+      // Check for dupes.
+      $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
+         FROM civicrm_relationship r
+         INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
+         LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
+         WHERE r.contact_id_b = %1 AND r.relationship_type_id = 5 AND r.is_active = 1", [1 => [$orgId, "Integer"]])->fetchAll()[0]; // We expect only a single contact
+      if (!empty($staffDetails)) {
+        if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
+          // Dupe found
+          $individualParams["contact_id"] = $staffDetails['contact_id_a'];
+        }
+      }
+    }
+  }
+
+  public static function createWebsite($cid, $url) {
+    civicrm_api3('Website', 'create', [
+      'website_type_id' => 'Work',
+      'url' => $url,
+      'contact_id' => $cid,
+    ]);
+  }
+
+  public static function createPhone($cid, $phone) {
+    if (empty($phone)) {
+      return;
+    }
+    civicrm_api3('Phone', 'create', [
+      'phone' => $phone,
+      'location_type_id' => 'Work',
+      'contact_id' => $cid,
+      'phone_type_id' => 'Phone',
+      'is_primary' => 1,
+    ]);
+  }
+
+  public static function createRelationship($cid, $orgId, $relType, $isABA = FALSE) {
+    $relationshipParams = [
+      'contact_id_a' => $cid,
+      'contact_id_b' => $orgId,
+      'relationship_type_id' => $relType,
+    ];
+    if ($isABA) {
+      $relationshipParams[ABA_REL] = 1;
+    }
+    $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
+    if (empty($relationshipCheck['count'])) {
+      try {
+        civicrm_api3('Relationship', 'create', $relationshipParams);
+      } catch (Exception $e) {}
+    }
+  }
+
+  public static function createAddress($values, $rowNumber, $cid, $addId = NULL) {
+    $addressParams = [
+      'street_address' => $values['work_address'][$rowNumber],
+      'city' => $values['city'][$rowNumber],
+      'postal_code' => $values['postal_code'][$rowNumber],
+      'contact_id' => $cid,
+      'country_id' => 'CA',
+      'state_province_id' => 'Ontario',
+      'location_type_id' => 'Work',
+    ];
+    if ($rowNumber == 1) {
+      $addressParams['is_primary'] = 1;
+    }
+    if (!empty($addId)) {
+      $addressParams['id'] = $addId;
+    }
+    $address = civicrm_api3('Address', 'create', $addressParams);
+    return [$address['id'], $addressParams];
   }
 
   /**

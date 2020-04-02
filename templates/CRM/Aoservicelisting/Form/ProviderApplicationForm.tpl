@@ -15,7 +15,7 @@
   <div class="content">{$form.organization_email.html}</div>
   <div class="clear"></div>
 </div>
-<div class="crm-section edit-row-{$form.website.id}">
+<div class="crm-section edit-row-{$form .website.id}">
   <div class="label">{$form.website.label}</div>
   <div class="content">{$form.website.html}</div>
   <div class="clear"></div>
@@ -80,10 +80,45 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
 
+<div class="aba_staff_members crm-section">
+  {section name='a' start=1 loop=21}
+    {assign var='rowa' value=$smarty.section.a.index}
+    <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
+      <fieldset>
+        <legend class="aba-legend">
+          <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
+        </legend>
+        <div class="crm-section">
+          <div class="label">{$form.aba_first_name.$rowa.label}</div>
+          <div class="content">{$form.aba_first_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.aba_last_name.$rowa.label}</div>
+          <div class="content">{$form.aba_last_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
+          <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        {if $rowa neq 1}
+          <div><a href=# class="remove_item_aba crm-hover-button" style="float:right;"><b>{ts}Hide{/ts}</b></a></div>
+        {/if}
+      </fieldset>
+    </div>
+  {/section}
+</div>
+<span id="add-another-aba" class="crm-hover-button"><a href=#>{ts}Add another ABA certified staff person{/ts}</a></span>
+<div class="crm-public-form-item crm-section listing3">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile3}
+</div>
+
 <div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
-    <div id="staff_member-{$rowNum}" class="{if $rowNum > 1}hiddenElement{/if} {cycle values="odd-row,even-row"} crm-section form-item">
+    <div id="staff_member-{$rowNum}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
       <fieldset>
         <legend>
           <span class="fieldset-legend">{ts 1=$rowNum}Staff Person %1{/ts}</span>
@@ -146,23 +181,101 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function($) {
-      $('.crm-profile legend').hide();
+      var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
+      var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
+      if (abaServices == "1") {
+        $(abacredentialsSectionID).show();
+      }
+      else {
+        $(abacredentialsSectionID).hide();
+      }
+      $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
+        if ($(this).val() == "1") {
+          $('#aba_staff_member-1').removeClass('hiddenElement');
+          $(abacredentialsSectionID).show();
+        }
+        else {
+          $('#aba_staff_member-1').addClass('hiddenElement');
+          $(abacredentialsSectionID).hide();
+        }
+      });
+
+      var servicecheckedcount=0;
+      var serviceunchekecount=0;
+      var abservices = $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]');
+      abservices.each(function() {
+        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+          servicecheckedcount++;
+        }
+        if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+          serviceunchekecount++;
+        }
+      });
+      showABA(servicecheckedcount, serviceunchekecount);
+      abservices.change(function() {
+          var checked = 0;
+          var unchecked = 5;
+          abservices.each(function() {
+            if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+              checked++;
+            }
+            if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+              unchecked--;
+            }
+          });
+          showABA(checked, abservices.filter(':checked'));
+          hideABA(unchecked, checked);
+      });
+
+      function showABA(countcheck, service) {
+        if (countcheck) {
+          $('#aba_staff_member-1').removeClass('hiddenElement');
+          for (var i=1; i<=countcheck; i++) {
+              if ($('[name=listing_type]:checked').val() == "2") {
+                  $('#aba_staff_member-' + i).removeClass('hiddenElement');
+              }
+          }
+        }
+      }
+
+      function hideABA(unchecked, checked) {
+        for (i=checked+1; i<=unchecked; i++) {
+          if (!$('#aba_staff_member-' + i).hasClass('hiddenElement') && i > 1) {
+            $('#aba_staff_member-' + i).addClass('hiddenElement');
+            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + i).val('').trigger('change');
+            $('#aba_last_name_' + i).val('').trigger('change');
+            $('#aba_first_name_' + i).val('').trigger('change');
+          }
+        }
+      }
+      $('.crm-profile legend:not(.aba-legend)').hide();
       $('#crm-container.crm-public .label').css('font-size', '16px');
       $('.crm-clear-link').hide();
+
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
         $('.edit-row-organization_email').hide();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
-        $('#add-another-staff').hide();
+        $('#add-another-staff, #add-another-aba').hide();
+        $('#aba_first_name_1').parent().parent().hide();
+        $('#aba_last_name_1').parent().parent().hide();
+        $('#staff_first_name_1').parent().parent().hide();
+        $('#staff_last_name_1').parent().parent().hide();
       }
       else {
         $('.edit-row-organization_name').show();
         $('.edit-row-organization_email').show();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-        $('#add-another-staff').show();
+        if (abaServices == "1") {
+            $('#add-another-staff, #add-another-aba').show();
+        }
+        $('#aba_first_name_1').parent().parent().show();
+        $('#aba_last_name_1').parent().parent().show();
+        $('#staff_first_name_1').parent().parent().show();
+        $('#staff_last_name_1').parent().parent().show();
       }
       $('[name=listing_type]').on('change', function() {
         if ($(this).val() == "1") {
@@ -170,14 +283,24 @@
           $('.edit-row-organization_email').hide();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'none');
-          $('#add-another-staff').hide();
+          $('#add-another-staff, #add-another-aba').hide();
+          $('#aba_first_name_1').parent().parent().hide();
+          $('#aba_last_name_1').parent().parent().hide();
+          $('#staff_first_name_1').parent().parent().hide();
+          $('#staff_last_name_1').parent().parent().hide();
         }
         else {
           $('.edit-row-organization_name').show();
           $('.edit-row-organization_email').show();
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-          $('#add-another-staff').show();
+          if ($('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val() == "1") {
+              $('#add-another-staff, #add-another-aba').show();
+          }
+          $('#aba_first_name_1').parent().parent().show();
+          $('#aba_last_name_1').parent().parent().show();
+          $('#staff_first_name_1').parent().parent().show();
+          $('#staff_last_name_1').parent().parent().show();
         }
       });
 
@@ -213,6 +336,7 @@
           $(this).find('input').val('').trigger('change');
         });
       });
+      // Hide/show staff
       $('#add-another-staff').on('click', function(e) {
         e.preventDefault();
         if ($('[id^="staff_member-"]').hasClass("hiddenElement")) {
@@ -227,6 +351,23 @@
           $(this).find('input').val('').trigger('change');
         });
       });
+
+      // Hide/show ABA staff
+      $('#add-another-aba').on('click', function(e) {
+          e.preventDefault();
+          if ($('[id^="aba_staff_member-"]').hasClass("hiddenElement")) {
+              $('[id^="aba_staff_member-"].hiddenElement:first').removeClass('hiddenElement');
+          }
+      });
+      $('.remove_item_aba').on('click', function(e) {
+          e.preventDefault();
+          var row = $(this).closest('[id^="aba_staff_member-"]');
+          row.addClass('hiddenElement');
+          row.find('div.content').each(function() {
+              $(this).find('input').val('').trigger('change');
+          });
+      });
+
       $('#add-another-camp').on('click', function(e) {
         e.preventDefault();
         if ($('[id^="camp_session-"]').hasClass("hiddenElement")) {
@@ -280,22 +421,10 @@
       function showStaff(countcheck, service) {
         if (countcheck) {
           for (var i=1; i<=countcheck; i++) {
-            $('#staff_member-' + i).removeClass('hiddenElement');
+            if ($('[name=listing_type]:checked').val() == "2") {
+              $('#staff_member-' + i).removeClass('hiddenElement');
+            }
           }
-          //var count = 1;
-          //service.each(function(i, v) {
-            //var id = v.getAttribute('id');
-            //var label = $('label[for="' + id + '"]').html();
-            //var field = parseInt(id.split('_').pop());
-            //var regulatorMapping = {/literal}'{$regulator_services}'{literal};
-            //regulatorMapping = JSON.parse(regulatorMapping);
-            //if (field && regulatorMapping.hasOwnProperty(field)) {
-              //$('#staff_record_regulator_' + count).val('https://www.' + regulatorMapping[field].split(',').pop());
-              //$('.crm-label-' + count).remove();
-              //$('#staff_member-' + count).find('div.crm-section:nth-child(3)').append('<div class="content crm-label-' + count + '">' + label + '</div>');
-              //count++;
-            //}
-          //});
         }
       }
 
@@ -320,31 +449,39 @@
       });
       $('#primary_first_name').change(function() {
         $('#staff_first_name_1').val($(this).val()).trigger('change');
+        $('#aba_first_name_1').val($(this).val()).trigger('change');
       });
       $('#primary_last_name').change(function() {
         $('#staff_last_name_1').val($(this).val()).trigger('change');
+        $('#aba_last_name_1').val($(this).val()).trigger('change');
       });
       var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
       var selectorVal = $('[name=' + selector + ']:checked').val();
       var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
         regulatedServices.show();
+        $('#regulated-staff-message').show();
       }
       else {
         regulatedServices.hide();
+        $('#regulated-staff-message').hide();  
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
         if ($(this).val() == "1") {
+          $('#staff_member-1').removeClass('hiddenElement');
           $('.editrow_' + rsSelector + '-section').show();
           $('[id^=staff_record_regulator]').each(function() {
             if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
               $(this).parent().parent().show();
             }
           });
+          $('#staff_first_name_1').val($('#primary_first_name').val()).trigger('change');
+          $('#staff_last_name_1').val($('#primary_last_name').val()).trigger('change');
           $('#regulated-staff-message').show();
         }
         else {
+          $('#staff_member-1').addClass('hiddenElement');
           $('.editrow_' + rsSelector + '-section').hide();
           $('[id^=' + rsSelector + '_]').each(function() {
              if ($(this).prop('checked')) {
@@ -352,12 +489,16 @@
              }
           });
           $('[id^=staff_record_regulator]').each(function() {
-            if (!$(this).parent().parent().parent().parent().hasClass('hiddenElement')) {
-              $(this).val('').trigger('change');
-              $(this).parent().parent().hide();
-            }
+            $(this).val('').trigger('change');
+            $(this).parent().parent().hide();
           });
           $('#regulated-staff-message').hide();
+          $('[id^=staff_first_name]').each(function() {
+            $(this).val('').trigger('change');
+          });
+          $('[id^=staff_last_name]').each(function() {
+            $(this).val('').trigger('change');
+          });
         }
       });
       var otherLanguageField = $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal});

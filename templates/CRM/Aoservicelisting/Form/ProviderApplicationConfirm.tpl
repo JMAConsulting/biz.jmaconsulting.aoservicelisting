@@ -70,6 +70,36 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
 <div class="crm-public-form-item crm-section">
+  {section name='a' start=1 loop=21}
+    {assign var='rowa' value=$smarty.section.a.index}
+    <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
+      <fieldset>
+        <legend>
+          <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
+        </legend>
+        <div class="crm-section">
+          <div class="label">{$form.aba_first_name.$rowa.label}</div>
+          <div class="content">{$form.aba_first_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.aba_last_name.$rowa.label}</div>
+          <div class="content">{$form.aba_last_name.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="crm-section">
+          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
+          <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
+          <div class="clear"></div>
+        </div>
+      </fieldset>
+    </div>
+  {/section}
+</div>
+<div class="crm-public-form-item crm-section listing3">
+  {include file="CRM/UF/Form/Block.tpl" fields=$profile3}
+</div>
+<div class="crm-public-form-item crm-section">
   {section name='s' start=1 loop=22}
     {assign var='rowNum' value=$smarty.section.s.index}
     <div id="staff_member-{$rowNum}" class=" {cycle values="odd-row,even-row"} crm-section form-item">
@@ -90,7 +120,9 @@
     </div>
   {/section}
 </div>
-<p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
+<div id="regulated-staff-information">
+  <p>{ts}For each staff person who is a regulated professional, add a link to their listing on their College's site showing their status. If a URL directly to the record is not available, a link to the regulator's site is sufficient. For a camp, link to the camp's accreditation. Staff information is used by Autism Ontario for verification purposes and is not displayed to the public{/ts}</p>
+</div>
 <div class="crm-public-form-item crm-section listing2">
   {include file="CRM/UF/Form/Block.tpl" fields=$profile2}
 </div>
@@ -144,6 +176,25 @@
       $('[id^=work_address_]').each(function() {
         if ($(this).parent().text().length < 2) {
           $(this).parent().parent().parent().parent().addClass('hiddenElement');
+        }
+      });
+      if ({/literal}{$SHOW_REGULATED_SERVICES}{literal}) {
+        $('#editrow-' + {/literal}'{$REGULATED_SERVICES}'{literal}).show();
+        $('#regulated-staff-information').show();
+      }
+      else {
+        $('#editrow-' + {/literal}'{$REGULATED_SERVICES}'{literal}).hide();
+        $('#regulated-staff-information').hide();
+      }
+      if ({/literal}{$SHOW_ABA_SERVICES}{literal}) {
+        $('#editrow-' + {/literal}'{$ABA_SERVICES}'{literal}).show();
+      }
+      else {
+        $('#editrow-' + {/literal}'{$ABA_SERVICES}'{literal}).hide();
+      }
+      $('[id^=' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_]').each(function() {
+        if ($(this).parent().text().length >= 2) {
+          $(this).parent().parent().parent().parent().parent().removeClass('hiddenElement');
         }
       });
     });
