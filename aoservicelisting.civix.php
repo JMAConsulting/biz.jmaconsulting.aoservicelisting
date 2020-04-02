@@ -208,10 +208,10 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'contact_id_b' => $orgId,
       'relationship_type_id' => $relType,
     ];
+    $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
     if ($isABA) {
       $relationshipParams[ABA_REL] = 1;
     }
-    $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
     if (empty($relationshipCheck['count'])) {
       try {
         civicrm_api3('Relationship', 'create', $relationshipParams);
