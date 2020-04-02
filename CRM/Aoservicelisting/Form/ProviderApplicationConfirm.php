@@ -37,6 +37,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $defaults = $this->get('formValues');
     $this->assign('REGULATED_SERVICES', REGULATED_SERVICE_CF);
     $this->assign('ABA_SERVICES', ABA_SERVICES);
+    $this->assign('ABA_CREDENTIALS', ABA_CREDENTIALS);
     if (!empty($defaults[ABA_SERVICES])) {
       $this->assign('SHOW_ABA_SERVICES', 1);
     }

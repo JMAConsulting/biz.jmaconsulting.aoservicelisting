@@ -465,11 +465,11 @@
       var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
         regulatedServices.show();
-        $('#regulated-staff-message, .staff_members').show();
+        $('#regulated-staff-message, .staff_members, #add-another-aba').show();
       }
       else {
         regulatedServices.hide();
-        $('#regulated-staff-message, .staff_members').hide();
+        $('#regulated-staff-message, .staff_members, #add-another-aba').hide();
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};

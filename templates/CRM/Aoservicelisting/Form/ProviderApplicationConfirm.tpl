@@ -69,7 +69,7 @@
 <div class="crm-public-form-item crm-section listing1">
   {include file="CRM/UF/Form/Block.tpl" fields=$profile1}
 </div>
-<div class="crm-public-form-item crm-section">
+<div class="aba_staff_members crm-public-form-item crm-section">
   {section name='a' start=1 loop=21}
     {assign var='rowa' value=$smarty.section.a.index}
     <div id="aba_staff_member-{$rowa}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
@@ -188,9 +188,13 @@
       }
       if ({/literal}{$SHOW_ABA_SERVICES}{literal}) {
         $('#editrow-' + {/literal}'{$ABA_SERVICES}'{literal}).show();
+        $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal}).show();
+        $('.aba_staff_members').show();
       }
       else {
         $('#editrow-' + {/literal}'{$ABA_SERVICES}'{literal}).hide();
+        $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal}).hide();
+        $('.aba_staff_members').hide();
       }
       $('[id^=' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_]').each(function() {
         if ($(this).parent().text().length >= 2) {
