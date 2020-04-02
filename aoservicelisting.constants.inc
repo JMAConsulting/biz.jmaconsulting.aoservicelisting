@@ -24,3 +24,5 @@
   define('ABA_CREDENTIALS', 'custom_884');
   define('CERTIFICATE_NUMBER', 'custom_883');
   define('ABA_REL', 'custom_886');
+  define('ACKNOWLEDGE_SENDER', 'servicelisting@autismontario.com');
+  define('FROM_EMAIL', '"Autism Ontario" <servicelisting@autismontario.com>');

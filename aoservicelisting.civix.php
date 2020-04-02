@@ -76,7 +76,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
-  public static function sendMessage($contactID, $msgId, $cc = NULL, $applicantID = NULL) {
+  public static function sendMessage($contactID, $msgId, $applicantID = NULL) {
     if (empty($contactID)) {
       return;
     }
@@ -90,17 +90,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
 
     if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
-      $contact['email'] = "servicelisting@autismontario.com";
+      $contact['email'] = ACKNOWLEDGE_SENDER;
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
-      $contact['email'] = $cc;
     }
     $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
     $mailParams = array(
       'groupName' => 'Service Application Listing Confirmation',
-      'from' => '"Autism Ontario" <servicelisting@autismontario.com>',
+      'from' => FROM_EMAIL,
       'toName' =>  $contact['display_name'],
       'toEmail' => $contact['email'],
       'subject' => $body_subject,
@@ -120,7 +119,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
-    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, NULL, $cid);
+    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, $cid);
   }
 
   public static function editActivity($cid) {

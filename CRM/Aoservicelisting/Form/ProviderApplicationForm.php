@@ -94,12 +94,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
+            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
             if (empty($staffMember[ABA_REL])) {
+              if (empty($website['values']) {
+                continue;
+              }
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
               if (!empty($website['count'])) {
                 $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
               }
