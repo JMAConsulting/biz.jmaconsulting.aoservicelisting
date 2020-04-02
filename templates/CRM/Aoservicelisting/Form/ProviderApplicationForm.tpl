@@ -460,10 +460,11 @@
       var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
         regulatedServices.show();
+        $('#regulated-staff-message').show();
       }
       else {
         regulatedServices.hide();
-        
+        $('#regulated-staff-message').hide();  
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};

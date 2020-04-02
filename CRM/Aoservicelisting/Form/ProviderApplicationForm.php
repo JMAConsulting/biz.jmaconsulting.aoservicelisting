@@ -246,7 +246,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       }
     }
     // Check if no aba credentials are checked.
-    if (!empty($values[ABA_CREDENTIALS]) && empty($setAbaValues)) {
+    if (empty($values[ABA_CREDENTIALS]) && !empty($setAbaValues)) {
       $errors[ABA_CREDENTIALS] = E::ts('ABA credentials held is a required field when you say you provide ABA services');
     }
 
@@ -400,6 +400,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
         if (empty($values[CERTIFICATE_NUMBER][$key])) {
           $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
+        }
+        if (!preg_match('/^[0-9 \-]+$/m', $values[CERTIFICATE_NUMBER][$key])) {
+          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is invalid');
         }
       }
     }

@@ -35,6 +35,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerconfirmstyle.css');
     $defaults = $this->get('formValues');
+    $this->assign('REGULATED_SERVICES', REGULATED_SERVICE_CF);
+    $this->assign('ABA_SERVICES', ABA_SERVICES);
+    if (!empty($defaults[ABA_SERVICES])) {
+      $this->assign('SHOW_ABA_SERVICES', 1);
+    }
+    else {
+      $this->assign('SHOW_ABA_SERVICES', 0);
+    }
+    if (!empty($defaults[IS_REGULATED_SERVICE])) {
+      $this->assign('SHOW_REGULATED_SERVICES', 1);
+    }
+    else {
+      $this->assign('SHOW_REGULATED_SERVICES', 0);
+    }
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
     $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions);
     $this->add('text', 'organization_name', E::ts('Organization Name'));
@@ -227,13 +241,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         if (empty($individualParams['contact_id'])) {
           $individualParams['contact_sub_type'] = 'Provider';
         }
-
+        $abaStaffMemberFound = FALSE;
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
           // Check that we have found the same combination of first and last names
           if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) == array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name'])) {
             $arrayKey = array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']);
             $individualParams[CERTIFICATE_NUMBER] = $values[CERTIFICATE_NUMBER][$arrayKey];
             $abaStaffDone[] = $arrayKey;
+            $abaStaffMemberFound = TRUE;
           }
         }
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
@@ -255,7 +270,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
         }
 
-        E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
+        E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL, $abaStaffMemberFound);
 
         if ($rowNumber === 1) {
           E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
