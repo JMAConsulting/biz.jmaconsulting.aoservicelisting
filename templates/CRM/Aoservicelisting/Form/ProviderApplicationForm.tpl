@@ -115,7 +115,7 @@
   {include file="CRM/UF/Form/Block.tpl" fields=$profile3}
 </div>
 
-<div class="crm-public-form-item crm-section">
+<div class="staff_members crm-public-form-item crm-section">
   {section name='s' start=1 loop=21}
     {assign var='rowNum' value=$smarty.section.s.index}
     <div id="staff_member-{$rowNum}" class="hiddenElement {cycle values="odd-row,even-row"} crm-section form-item">
@@ -183,20 +183,25 @@
     CRM.$(function($) {
       var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
       var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
+      var abastaffSectionID = '.aba_staff_members';
       if (abaServices == "1") {
         $(abacredentialsSectionID).show();
+        $(abastaffSectionID).show();
       }
       else {
         $(abacredentialsSectionID).hide();
+        $(abastaffSectionID).hide();
       }
       $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').change(function() {
         if ($(this).val() == "1") {
           $('#aba_staff_member-1').removeClass('hiddenElement');
           $(abacredentialsSectionID).show();
+          $(abastaffSectionID).show();
         }
         else {
           $('#aba_staff_member-1').addClass('hiddenElement');
           $(abacredentialsSectionID).hide();
+          $(abastaffSectionID).hide();
         }
       });
 
@@ -460,11 +465,11 @@
       var regulatedServices =  $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal});
       if (selectorVal == "1") {
         regulatedServices.show();
-        $('#regulated-staff-message').show();
+        $('#regulated-staff-message, .staff_members').show();
       }
       else {
         regulatedServices.hide();
-        $('#regulated-staff-message').hide();  
+        $('#regulated-staff-message, .staff_members').hide();
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
@@ -478,7 +483,7 @@
           });
           $('#staff_first_name_1').val($('#primary_first_name').val()).trigger('change');
           $('#staff_last_name_1').val($('#primary_last_name').val()).trigger('change');
-          $('#regulated-staff-message').show();
+          $('#regulated-staff-message, .staff_members').show();
         }
         else {
           $('#staff_member-1').addClass('hiddenElement');
@@ -492,7 +497,7 @@
             $(this).val('').trigger('change');
             $(this).parent().parent().hide();
           });
-          $('#regulated-staff-message').hide();
+          $('#regulated-staff-message, .staff_members').hide();
           $('[id^=staff_first_name]').each(function() {
             $(this).val('').trigger('change');
           });
