@@ -96,7 +96,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
             $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
             if (empty($staffMember[ABA_REL])) {
-              if (empty($website['values']) {
+              if (empty($website['values'])) {
                 continue;
               }
               $staffMemberIds[] = $staffMemberContactId;
