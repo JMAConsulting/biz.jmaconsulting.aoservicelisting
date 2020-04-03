@@ -207,7 +207,7 @@ msgstr "Vous devez accepter les renonciations pour soumettre la demande."
 
 #: CRM/Aoservicelisting/Page/ProviderApplicationThankYou.php
 msgid "Thank you for submitting your application"
-msgstr "Merci pour votre candidature"
+msgstr "Merci de votre demande"
 
 #: templates/CRM/Aoservicelisting/Form/ProviderApplicationConfirm.tpl
 msgid ""
@@ -328,15 +328,8 @@ msgid "Application Submitted"
 msgstr "Demande présentée"
 
 #: templates/CRM/Aoservicelisting/Page/ProviderApplicationThankYou.tpl
-msgid ""
-"We have received your application to be on the Autism Ontario Service "
-"Listing.  We are processing applications and hope to provide answers "
-"shortly.  Thank you for your patience during this time."
-msgstr ""
-"Nous avons reçu votre demande d'inscription au Répertoire des services "
-"d'Autisme Ontario. Nous procédons actuellement au traitement des demandes, "
-"et espérons vous donner une réponse sous peu. D’ici là, nous vous remercions "
-"de votre patience."
+msgid "We have received your application to be on the Autism Ontario Service Listing. You will receive an email confirmation shortly. Thank you for your patience during this time."
+msgstr "Nous avons reçu votre demande d'inscription au Répertoire des services d'Autisme Ontario. Vous recevrez sous peu un courriel de confirmation. Nous vous remercions de votre patience pendant cette période."
 
 msgid "Autism Ontario Service Listing Application"
 msgstr "Demande d'inscription au Répertoire des services d'Autisme Ontario"
@@ -379,3 +372,9 @@ msgstr "Le numéro de certificat est un champ obligatoire"
 
 msgid "Please ensure that you have entered all the staff members that match the ABA credentials"
 msgstr "Assurez-vous d’avoir inscrit tous les membres du personnel qui possèdent les titres de compétence en ACA"
+
+msgid "BACB certificate number is invalid"
+msgstr "Le numéro de certificat du BACB n'est pas valide"
+
+msgid "'None of the above' must be the only option selected"
+msgstr "'Aucune de ces réponses ' doit être la seule option sélectionnée"
