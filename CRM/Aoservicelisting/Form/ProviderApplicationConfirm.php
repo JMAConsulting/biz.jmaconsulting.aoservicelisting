@@ -232,7 +232,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'first_name' => $values['staff_first_name'][$rowNumber],
           'last_name' => $values['staff_last_name'][$rowNumber],
         ];
-        if ($rowNumber === 1) {
+        if ($rowNumber === 1 && ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
+          $values['primary_last_name'] == $values['staff_last_name'][$rowNumber])) {
           $individualParams['email'] = $values['email-Primary'];
         }
 
