@@ -181,7 +181,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       // Set status to offline verification.
       civicrm_api3('Contact', 'create', [
         'id' => $this->organizationId,
-        STATUS => "Awaiting Staff Verification Offline",
+        STATUS => "Pending Approval",
       ]);
     }
 
@@ -274,7 +274,37 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL, $abaStaffMemberFound);
 
         if ($rowNumber === 1) {
-          E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
+          // Check if primary contact is the same as staff member 1
+          if ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
+            $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]
+          ) {
+            E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
+          }
+          else {
+            // Create the primary contact
+            $primaryParams = [
+              'first_name' => $values['primary_first_name'],
+              'last_name' => $values['primary_last_name'],
+              'contact_type' => 'Individual',
+              'contact_sub_type' => 'Provider',
+            ];
+            if (!empty($this->_loggedInContactID)) {
+              $primaryParams['contact_id'] = $this->_loggedInContactID;
+            }
+            $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
+
+            if ($primId) {
+              E::createPhone($primId, CRM_Utils_Array::value('phone-Primary-6', $values));
+              foreach ($addressIds as $key => $details) {
+                $aparams = $details[1];
+                unset($aparams['id']);
+                $aparams['contact_id'] = $primId;
+                $aparams['master_id'] = $details[0];
+                $aparams['add_relationship'] = 0;
+                civicrm_api3('Address', 'create', $aparams);
+              }
+            }
+          }
         }
       }
     }
@@ -290,7 +320,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
 
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
-      if (!empty($certificateNumber) && in_array($key, $abaStaffDone) === FALSE) {
+      if (!empty($certificateNumber) && in_array($key, $abaStaffDone) == FALSE) {
         $individualParams = [
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],

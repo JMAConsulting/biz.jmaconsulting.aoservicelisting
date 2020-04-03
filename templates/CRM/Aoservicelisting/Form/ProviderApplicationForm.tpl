@@ -511,10 +511,14 @@
           });
           $('#regulated-staff-message, .staff_members').hide();
           $('[id^=staff_first_name]').each(function() {
-            $(this).val('').trigger('change');
+            if ($(this).attr('id') != 'staff_first_name_1') {
+              $(this).val('').trigger('change');
+            }
           });
           $('[id^=staff_last_name]').each(function() {
-            $(this).val('').trigger('change');
+            if ($(this).attr('id') != 'staff_last_name_1') {
+              $(this).val('').trigger('change');
+            }
           });
         }
       });
