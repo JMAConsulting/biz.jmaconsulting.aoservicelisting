@@ -212,7 +212,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if ($isABA) {
       $relationshipParams[ABA_REL] = 1;
     }
-    if (empty($relationshipCheck['count'])) {
+    if ($relationshipCheck['count'] < 1) {
       try {
         civicrm_api3('Relationship', 'create', $relationshipParams);
       } catch (Exception $e) {}
