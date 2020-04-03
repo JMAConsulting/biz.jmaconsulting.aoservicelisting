@@ -287,9 +287,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
               'last_name' => $values['primary_last_name'],
               'contact_type' => 'Individual',
               'contact_sub_type' => 'Provider',
+              'email' => $values['email-Primary'],
             ];
             if (!empty($this->_loggedInContactID)) {
               $primaryParams['contact_id'] = $this->_loggedInContactID;
+            }
+            else {
+              E::findDupes(NULL, $organization['id'], $primaryParams, FALSE, PRIMARY_CONTACT_REL);
             }
             $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
 

@@ -146,7 +146,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
   }
 
-  public static function findDupes($cid, $orgId, &$individualParams, $checkABARel = FALSE) {
+  public static function findDupes($cid, $orgId, &$individualParams, $checkABARel = FALSE, $rel = EMPLOYER_CONTACT_REL) {
     if (!empty($cid)) {
       $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
       if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
@@ -171,7 +171,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
          FROM civicrm_relationship r
          INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
          LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
-         WHERE r.contact_id_b = %1 AND r.relationship_type_id = 5 AND r.is_active = 1", [1 => [$orgId, "Integer"]])->fetchAll()[0]; // We expect only a single contact
+         WHERE r.contact_id_b = %1 AND r.relationship_type_id = %2 AND r.is_active = 1", [1 => [$orgId, "Integer"], 2 => [$rel, "Integer"]])->fetchAll()[0]; // We expect only a single contact
       if (!empty($staffDetails)) {
         if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
           // Dupe found
