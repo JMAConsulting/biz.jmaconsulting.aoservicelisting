@@ -24,6 +24,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (empty($this->organizationId)) {
       $defaults['listing_type'] = 1;
+      $defaults['website'] = "http://";
     }
 
     if (!empty($this->_loggedInContactID)) {
@@ -142,6 +143,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'), $attr);
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), NULL, TRUE);
+    $this->addRule('website', E::ts('Enter a valid web address beginning with \'http://\' or \'https://\'.'), 'url');
     $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
     $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
     $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr);
@@ -157,6 +159,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
+      $this->addRule("staff_record_regulator[$rowNumber]", E::ts('Enter a valid web address beginning with \'http://\' or \'https://\'.'), 'url');
       $this->add('hidden', "aba_contact_id[$rowNumber]", NULL);
       $this->add('text', "aba_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "aba_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
