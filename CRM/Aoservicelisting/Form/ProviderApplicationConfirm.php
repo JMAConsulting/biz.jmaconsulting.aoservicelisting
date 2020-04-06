@@ -80,6 +80,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->buildCustom(SERVICELISTING_PROFILE2, 'profile2', TRUE);
     $this->buildCustom(SERVICELISTING_PROFILE3, 'profile3', TRUE);
     $this->assign('CERTIFICATE_NUMBER', CERTIFICATE_NUMBER);
+    $this->assign('OTHER_LANGUAGE', OTHER_LANGUAGE);
+    $this->assign('LANGUAGES', LANGUAGES);
 
     // populating camp values
     $customFields = civicrm_api3('CustomField', 'get', ['custom_group_id' => CAMP_CG])['values'];
