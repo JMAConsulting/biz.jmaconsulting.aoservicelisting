@@ -301,6 +301,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
 
             if ($primId) {
+              E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);
               E::createPhone($primId, CRM_Utils_Array::value('phone-Primary-6', $values));
               foreach ($addressIds as $key => $details) {
                 $aparams = $details[1];
