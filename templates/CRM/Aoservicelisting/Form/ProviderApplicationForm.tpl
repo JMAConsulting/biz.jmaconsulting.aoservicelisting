@@ -181,6 +181,13 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function($) {
+      // Add class onto the label of listing_type radio_elements
+      $('[for$=listing_type]').each(function() { 
+        $(this).addClass('listing_type_label_' + $(this).prev().val());
+        if (CRM.config.locale != "en_US") {
+          $(this).addClass('language_french');
+        }
+      });
       var abaServices = $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val();
       var abacredentialsSectionID = '.editrow_' + {/literal}'{$ABA_CREDENTIALS}'{literal} + '-section';
       var abastaffSectionID = '.aba_staff_members';

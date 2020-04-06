@@ -42,3 +42,25 @@ fieldset:not(.fieldgroup) {
 table th, table td {
   background-color: transparent !important;
 }
+
+.listing_type_label_1 {
+  margin-right: 3em;
+}
+
+.listing_type_label_1.language_french {
+  margin-right: 4em;
+}
+
+@media (min-width: 375px) {
+  .listing_type_label_1, .listing_type_label_1.language_french {
+    margin-right: 6em;
+  }
+}
+
+
+@media (min-width: 425px) {
+  .listing_type_label_1, .listing_type_label_1.language_french {
+    margin-right: 0;
+  }
+}
+
