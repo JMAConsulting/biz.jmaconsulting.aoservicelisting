@@ -345,7 +345,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
 
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
-      if (!empty($certificateNumber) && in_array($key, $abaStaffDone) == FALSE) {
+      if (!empty($certificateNumber) && !in_array($key, $abaStaffDone)) {
         $individualParams = [
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],
