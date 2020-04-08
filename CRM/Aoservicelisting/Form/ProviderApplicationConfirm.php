@@ -293,6 +293,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
               'email' => $values['email-Primary'],
             ];
             if (!empty($this->_loggedInContactID)) {
+              $primaryParams['contact_id'] = $this->_loggedInContactID;
               $primaryContact = civicrm_api3('Contact', 'getsingle', [
                 'id' => $this->_loggedInContactID,
                 'contact_type' => 'Individual',
@@ -303,10 +304,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
                 $primaryContact['last_name'] != $primaryParams['last_name'] &&
                 $primaryContact['email'] != $primaryParams['email']
               ) {
-                civicrm_api3('Contact', 'delete', ['id' => $this->_loggedInContactID]);
-              }
-              else {
-                $primaryParams['contact_id'] = $this->_loggedInContactID;
+                civicrm_api3('Relationship', 'get', [
+                  'contact_id_a' => $this->_loggedInContactID,
+                  'contact_id_b' => $organization['id'],
+                  'relationship_type_id' => PRIMARY_CONTACT_REL,
+                  'api.relationship.delete' => '$value.id',
+                ]);
               }
             }
             else {
@@ -315,9 +318,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
 
             if ($primId) {
-              if (!empty($this->_loggedInContactID)) {
-                $this->_loggedInContactID = $primId;
-              }
               E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);
               E::createPhone($primId, CRM_Utils_Array::value('phone-Primary-6', $values));
               foreach ($addressIds as $key => $details) {
