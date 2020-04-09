@@ -276,7 +276,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
         }
 
-        E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL, $abaStaffMemberFound);
+        E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
         if (!$primaryContactFound) {
           // Check if primary contact is the same as staff member 1
@@ -322,7 +322,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $primaryContactId = $abaMember['id'];
         }
 
-        E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL, TRUE);
+        E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
         // create address
         $addressKey = $key - 1;

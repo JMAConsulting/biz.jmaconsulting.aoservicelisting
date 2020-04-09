@@ -88,28 +88,26 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           'is_active'  => 1,
           'sequential' => 1,
           'relationship_type_id' => EMPLOYER_CONTACT_REL,
-          'return' => ['contact_id_a', ABA_REL],
+          'return' => ['contact_id_a'],
         ]);
         $staffRowCount = $abaStaffCount = 2;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
-            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
-            if (empty($staffMember[ABA_REL])) {
-              if (empty($website['values'])) {
-                continue;
-              }
+            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
+            $regulatorUrlPresent = (!empty($website['values']));
+            $certificateNumberPresent = (!empty($staffDetails[CERTIFICATE_NUMBER]));
+
+            if ($regulatorUrlPresent) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              if (!empty($website['count'])) {
-                $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
-              }
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
               $staffRowCount++;
             }
-            else {
+            if ($certificateNumberPresent) {
               $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $staffMember['contact_id_a'];
               $defaults['aba_first_name[' . $abaStaffCount . ']'] = $staffDetails['first_name'];
               $defaults['aba_last_name[' . $abaStaffCount . ']'] = $staffDetails['last_name'];
