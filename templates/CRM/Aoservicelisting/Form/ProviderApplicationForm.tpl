@@ -324,7 +324,7 @@
           $('#staff_first_name_1').parent().parent().hide();
           $('#staff_last_name_1').parent().parent().hide();
           hideStaff(parseInt(service.filter(':checked').length), 1);
-          hideABA(serviceunchekecount, servicecheckedcount);
+          hideABA(serviceunchekecount, 0);
         }
         else {
           $('.edit-row-organization_name').show();

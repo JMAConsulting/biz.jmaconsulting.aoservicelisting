@@ -297,7 +297,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $regulatedUrlValidated = FALSE;
         if (!empty($urls)) {
           foreach ($urls as $url) {
-            if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
+            $parts = (array) explode(',', $url);
+            $entryFound = FALSE;
+            foreach ($parts as $url) {
+              if (stristr($value, $url) !== FALSE) {
+                $entryFound = TRUE;
+                break;
+              }
+            }
+            if (!$regulatedUrlValidated && $entryFound) {
               $serviceValueFound = array_search($url, $regulatorUrlMapping);
               $verifiedURLCounter[$serviceValueFound] = $verifiedURLCounter[$serviceValueFound] + 1;
               $regulatedUrlValidated = TRUE;
