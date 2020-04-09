@@ -306,10 +306,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
               }
             }
             if (!$regulatedUrlValidated && $entryFound) {
-              $serviceValueFound = array_search($url, $regulatorUrlMapping);
-              $verifiedURLCounter[$serviceValueFound] = $verifiedURLCounter[$serviceValueFound] + 1;
-              $regulatedUrlValidated = TRUE;
-              unset($regulatorRecordKeys[$key]);
+              foreach ($regulatorUrlMapping as $k => $val) {
+                if (stristr($val, $url) !== FALSE) {
+                  $verifiedURLCounter[$k] = $verifiedURLCounter[$k] + 1;
+                  $regulatedUrlValidated = TRUE;
+                  unset($regulatorRecordKeys[$key]);
+                }
+              }
             }
           }
         }
