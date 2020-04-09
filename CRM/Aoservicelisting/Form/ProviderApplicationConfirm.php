@@ -284,6 +284,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]
           ) {
             E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
+            $primaryContactFound = TRUE;
             $primaryContactId = $staffMember['id'];
           }
         }
