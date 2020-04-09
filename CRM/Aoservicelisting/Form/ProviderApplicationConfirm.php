@@ -150,19 +150,19 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   public function submit($values)
   {
     $this->processCustomValue($values);
-    if (empty($values['organization_name'])) {
-      $values['organization_name'] = 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'];
-    }
+
     $organization_params = [
-      'organization_name' => $values['organization_name'],
+      'organization_name' => empty($values['organization_name']) ? 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'] : $values['organization_name'],
       'email' => $values['organization_email'] ?: $values['email-Primary'],
     ];
+
     if (!empty($this->organizationId)) {
       $organization_params['id'] = $this->organizationId;
       // delete all camp session custom values if present
       $tableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => CAMP_CG, 'return' => "table_name"]);
       CRM_Core_DAO::executeQuery("DELETE FROM $tableName WHERE entity_id = " . $this->organizationId);
-    } else {
+    }
+    else {
       $dedupeParams = CRM_Dedupe_Finder::formatParams($organization_params, 'Organization');
       $dedupeParams['check_permission'] = 0;
       $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Organization', NULL, [], 11);
@@ -207,17 +207,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       E::createWebsite($organization['id'], $values['website']);
     }
 
-    $staffMemberIds = $abaStaffDone = [];
-
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
     if (!empty($customValues) && is_array($customValues)) {
       CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
     }
-
     civicrm_api3('CustomValue', 'create', [
       WAIVER_FIELD => $values['waiver_field'],
       'entity_id' => $organization['id'],
     ]);
+
+
+    $staffMemberIds = $abaStaffDone = [];
     $primaryContactFound = FALSE;
     $primaryContactId = 0;
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
@@ -284,6 +284,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]
           ) {
             E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
+            E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
             $primaryContactFound = TRUE;
             $primaryContactId = $staffMember['id'];
           }
@@ -372,13 +373,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         E::findDupes(NULL, $organization['id'], $primaryParams, FALSE, PRIMARY_CONTACT_REL);
       }
       $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
+      E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);
+      E::createPhone($primId, CRM_Utils_Array::value('phone-Primary-6', $values));
     }
     else {
       $primId = $primaryContactId;
     }
     if ($primId) {
-      E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);
-      E::createPhone($primId, CRM_Utils_Array::value('phone-Primary-6', $values));
       foreach ($addressIds as $key => $details) {
         $aparams = $details[1];
         unset($aparams['id']);
