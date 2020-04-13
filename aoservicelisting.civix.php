@@ -146,14 +146,11 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
   }
 
-  public static function findDupes($cid, $orgId, &$individualParams, $checkABARel = FALSE, $rel = EMPLOYER_CONTACT_REL) {
+  public static function findDupes($cid, $orgId, &$individualParams, $rel = EMPLOYER_CONTACT_REL, $isOrgOptional = FALSE) {
     if (!empty($cid)) {
       $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
       if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
         $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
-        if ($checkABARel) {
-          $params[ABA_REL] = 1;
-        }
         $relationships = civicrm_api3('Relationship', 'get', $params);
         if (!empty($relationships['values'])) {
           // End Date all relationships as they have either overwritten the data or not.
@@ -166,12 +163,14 @@ class CRM_Aoservicelisting_ExtensionUtil {
       }
     }
     if (empty($individualParams['contact_id'])) {
+      $orgClause = ' r.contact_id_b = ' . $orgId;
+      $orgClause = $isOrgOptional ? " ($orgClause OR r.contact_id_b IS NOT NULL) " : $orgClause;
       // Check for dupes.
       $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
          FROM civicrm_relationship r
          INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
          LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
-         WHERE r.contact_id_b = %1 AND r.relationship_type_id = %2 AND r.is_active = 1", [1 => [$orgId, "Integer"], 2 => [$rel, "Integer"]])->fetchAll()[0]; // We expect only a single contact
+         WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1", [2 => [$rel, "Integer"]])->fetchAll()[0]; // We expect only a single contact
       if (!empty($staffDetails)) {
         if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
           // Dupe found
@@ -202,16 +201,13 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
-  public static function createRelationship($cid, $orgId, $relType, $isABA = FALSE) {
+  public static function createRelationship($cid, $orgId, $relType) {
     $relationshipParams = [
       'contact_id_a' => $cid,
       'contact_id_b' => $orgId,
       'relationship_type_id' => $relType,
     ];
     $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
-    if ($isABA) {
-      $relationshipParams[ABA_REL] = 1;
-    }
     if ($relationshipCheck['count'] < 1) {
       try {
         civicrm_api3('Relationship', 'create', $relationshipParams);

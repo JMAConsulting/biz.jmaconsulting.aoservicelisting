@@ -203,6 +203,9 @@
           $(this).parent().parent().parent().parent().parent().removeClass('hiddenElement');
         }
       });
+
+      // hide other language field
+      $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal}).toggle(($.inArray('Other Language',  $('#' + {/literal}'{$LANGUAGES}'{literal}).val()) !== -1));
     });
   </script>
 {/literal}

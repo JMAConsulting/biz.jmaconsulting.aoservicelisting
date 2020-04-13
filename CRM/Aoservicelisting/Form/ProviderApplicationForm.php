@@ -24,6 +24,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (empty($this->organizationId)) {
       $defaults['listing_type'] = 1;
+      $defaults['website'] = "http://";
     }
 
     if (!empty($this->_loggedInContactID)) {
@@ -87,28 +88,26 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           'is_active'  => 1,
           'sequential' => 1,
           'relationship_type_id' => EMPLOYER_CONTACT_REL,
-          'return' => ['contact_id_a', ABA_REL],
+          'return' => ['contact_id_a'],
         ]);
         $staffRowCount = $abaStaffCount = 2;
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
-            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
-            if (empty($staffMember[ABA_REL])) {
-              if (empty($website['values'])) {
-                continue;
-              }
+            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
+            $regulatorUrlPresent = (!empty($website['values']));
+            $certificateNumberPresent = (!empty($staffDetails[CERTIFICATE_NUMBER]));
+
+            if ($regulatorUrlPresent) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              if (!empty($website['count'])) {
-                $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
-              }
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website['values'][0]['url'];
               $staffRowCount++;
             }
-            else {
+            if ($certificateNumberPresent) {
               $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $staffMember['contact_id_a'];
               $defaults['aba_first_name[' . $abaStaffCount . ']'] = $staffDetails['first_name'];
               $defaults['aba_last_name[' . $abaStaffCount . ']'] = $staffDetails['last_name'];
@@ -142,6 +141,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'), $attr);
     $this->add('email', 'organization_email', E::ts('Organization Email'));
     $this->add('text', 'website', E::ts('Website'), NULL, TRUE);
+    $this->addRule('website', E::ts('Enter a valid web address beginning with \'http://\' or \'https://\'.'), 'url');
     $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
     $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
     $this->add('text', 'primary_last_name', E::ts('Last Name'), $nameAttr);
@@ -157,6 +157,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
+      $this->addRule("staff_record_regulator[$rowNumber]", E::ts('Enter a valid web address beginning with \'http://\' or \'https://\'.'), 'url');
       $this->add('hidden', "aba_contact_id[$rowNumber]", NULL);
       $this->add('text', "aba_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "aba_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
@@ -284,21 +285,26 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
               $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
             }
           }
-          elseif (!empty($values['aba_first_name'][$key]) && !empty($values['aba_last_name'][$key]) && $key > 1) {
-            if (($values['aba_first_name'][$key] == $values['staff_first_name'][$key]) && ($values['aba_last_name'][$key] == $values['staff_last_name'][$key])) {
-              $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member and ABA staff member cannot be same');
-              $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member and ABA staff member cannot be same');
-            }
-          }
         }
         $regulatedUrlValidated = FALSE;
         if (!empty($urls)) {
           foreach ($urls as $url) {
-            if (!$regulatedUrlValidated && stristr($value, $url) !== FALSE) {
-              $serviceValueFound = array_search($url, $regulatorUrlMapping);
-              $verifiedURLCounter[$serviceValueFound] = $verifiedURLCounter[$serviceValueFound] + 1;
-              $regulatedUrlValidated = TRUE;
-              unset($regulatorRecordKeys[$key]);
+            $parts = (array) explode(',', $url);
+            $entryFound = FALSE;
+            foreach ($parts as $url) {
+              if (stristr($value, $url) !== FALSE) {
+                $entryFound = TRUE;
+                break;
+              }
+            }
+            if (!$regulatedUrlValidated && $entryFound) {
+              foreach ($regulatorUrlMapping as $k => $val) {
+                if (stristr($val, $url) !== FALSE) {
+                  $verifiedURLCounter[$k] = $verifiedURLCounter[$k] + 1;
+                  $regulatedUrlValidated = TRUE;
+                  unset($regulatorRecordKeys[$key]);
+                }
+              }
             }
           }
         }
@@ -403,9 +409,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
         if (empty($values[CERTIFICATE_NUMBER][$key])) {
           $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
-        }
-        if (!preg_match('/^[0-9 \-]+$/m', $values[CERTIFICATE_NUMBER][$key])) {
-          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is invalid');
         }
       }
     }

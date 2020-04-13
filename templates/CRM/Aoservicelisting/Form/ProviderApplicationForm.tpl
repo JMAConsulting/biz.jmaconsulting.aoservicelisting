@@ -302,6 +302,17 @@
         $('#staff_last_name_1').parent().parent().show();
       }
       $('[name=listing_type]').on('change', function() {
+        var servicecheckedcount = 0;
+        var serviceunchekecount = 5;
+        $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]').each(function() {
+          if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+            servicecheckedcount++;
+          }
+          if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+            serviceunchekecount--;
+          }
+        });
+        var service = $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + ' input[type=checkbox]');
         if ($(this).val() == "1") {
           $('.edit-row-organization_name').hide();
           $('.edit-row-organization_email').hide();
@@ -312,6 +323,8 @@
           $('#aba_last_name_1').parent().parent().hide();
           $('#staff_first_name_1').parent().parent().hide();
           $('#staff_last_name_1').parent().parent().hide();
+          hideStaff(parseInt(service.filter(':checked').length), 1);
+          hideABA(serviceunchekecount, 0);
         }
         else {
           $('.edit-row-organization_name').show();
@@ -325,6 +338,8 @@
           $('#aba_last_name_1').parent().parent().show();
           $('#staff_first_name_1').parent().parent().show();
           $('#staff_last_name_1').parent().parent().show();
+          showStaff(parseInt(services.filter(':checked').length), services.filter(':checked'));
+          showABA(servicecheckedcount, serviceunchekecount);
         }
       });
 
@@ -456,6 +471,8 @@
         for (i=checked+1; i<=unchecked; i++) {
           if (!$('#staff_member-' + i).hasClass('hiddenElement') && i > 1) {
             $('#staff_member-' + i).addClass('hiddenElement');
+            $('#staff_last_name_' + i).val('').trigger('change');
+            $('#staff_first_name_' + i).val('').trigger('change');
             $('#staff_record_regulator_' + i).val('');
           }
         }

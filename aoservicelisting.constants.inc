@@ -26,4 +26,3 @@
   define('ABA_SERVICES', 'custom_912');
   define('ABA_CREDENTIALS', 'custom_911');
   define('CERTIFICATE_NUMBER', 'custom_910');
-  define('ABA_REL', 'custom_913');
