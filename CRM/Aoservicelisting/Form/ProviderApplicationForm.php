@@ -285,12 +285,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
               $errors['staff_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member is required');
             }
           }
-          elseif (!empty($values['aba_first_name'][$key]) && !empty($values['aba_last_name'][$key]) && $key > 1) {
-            if (($values['aba_first_name'][$key] == $values['staff_first_name'][$key]) && ($values['aba_last_name'][$key] == $values['staff_last_name'][$key])) {
-              $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the regulated staff member and ABA staff member cannot be same');
-              $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the regulated staff member and ABA staff member cannot be same');
-            }
-          }
         }
         $regulatedUrlValidated = FALSE;
         if (!empty($urls)) {
@@ -415,9 +409,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
         if (empty($values[CERTIFICATE_NUMBER][$key])) {
           $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
-        }
-        if (!preg_match('/^[0-9 \-]+$/m', $values[CERTIFICATE_NUMBER][$key])) {
-          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is invalid');
         }
       }
     }

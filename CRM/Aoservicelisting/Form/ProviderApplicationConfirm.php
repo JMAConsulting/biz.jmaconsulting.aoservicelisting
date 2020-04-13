@@ -370,7 +370,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
       }
       else {
-        E::findDupes(NULL, $organization['id'], $primaryParams, FALSE, PRIMARY_CONTACT_REL);
+        E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE);
       }
       $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
       E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);

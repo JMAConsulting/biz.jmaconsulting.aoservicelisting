@@ -471,6 +471,8 @@
         for (i=checked+1; i<=unchecked; i++) {
           if (!$('#staff_member-' + i).hasClass('hiddenElement') && i > 1) {
             $('#staff_member-' + i).addClass('hiddenElement');
+            $('#staff_last_name_' + i).val('').trigger('change');
+            $('#staff_first_name_' + i).val('').trigger('change');
             $('#staff_record_regulator_' + i).val('');
           }
         }
