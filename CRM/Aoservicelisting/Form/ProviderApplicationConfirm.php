@@ -245,7 +245,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
         $individualParams['contact_type'] = 'Individual';
         if (empty($individualParams['contact_id'])) {
-          $individualParams['contact_sub_type'] = 'Provider';
+          $individualParams['contact_sub_type'] = PRIMARY_CONTACT_SUBTYPE;
         }
         $abaStaffMemberFound = FALSE;
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
@@ -309,7 +309,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'last_name' => $values['aba_last_name'][$key],
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
           'contact_type' => 'Individual',
-          'contact_sub_type' => 'Provider',
+          'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
         ];
         if ($values['primary_first_name'] == $values['aba_first_name'][$rowNumber] &&
           $values['primary_last_name'] == $values['aba_last_name'][$rowNumber]) {
@@ -346,7 +346,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
          'first_name' => $values['primary_first_name'],
          'last_name' => $values['primary_last_name'],
          'contact_type' => 'Individual',
-         'contact_sub_type' => 'Provider',
+         'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
          'email' => $values['email-Primary'],
       ];
       if (!empty($this->_loggedInContactID)) {
@@ -354,7 +354,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
           'contact_type' => 'Individual',
-          'contact_sub_type' => 'Provider',
+          'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
           'return' => ['first_name', 'last_name', 'email'],
         ]);
         if ($primaryContact['first_name'] != $primaryParams['first_name'] &&

@@ -317,7 +317,10 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'name' => $name['display_name'],
       'notify' => TRUE,
     ];
-    CRM_Core_BAO_CMSUser::create($params, 'email');
+    $ufID = CRM_Core_BAO_CMSUser::create($params, 'email');
+    $user = CRM_Core_Config::singleton()->userSystem->loadUser($name['name']);
+    $user->addRole('authorized_contact');
+    $user->save();
   }
 
   function setStatus($oldStatus = NULL, $cid, $submitValues) {
