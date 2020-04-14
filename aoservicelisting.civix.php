@@ -181,6 +181,15 @@ class CRM_Aoservicelisting_ExtensionUtil {
   }
 
   public static function createWebsite($cid, $url) {
+    $result = civicrm_api3('Website', 'get', [
+      'contact_id' => $cid,
+      'url' => $url,
+      'return' => 'id',
+      'options' => ['limit' => 1],
+    ]);
+    if (!empty($result['id'])) {
+      return;
+    }
     civicrm_api3('Website', 'create', [
       'website_type_id' => 'Work',
       'url' => $url,
@@ -192,13 +201,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($phone)) {
       return;
     }
-    civicrm_api3('Phone', 'create', [
+    $params = [
       'phone' => $phone,
       'location_type_id' => 'Work',
       'contact_id' => $cid,
       'phone_type_id' => 'Phone',
       'is_primary' => 1,
-    ]);
+    ];
+    $result = civicrm_api3('Phone', 'get', $params);
+    if (!empty($result['values'])) {
+      return;
+    }
+    civicrm_api3('Phone', 'create', $params);
   }
 
   public static function createRelationship($cid, $orgId, $relType) {
