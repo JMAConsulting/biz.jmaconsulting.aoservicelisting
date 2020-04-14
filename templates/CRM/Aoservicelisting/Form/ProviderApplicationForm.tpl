@@ -182,7 +182,7 @@
   <script type="text/javascript">
     CRM.$(function($) {
       // Add class onto the label of listing_type radio_elements
-      $('[for$=listing_type]').each(function() { 
+      $('[for$=listing_type]').each(function() {
         $(this).addClass('listing_type_label_' + $(this).prev().val());
         if (CRM.config.locale != "en_US") {
           $(this).addClass('language_french');
@@ -215,6 +215,10 @@
           }
         }
         else {
+          $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_1').val('').trigger('change');
+          $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]:checked').each(function(e) {
+            $(this).attr('checked', false);
+          });
           $('#aba_staff_member-1').addClass('hiddenElement');
           $(abacredentialsSectionID).hide();
           $(abastaffSectionID).hide();
