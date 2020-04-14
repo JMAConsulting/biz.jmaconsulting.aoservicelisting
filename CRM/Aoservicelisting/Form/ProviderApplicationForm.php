@@ -377,7 +377,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $geocodeProvider->format($supplementalAddressGeocodeParams);
           if (!empty($supplementalAddressGeocodeParams['geo_code_error'])) {
             // Disabled for now until the geocoding api is fixed.
-            // $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+            $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
           }
         }
         catch (Exception $e) {
@@ -408,7 +408,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the ABA staff member is required');
         }
         if (empty($values[CERTIFICATE_NUMBER][$key])) {
-          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('BACB certificate number is required');
+          $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('Certificate number is a required field');
         }
       }
     }
@@ -416,7 +416,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $errors[ABA_CREDENTIALS] = E::ts('You have selected more than one ABA credential');
     }
     if ($values['listing_type'] == 2 && count($setAbaValues) > $abaStaffMemberCount) {
-      $errors[ABA_CREDENTIALS] = E::ts('Ensure you have entered all the staff members that match the ABA credentials');
+      $errors[ABA_CREDENTIALS] = E::ts('Please ensure that you have entered all the staff members that match the ABA credentials');
     }
     $credentials = [];
     if (!empty($values[ABA_CREDENTIALS])) {
