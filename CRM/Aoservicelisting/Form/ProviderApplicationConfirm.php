@@ -193,15 +193,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     $addressIds = [0 => [$add1Id, $addressParams1]];
 
-    $id = civicrm_api3('Website', 'get', [
-      'contact_id' => $organization['id'],
-      'url' => $values['website'],
-      'return' => 'id',
-      'options' => ['limit' => 1],
-    ]);
-    if (empty($id['id'])) {
-      E::createWebsite($organization['id'], $values['website']);
-    }
+    E::createWebsite($organization['id'], $values['website']);
 
     $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
     if (!empty($customValues) && is_array($customValues)) {
