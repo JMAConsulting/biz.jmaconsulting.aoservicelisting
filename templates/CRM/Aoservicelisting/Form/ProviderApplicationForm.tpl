@@ -216,10 +216,12 @@
         }
         else {
           $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_1').val('').trigger('change');
+          var servicecheckedcount = 0;
           $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]:checked').each(function(e) {
             $(this).attr('checked', false);
+            servicecheckedcount++;
           });
-          $('#aba_staff_member-1').addClass('hiddenElement');
+          hideABA(serviceunchekecount, 0);
           $(abacredentialsSectionID).hide();
           $(abastaffSectionID).hide();
           if ($('[name=listing_type]:checked').val() == 2) {
