@@ -245,6 +245,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (!empty($addId)) {
       $addressParams['id'] = $addId;
     }
+    else {
+      $result = civicrm_api3('Address', 'get', $addressParams);
+      if (!empty($result['values'])) {
+        return;
+      }
+    }
     $address = civicrm_api3('Address', 'create', $addressParams);
     return [$address['id'], $addressParams];
   }
