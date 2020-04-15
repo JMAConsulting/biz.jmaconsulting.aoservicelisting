@@ -256,7 +256,7 @@
         showABA(checked, abservices.filter(':checked'));
         hideABA(unchecked, checked);
         // If the only box that is checked is none of the above hid all aba staff fields..
-        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1) {
+        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1 && checked === 0) {
           if (!$('#aba_staff_member-1').hasClass('hiddenElement')) {
             $('#aba_staff_member-1').addClass('hiddenElement');
             $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_1').val('').trigger('change');
