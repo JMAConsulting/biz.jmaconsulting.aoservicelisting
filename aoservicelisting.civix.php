@@ -317,10 +317,14 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'name' => $name['display_name'],
       'notify' => TRUE,
     ];
-    $ufID = CRM_Core_BAO_CMSUser::create($params, 'email');
-    $user = CRM_Core_Config::singleton()->userSystem->loadUser($name['name']);
-    $user->addRole('authorized_contact');
-    $user->save();
+    CRM_Core_BAO_CMSUser::create($params, 'email');
+
+    $authorizedContact = user_load_by_name($name['name']);
+    if (!empty($authorizedContact)) {
+      $roles = array_merge($authorizedContact->getRoles(), ['authorized_contact']);
+      $authorizedContact->set('roles', array_unique($roles));
+      $authorizedContact->save();
+    }
   }
 
   function setStatus($oldStatus = NULL, $cid, $submitValues) {
