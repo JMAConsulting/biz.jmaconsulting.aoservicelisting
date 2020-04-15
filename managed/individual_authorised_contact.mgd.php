@@ -1,14 +1,14 @@
 <?php
 return [
   0 => [
-    'name' => 'ServiceProviderContactType',
+    'name' => 'AuthorizedContactType',
     'entity' => 'ContactType',
     'update' => 'never',
     'params' => [
       'version' => 3,
-      'label' => 'Service Listing',
-      'name' => 'service_provider',
-      'parent_id' => 'Organization',
+      'label' => 'Authorized Contact',
+      'name' => 'authorized_contact',
+      'parent_id' => 'Individual',
       'is_active' => 1,
       'is_reserved' => 1,
     ],
