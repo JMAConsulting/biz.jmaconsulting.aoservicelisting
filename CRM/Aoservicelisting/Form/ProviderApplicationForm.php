@@ -245,7 +245,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     // ABA Services
     foreach ($values[ABA_CREDENTIALS] as $value => $checked) {
-      if ($checked) {
+      if ($checked && $value !== 'None') {
         $setAbaValues[] = $value;
       }
     }
