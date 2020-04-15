@@ -257,12 +257,10 @@
         hideABA(unchecked, checked);
         // If the only box that is checked is none of the above hid all aba staff fields..
         if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1 && checked === 0) {
-          if (!$('#aba_staff_member-1').hasClass('hiddenElement')) {
-            $('#aba_staff_member-1').addClass('hiddenElement');
-            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_1').val('').trigger('change');
-            $('#aba_last_name_1').val('').trigger('change');
-            $('#aba_first_name_1').val('').trigger('change');
+          for (i=1; i<=6; i++) {
+            hideABAStaffField(i);
           }
+          $('#add-another-aba').hide();
         }
       });
 
@@ -277,13 +275,17 @@
         }
       }
 
+      function hideABAStaffField(key) {
+        $('#aba_staff_member-' + key).addClass('hiddenElement');
+        $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + key).val('').trigger('change');
+        $('#aba_last_name_' + key).val('').trigger('change');
+        $('#aba_first_name_' + key).val('').trigger('change');
+      }
+
       function hideABA(unchecked, checked) {
         for (i=checked+1; i<=unchecked; i++) {
           if (!$('#aba_staff_member-' + i).hasClass('hiddenElement') && i > 1) {
-            $('#aba_staff_member-' + i).addClass('hiddenElement');
-            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_' + i).val('').trigger('change');
-            $('#aba_last_name_' + i).val('').trigger('change');
-            $('#aba_first_name_' + i).val('').trigger('change');
+            hideABAStaffField(i);
           }
         }
       }
