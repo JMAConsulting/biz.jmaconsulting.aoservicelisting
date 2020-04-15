@@ -243,18 +243,27 @@
       });
       showABA(servicecheckedcount, serviceunchekecount);
       abservices.change(function() {
-          var checked = 0;
-          var unchecked = 5;
-          abservices.each(function() {
-            if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
-              checked++;
-            }
-            if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
-              unchecked--;
-            }
-          });
-          showABA(checked, abservices.filter(':checked'));
-          hideABA(unchecked, checked);
+        var checked = 0;
+        var unchecked = 5;
+        abservices.each(function() {
+          if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+            checked++;
+          }
+          if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
+            unchecked--;
+          }
+        });
+        showABA(checked, abservices.filter(':checked'));
+        hideABA(unchecked, checked);
+        // If the only box that is checked is none of the above hid all aba staff fields..
+        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1) {
+          if (!$('#aba_staff_member-1').hasClass('hiddenElement')) {
+            $('#aba_staff_member-1').addClass('hiddenElement');
+            $('#' + {/literal}'{$CERTIFICATE_NUMBER}'{literal} + '_1').val('').trigger('change');
+            $('#aba_last_name_1').val('').trigger('change');
+            $('#aba_first_name_1').val('').trigger('change');
+          }
+        }
       });
 
       function showABA(countcheck, service) {
