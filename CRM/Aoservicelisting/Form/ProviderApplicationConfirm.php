@@ -244,9 +244,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
 
         $individualParams['contact_type'] = 'Individual';
-        if (empty($individualParams['contact_id'])) {
-          $individualParams['contact_sub_type'] = PRIMARY_CONTACT_SUBTYPE;
-        }
         $abaStaffMemberFound = FALSE;
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
           // Check that we have found the same combination of first and last names
@@ -309,7 +306,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           'last_name' => $values['aba_last_name'][$key],
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
           'contact_type' => 'Individual',
-          'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
         ];
         if ($values['primary_first_name'] == $values['aba_first_name'][$rowNumber] &&
           $values['primary_last_name'] == $values['aba_last_name'][$rowNumber]) {
