@@ -3,6 +3,7 @@ return [
   0 => [
     'name' => 'PrimaryCotnactRelationshipType',
     'entity' => 'RelationshipType',
+    'update' => 'never',
     'params' => [
       'name_a_b' => 'primary_contact_for',
       'name_b_a' => 'primary_contact_is',

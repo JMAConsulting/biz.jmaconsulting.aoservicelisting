@@ -3,6 +3,7 @@ return [
   0 => [
     'name' => 'AuthorizedContactType',
     'entity' => 'ContactType',
+    'update' => 'never',
     'params' => [
       'version' => 3,
       'label' => 'Authorized Contact',

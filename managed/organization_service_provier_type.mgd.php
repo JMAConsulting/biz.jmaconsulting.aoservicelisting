@@ -3,6 +3,7 @@ return [
   0 => [
     'name' => 'ServiceProviderContactType',
     'entity' => 'ContactType',
+    'update' => 'never',
     'params' => [
       'version' => 3,
       'label' => 'Service Listing',

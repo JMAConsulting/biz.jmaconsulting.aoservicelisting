@@ -3,6 +3,7 @@ return [
   0 => [
     'name' => 'ServiceProviderCustomData',
     'entity' => 'CustomGroup',
+    'update' => 'never',
     'params' => [
       'name' => 'service_provider_details',
       'title' => 'Service Listing Details',
@@ -18,6 +19,7 @@ return [
   1 => [
     'name' => 'ServiceProviderEvents',
     'entity' => 'CustomGroup',
+    'update' => 'never',
     'params' => [
       'name' => 'service_provider_events',
       'title' => 'Service Listing Events',
