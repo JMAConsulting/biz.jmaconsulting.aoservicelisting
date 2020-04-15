@@ -232,6 +232,7 @@
 
       var servicecheckedcount=0;
       var serviceunchekecount=0;
+      var onlyNoneSelected = false;
       var abservices = $('#editrow-' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ' input[type=checkbox]');
       abservices.each(function() {
         if ($(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
@@ -239,6 +240,19 @@
         }
         if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
           serviceunchekecount++;
+        }
+        // If the only box that is checked is none of the above hid all aba staff fields..
+        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1 && servicecheckedcount === 0) {
+          for (i=1; i<=6; i++) {
+            hideABAStaffField(i);
+            onlyNoneSelected = true;
+          }
+          $('#add-another-aba').hide();
+        }
+        else {
+          if ($('[name=listing_type]:checked').val() == "2") {
+            $('#add-another-aba').show();
+          }
         }
       });
       showABA(servicecheckedcount, serviceunchekecount);
@@ -252,16 +266,21 @@
           if (!$(this).prop('checked') && $(this).attr('id').indexOf('None') === -1) {
             unchecked--;
           }
+          // If the only box that is checked is none of the above hid all aba staff fields..
+          if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1 && checked === 0) {
+            for (i=1; i<=6; i++) {
+              hideABAStaffField(i);
+            }
+            $('#add-another-aba').hide();
+          }
+          else {
+            if ($('[name=listing_type]:checked').val() == "2") {
+              $('#add-another-aba').show();
+            }
+          }
         });
         showABA(checked, abservices.filter(':checked'));
         hideABA(unchecked, checked);
-        // If the only box that is checked is none of the above hid all aba staff fields..
-        if ($(this).prop('checked') && $(this).attr('id').indexOf('None') !== -1 && checked === 0) {
-          for (i=1; i<=6; i++) {
-            hideABAStaffField(i);
-          }
-          $('#add-another-aba').hide();
-        }
       });
 
       function showABA(countcheck, service) {
@@ -310,9 +329,10 @@
         $('.edit-row-organization_email').show();
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
         $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
-        if (abaServices == "1") {
-            $('#add-another-staff, #add-another-aba').show();
+        if (abaServices == "1" && !onlyNoneSelected) {
+            $('#add-another-aba').show();
         }
+        $('#add-another-staff').show();
         $('#aba_first_name_1').parent().parent().show();
         $('#aba_last_name_1').parent().parent().show();
         $('#staff_first_name_1').parent().parent().show();
