@@ -350,7 +350,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
       $geocodeProvider->format($primaryAddressGeocodeParams);
       if (!empty($primaryAddressGeocodeParams['geo_code_error'])) {
-        $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+        $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address');
       }
     }
     catch (Exception $e) {
@@ -375,7 +375,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
           $geocodeProvider->format($supplementalAddressGeocodeParams);
           if (!empty($supplementalAddressGeocodeParams['geo_code_error'])) {
-            $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address so that Google Maps understands it.');
+            $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address');
           }
         }
         catch (Exception $e) {
@@ -400,10 +400,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       if (!empty($value)) {
         $abaStaffMemberCount++;
         if (empty($values['aba_first_name'][$key])) {
-          $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First name of the ABA staff member is required');
+          $errors['aba_first_name' . '[' . $key . ']'] = E::ts('First Name of ABA staff member is a required field');
         }
         if (empty($values['aba_last_name'][$key])) {
-          $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last name of the ABA staff member is required');
+          $errors['aba_last_name' . '[' . $key . ']'] = E::ts('Last Name of ABA staff member is a required field');
         }
         if (empty($values[CERTIFICATE_NUMBER][$key])) {
           $errors[CERTIFICATE_NUMBER . '[' . $key . ']'] = E::ts('Certificate number is a required field');

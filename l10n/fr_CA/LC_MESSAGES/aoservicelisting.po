@@ -130,8 +130,16 @@ msgid "First name of the regulated staff member is required"
 msgstr "Le prénom de l’employé réglementé est obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "First Name of ABA staff member is a required field"
+msgstr "Le prénom du membre du personnel agréé en ACA est un champ obligatoire"
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid "Last name of the regulated staff member is required"
 msgstr "Le nom de l’employé réglementé est obligatoire"
+
+#: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
+msgid "Last Name of ABA staff member is a required field"
+msgstr "Le nom de famille du membre du personnel agréé en ACA est un champ obligatoire"
 
 #: CRM/Aoservicelisting/Form/ProviderApplicationForm.php
 msgid ""
@@ -378,3 +386,9 @@ msgstr "Le numéro de certificat du BACB n'est pas valide"
 
 msgid "'None of the above' must be the only option selected"
 msgstr "'Aucune de ces réponses ' doit être la seule option sélectionnée"
+
+msgid "Credentials held is a required field"
+msgstr "Titre(s) de compétence détenu(s) » est un champ obligatoire"
+
+msgid "Unable to find this location on Google Maps. Please revise the address"
+msgstr "Impossible de trouver ce lieu sur Google Maps. Veuillez modifier l’adresse"
