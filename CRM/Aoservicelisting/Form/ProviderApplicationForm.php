@@ -24,7 +24,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (empty($this->organizationId)) {
       $defaults['listing_type'] = 1;
-      $defaults['website'] = "http://";
     }
 
     if (!empty($this->_loggedInContactID)) {
@@ -77,9 +76,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
         if (!empty($primaryWebsite['values'][0]['url'])) {
           $defaults['website'] = $primaryWebsite['values'][0]['url'];
-        }
-        else {
-          $defaults['website'] = "http://";
         }
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
@@ -140,7 +136,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $listingTypeField = $this->addRadio('listing_type', E::ts('Type of Service Listing'), $serviceListingOptions, $attr);
     $organizationNameField = $this->add('text', 'organization_name', E::ts('Organization Name'), $attr);
     $this->add('email', 'organization_email', E::ts('Organization Email'));
-    $this->add('text', 'website', E::ts('Website'), NULL, TRUE);
+    $this->add('text', 'website', E::ts('Website'), NULL);
     $this->addRule('website', E::ts('Enter a valid web address beginning with \'http://\' or \'https://\'.'), 'url');
     $nameAttr = (!empty($this->organizationId) && $this->listingType = 1) ? ['readonly' => TRUE] : [];
     $this->add('text', 'primary_first_name', E::ts('First Name'), $nameAttr);
@@ -250,7 +246,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       }
     }
     // Check if no aba credentials are checked.
-    if (!empty($values[ABA_CREDENTIALS]) && empty($setAbaValues)) {
+    if (!empty($values[ABA_CREDENTIALS]) && empty($setAbaValues) && empty($value[ABA_CREDENTIALS]['None'])) {
       $errors[ABA_CREDENTIALS] = E::ts('Credentials held is a required field');
     }
 
