@@ -240,24 +240,28 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     }
 
     // ABA Services
-    foreach ($values[ABA_CREDENTIALS] as $value => $checked) {
-      if ($checked && $value !== 'None') {
-        $setAbaValues[] = $value;
+    if (!empty($values[ABA_SERVICES])) {
+      foreach ($values[ABA_CREDENTIALS] as $value => $checked) {
+        if ($checked && $value !== 'None') {
+          $setAbaValues[] = $value;
+        }
       }
-    }
-    // Check if no aba credentials are checked.
-    if (!empty($values[ABA_CREDENTIALS]) && empty($setAbaValues) && empty($value[ABA_CREDENTIALS]['None'])) {
-      $errors[ABA_CREDENTIALS] = E::ts('Credentials held is a required field');
+      // Check if no aba credentials are checked.
+      if (empty($setAbaValues) && empty($value[ABA_CREDENTIALS]['None'])) {
+        $errors[ABA_CREDENTIALS] = E::ts('Credentials held is a required field');
+      }
     }
 
-    foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
-      if ($checked) {
-        $setValues[] = $value;
+    if (!empty($values[IS_REGULATED_SERVICE])) {
+      foreach ($values[REGULATED_SERVICE_CF] as $value => $checked) {
+        if ($checked) {
+          $setValues[] = $value;
+        }
       }
-    }
-    // Check if no services are checked.
-    if (!empty($values[IS_REGULATED_SERVICE]) && empty($setValues)) {
-      $errors[IS_REGULATED_SERVICE] = E::ts('Regulated services provided is a required field when you say you provide regulated services');
+      // Check if no services are checked.
+      if (empty($setValues)) {
+        $errors[IS_REGULATED_SERVICE] = E::ts('Regulated services provided is a required field when you say you provide regulated services');
+      }
     }
     $urls = [];
     foreach ($setValues as $serviceValue) {
