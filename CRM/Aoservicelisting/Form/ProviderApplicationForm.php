@@ -247,7 +247,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
       // Check if no aba credentials are checked.
-      if (empty($setAbaValues) && empty($value[ABA_CREDENTIALS]['None'])) {
+      if (empty($setAbaValues) && empty($values[ABA_CREDENTIALS]['None'])) {
         $errors[ABA_CREDENTIALS] = E::ts('Credentials held is a required field');
       }
     }
