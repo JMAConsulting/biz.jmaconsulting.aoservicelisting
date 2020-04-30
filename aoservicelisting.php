@@ -164,14 +164,34 @@ function aoservicelisting_civicrm_preProcess($formName, &$form) {
       if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
         E::setStatus($form->_oldStatus, $form->_contactId, $form->_submitValues);
         $index = \Drupal\search_api\Entity\Index::load('default');
-        $index->trackItemsUpdated('entity:civicrm_contact', [$form->_contactId . ':und']);
+        $db_query = \Drupal::database()->select('search_api_item', 'sai');
+        $entity_id_field = $db_query->addField('sai', 'item_id');
+        $db_query->condition('sai.datasource', 'entity:civicrm_contact');
+        $db_query->condition('sai.item_id', 'entity:civicrm_contact/' . $form->_contactId . ':und');
+        $results = $db_query->execute()->fetchAll();
+        if (empty($results)) {
+          $index->trackItemsInserted('entity:civicrm_contact', [$form->_contactId . ':und']);
+        }
+        else {
+          $index->trackItemsUpdated('entity:civicrm_contact', [$form->_contactId . ':und']);
+        }
       }
     }
     if ($formName == "CRM_Contact_Form_Inline_CustomData") {
       if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
         E::setStatus($form->_oldStatus, $form->_submitValues['cid'], $form->_submitValues);
         $index = \Drupal\search_api\Entity\Index::load('default');
-        $index->trackItemsUpdated('entity:civicrm_contact', [$form->_submitValues['cid'] . ':und']);
+        $db_query = \Drupal::database()->select('search_api_item', 'sai');
+        $entity_id_field = $db_query->addField('sai', 'item_id');
+        $db_query->condition('sai.datasource', 'entity:civicrm_contact');
+        $db_query->condition('sai.item_id', 'entity:civicrm_contact/' . $form->_submitValues['cid'] . ':und');
+        $results = $db_query->execute()->fetchAll();
+        if (empty($results)) {
+          $index->trackItemsInserted('entity:civicrm_contact', [$form->_submitValues['cid'] . ':und']);
+        }
+        else {
+          $index->trackItemsUpdated('entity:civicrm_contact', [$form->_submitValues['cid'] . ':und']);
+        }
       }
     }
   }
