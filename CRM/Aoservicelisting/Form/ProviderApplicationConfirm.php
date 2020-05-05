@@ -229,8 +229,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
 
+        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
+        if (!empty($individualParams['email'])) {
+          // Check for dupes for primary contact.
+          if (empty($individualParams['contact_id'])) {
+            $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
+            $dedupeParams['check_permission'] = 0;
+            $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 12);
+            $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+          }
+        }
         $individualParams['contact_type'] = 'Individual';
         $abaStaffMemberFound = FALSE;
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
@@ -355,6 +364,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       }
       else {
         E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE);
+        // Check for dupes for primary contact.
+        if (empty($primaryParams['contact_id'])) {
+          $dedupeParams = CRM_Dedupe_Finder::formatParams($primaryParams, 'Individual');
+          $dedupeParams['check_permission'] = 0;
+          $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 12);
+          $primaryParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+        }
       }
       $primId = civicrm_api3('Contact', 'create', $primaryParams)['id'];
       E::createRelationship($primId, $organization['id'], PRIMARY_CONTACT_REL);
