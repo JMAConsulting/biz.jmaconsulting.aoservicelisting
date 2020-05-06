@@ -38,13 +38,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER]
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
-        $regulatorUrlPresent = (!empty($website['values']));
+        $website = civicrm_api3('Website', 'get', ['contact_id' => $this->_loggedInContactID, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
+        $regulatorUrlPresent = (!empty($website));
         $staffRowCount = $abaStaffCount = 1;
         if ($regulatorUrlPresent) {
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['staff_last_name['. $staffRowCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
           $defaults['staff_contact_id['. $staffRowCount . ']'] = $this->_loggedInContactID;
+          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website[0]['url'];
           $staffRowCount++;
         }
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
