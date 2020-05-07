@@ -1,6 +1,7 @@
 <?php
 
 use Drupal\civicrm_entity\SupportedEntities;
+use Drupal\Core\Entity\EntityStorageException;
 
 Class CRM_Migrate_Geolocation {
 
@@ -20,7 +21,7 @@ Class CRM_Migrate_Geolocation {
     \Drupal::service('civicrm')->initialize();
   }
 
-  function migrateGeoLocation($entity == 'Contact', $limit = 100) {
+  function migrateGeoLocation($entity = 'Contact', $limit = 100) {
     $dao = CRM_Core_DAO::executeQuery("
      SELECT a.id as address_id, e.id as contact_id
        FROM civicrm_contact e
@@ -29,26 +30,26 @@ Class CRM_Migrate_Geolocation {
         LIMIT 0, $limit
     ");
     while($dao->fetch()) {
-     $addressID = $dao->address_id;
-     if (!empty($addressID)) {
-       $address = new CRM_Core_BAO_Address();
-       $address->id = $addressID;
-       $address->find(TRUE);
-       if (!empty($address->geo_code_1) && !empty($address->geo_code_2)) {
-         $entityType = SupportedEntities::getEntityType($entity);
-         $key = ($entity == 'Contact') ? 'field_mapped_location' : 'field_mapped_location';
-         $entity = \Drupal::entityTypeManager()->getStorage(SupportedEntities::getEntityType($entity))->load($entityID);
-         $params = [
+      $addressID = $dao->address_id;
+      if (!empty($addressID)) {
+        $address = new CRM_Core_BAO_Address();
+        $address->id = $addressID;
+        $address->find(TRUE);
+        if (!empty($address->geo_code_1) && !empty($address->geo_code_2)) {
+          $entityType = SupportedEntities::getEntityType($entity);
+          $key = ($e == 'Contact') ? 'field_mapped_location' : 'field_mapped_location';
+          $entityObj = \Drupal::entityTypeManager()->getStorage(SupportedEntities::getEntityType($entity))->load($dao->contact_id);
+          $params = [
            'lat' => $address->geo_code_1,
            'lng'=> $address->geo_code_2,
            'lat_sin' => sin(deg2rad($address->geo_code_1)),
            'lat_cos' => cos(deg2rad($address->geo_code_1)),
            'lng_rad' => deg2rad($address->geo_code_2),
-         ];
-         $params['data'] = $params;
-         $entity->get('field_geolocation')->setValue(array($params));
-         $entity->get($key)->setValue(1);
-         $entity->save();
+          ];
+          $params['data'] = $params;
+          $entityObj->get('field_geolocation')->setValue(array($params));
+          $entityObj->get($key)->setValue(1);
+          $entityObj->save();
        }
      }
 
