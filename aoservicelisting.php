@@ -163,15 +163,11 @@ function aoservicelisting_civicrm_preProcess($formName, &$form) {
     if ($formName == "CRM_Contact_Form_Contact") {
       if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
         E::setStatus($form->_oldStatus, $form->_contactId, $form->_submitValues);
-        $index = \Drupal\search_api\Entity\Index::load('default');
-        $index->trackItemsUpdated('entity:civicrm_contact', [$form->_contactId . ':und']);
       }
     }
     if ($formName == "CRM_Contact_Form_Inline_CustomData") {
       if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
         E::setStatus($form->_oldStatus, $form->_submitValues['cid'], $form->_submitValues);
-        $index = \Drupal\search_api\Entity\Index::load('default');
-        $index->trackItemsUpdated('entity:civicrm_contact', [$form->_submitValues['cid'] . ':und']);
       }
     }
   }
