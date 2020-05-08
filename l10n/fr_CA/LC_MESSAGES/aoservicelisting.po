@@ -392,3 +392,15 @@ msgstr "Titre(s) de compétence détenu(s) » est un champ obligatoire"
 
 msgid "Unable to find this location on Google Maps. Please revise the address"
 msgstr "Impossible de trouver ce lieu sur Google Maps. Veuillez modifier l’adresse"
+
+msgid "Travels to remote areas"
+msgstr "Se déplace dans les secteurs éloignés"
+
+msgid "Travels to nearby areas"
+msgstr "Se déplace dans les secteurs adjacents"
+
+msgid "Not accepting new clients"
+msgstr "N’accepte pas de nouveaux clients"
+
+msgid "Verified listing"
+msgstr ""
