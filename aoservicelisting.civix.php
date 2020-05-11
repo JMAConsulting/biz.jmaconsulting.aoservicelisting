@@ -170,12 +170,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
          FROM civicrm_relationship r
          INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
          LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
-         WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1", [2 => [$rel, "Integer"]])->fetchAll()[0]; // We expect only a single contact
+         WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1
+         AND ca.first_name = %3 AND ca.last_name = %4",
+        [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']])->fetchAll()[0]; // We expect only a single contact
       if (!empty($staffDetails)) {
-        if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
-          // Dupe found
-          $individualParams["contact_id"] = $staffDetails['contact_id_a'];
-        }
+        // Dupe found
+        $individualParams["contact_id"] = $staffDetails['contact_id_a'];
       }
     }
   }
