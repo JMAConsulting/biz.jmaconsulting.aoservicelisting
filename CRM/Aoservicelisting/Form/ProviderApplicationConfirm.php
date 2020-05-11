@@ -304,8 +304,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
           'contact_type' => 'Individual',
         ];
-        if ($values['primary_first_name'] == $values['aba_first_name'][$rowNumber] &&
-          $values['primary_last_name'] == $values['aba_last_name'][$rowNumber]) {
+        if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
+          $values['primary_last_name'] == $values['aba_last_name'][$key]) {
           $individualParams['email'] = $values['email-Primary'];
           $primaryContactFound = TRUE;
         }
