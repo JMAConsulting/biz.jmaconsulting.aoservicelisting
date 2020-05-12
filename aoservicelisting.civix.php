@@ -330,7 +330,10 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'name' => $name['display_name'],
       'notify' => TRUE,
     ];
-    CRM_Core_BAO_CMSUser::create($params, 'email');
+    $ufId = CRM_Core_BAO_CMSUser::create($params, 'email');
+    if (empty($ufId)) {
+      return FALSE;
+    }
 
     $authorizedContact = user_load_by_name($name['name']);
     if (!empty($authorizedContact)) {
