@@ -91,6 +91,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
     if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
       $contact['email'] = ACKNOWLEDGE_SENDER;
+      $contact['display_name'] = CRM_Contact_BAO_Contact::displayName(SPECIALIST_ID);
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
@@ -307,15 +308,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
   public static function createUserAccount($cid) {
     // We create the user account for the primary contact.
-    $relationship = civicrm_api3('Relationship', 'get', [
-      'contact_id_b' => $cid,
-      'relationship_type_id' => PRIMARY_CONTACT_REL,
-      'return' => 'contact_id_a',
-    ]);
-    if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
-      $cid = $relationship['values'][$relationship['id']]['contact_id_a'];
-    }
-    else {
+    if (empty($cid)) {
       return;
     }
     $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name, $cid)) AS name, display_name
@@ -345,6 +338,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $authorizedContact->set('roles', array_unique($roles));
       $authorizedContact->save();
     }
+    return TRUE;
   }
 
   function setStatus($oldStatus = NULL, $cid, $submitValues) {
@@ -353,11 +347,24 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $key = preg_grep('/^' . STATUS . '_[\d]*/', $submitKeys);
       $newStatus = reset($key);
       if ($oldStatus != "Approved" && CRM_Utils_Array::value($newStatus, $submitValues) == 'Approved') {
+        // Fetch primary contact.
+        $relationship = civicrm_api3('Relationship', 'get', [
+          'contact_id_b' => $cid,
+          'relationship_type_id' => PRIMARY_CONTACT_REL,
+          'return' => 'contact_id_a',
+        ]);
+        if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
+          $primaryCid = $relationship['values'][$relationship['id']]['contact_id_a'];
+        }
         // Create drupal account if not exists.
-        self::createUserAccount($cid);
+        if (!self::createUserAccount($primaryCid)) {
+          // Set status message indicating that user account creation was unsuccessful.
+          $userUrl = CRM_Utils_System::url('civicrm/contact/view/useradd', "reset=1&action=add&cid=$primaryCid");
+          CRM_Core_Session::setStatus(ts('There was an error creating the user account. Please proceed to add one here: %1', [1 => $userUrl]), ts('Warning'), 'alert');
+        }
 
         // Send Mail
-        self::sendMessage($cid, APPROVED_MESSAGE);
+        self::sendMessage($primaryCid, APPROVED_MESSAGE);
 
         $activityID = civicrm_api3('Activity', 'get', [
           'source_contact_id' => $cid,
