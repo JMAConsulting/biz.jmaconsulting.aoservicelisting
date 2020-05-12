@@ -361,9 +361,11 @@ class CRM_Aoservicelisting_ExtensionUtil {
         }
         // Create drupal account if not exists.
         if (!self::createUserAccount($primaryCid)) {
-          // Set status message indicating that user account creation was unsuccessful.
-          $userUrl = CRM_Utils_System::url('civicrm/contact/view/useradd', "reset=1&action=add&cid=$primaryCid");
-          CRM_Core_Session::setStatus(ts('There was an error creating the user account. Please proceed to add one here: %1', [1 => $userUrl]), ts('Warning'), 'alert');
+          // Set status message indicating that user account creation was unsuccessful if the user account doesn't exist.
+          if (empty(CRM_Core_DAO::singleValueQuery("SELECT uf_id FROM civicrm_uf_match WHERE contact_id = %1", [1 => [$primaryCid, "Integer"]]))) {
+            $userUrl = CRM_Utils_System::url('civicrm/contact/view/useradd', "reset=1&action=add&cid=$primaryCid", TRUE);
+            CRM_Core_Session::setStatus(ts('There was an error creating the user account. Please proceed to add one <a href="%1">here</a>.', [1 => $userUrl]), ts('Warning'), 'alert');
+          }
         }
 
         // Send Mail
