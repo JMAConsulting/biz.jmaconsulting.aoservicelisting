@@ -256,20 +256,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
         E::createWebsite($staffMember['id'], $values['staff_record_regulator'][$rowNumber]);
 
-        if ($rowNumber == 1) {
-          // Create activity
-          if (empty($this->_loggedInContactID)) {
-            E::createActivity($organization['id']);
-            // Send email on confirmation.
-            E::sendMessage($staffMember['id'], RECEIVED_MESSAGE);
-          }
-          else {
-            // We need to handle cases of email edit.
-          }
-
-          E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
-        }
-
         E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
         if (!$primaryContactFound) {
@@ -388,6 +374,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $aparams['add_relationship'] = 0;
         $aparams['update_current_employer'] = 0;
         civicrm_api3('Address', 'create', $aparams);
+      }
+      // Create activity
+      if (empty($this->_loggedInContactID)) {
+        E::createActivity($organization['id']);
+        // Send email on confirmation.
+        E::sendMessage($primId, RECEIVED_MESSAGE);
+      }
+      else {
+        // We need to handle cases of email edit.
       }
     }
     // Redirect to thank you page.
