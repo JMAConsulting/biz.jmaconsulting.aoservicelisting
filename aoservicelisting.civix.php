@@ -309,7 +309,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function createUserAccount($cid) {
     // We create the user account for the primary contact.
     if (empty($cid)) {
-      return;
+      return FALSE;
     }
     $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name, $cid)) AS name, display_name
           FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
