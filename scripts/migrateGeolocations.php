@@ -21,36 +21,75 @@ Class CRM_Migrate_Geolocation {
     \Drupal::service('civicrm')->initialize();
   }
 
-  function migrateGeoLocation($entity = 'Contact', $limit = 100) {
+  public function migrateGeoLocation($entity = 'Contact', $limit = 100) {
+    if ($entity == 'Contact') {
+      $this->migrateGeoLocationForContact($limit);
+    }
+    else {
+      $this->migrateGeoLocationForEvent($limit);
+    }
+  }
+
+  public function migrateGeoLocationForEvent($limit = 100) {
     $dao = CRM_Core_DAO::executeQuery("
-     SELECT a.id as address_id, e.id as contact_id
+      SELECT e.id as event_id, geo_code_1, geo_code_2
+        FROM civicrm_event e
+         INNER JOIN civicrm_loc_block lb ON lb.id = e.loc_block_id
+         INNER JOIN  civicrm_address a ON a.id = lb.address_id
+         WHERE geo_code_1 IS NOT NULL AND geo_code_2 IS NOT NULL
+      LIMIT 0, $limit
+    ");
+    while($dao->fetch()) {
+      $params = [
+        [
+          'lat' => $dao->geo_code_1,
+          'lng'=> $dao->geo_code_2,
+          'lat_sin' => sin(deg2rad($dao->geo_code_1)),
+          'lat_cos' => cos(deg2rad($dao->geo_code_1)),
+          'lng_rad' => deg2rad($dao->geo_code_2),
+        ],
+      ];
+      $params['data'] = $params;
+      $entityType = SupportedEntities::getEntityType('Event');
+      $entityObj = \Drupal::entityTypeManager()->getStorage(SupportedEntities::getEntityType('Event'))->load($dao->event_id);
+      $entityObj->get('field_geolocation')->setValue(array($params));
+      $entityObj->get('field_mapped_location')->setValue(1);
+      $entityObj->save();
+    }
+  }
+
+  public function migrateGeoLocationForContact($limit = 100) {
+    $dao = CRM_Core_DAO::executeQuery("
+     SELECT GROUP_CONCAT(DISTINCT a.id) as address_id, e.id as contact_id
        FROM civicrm_contact e
-        INNER JOIN  civicrm_address a ON a.contact_id = e.id AND a.is_primary = 1
+        INNER JOIN  civicrm_address a ON a.contact_id = e.id AND geo_code_1 IS NOT NULL AND geo_code_2 IS NOT NULL
         WHERE contact_sub_type LIKE '%service_provider%'
+        GROUP BY a.contact_id
         LIMIT 0, $limit
     ");
     while($dao->fetch()) {
-      $addressID = $dao->address_id;
-      if (!empty($addressID)) {
+      $addressIDs = (array) explode(',', $dao->address_id);
+      $params = [];
+      foreach ($addressIDs as $addressID) {
         $address = new CRM_Core_BAO_Address();
         $address->id = $addressID;
         $address->find(TRUE);
-        if (!empty($address->geo_code_1) && !empty($address->geo_code_2)) {
-          $entityType = SupportedEntities::getEntityType($entity);
-          $key = ($e == 'Contact') ? 'field_mapped_location' : 'field_mapped_location';
-          $entityObj = \Drupal::entityTypeManager()->getStorage(SupportedEntities::getEntityType($entity))->load($dao->contact_id);
-          $params = [
-           'lat' => $address->geo_code_1,
-           'lng'=> $address->geo_code_2,
-           'lat_sin' => sin(deg2rad($address->geo_code_1)),
-           'lat_cos' => cos(deg2rad($address->geo_code_1)),
-           'lng_rad' => deg2rad($address->geo_code_2),
+
+        $p = [
+          'lat' => $address->geo_code_1,
+          'lng'=> $address->geo_code_2,
+          'lat_sin' => sin(deg2rad($address->geo_code_1)),
+          'lat_cos' => cos(deg2rad($address->geo_code_1)),
+          'lng_rad' => deg2rad($address->geo_code_2),
           ];
-          $params['data'] = $params;
-          $entityObj->get('field_geolocation')->setValue(array($params));
-          $entityObj->get($key)->setValue(1);
-          $entityObj->save();
-       }
+          $p['data'] = $p;
+          $params[] = $p;
+        }
+        $entityType = SupportedEntities::getEntityType('Contact');
+        $entityObj = \Drupal::entityTypeManager()->getStorage(SupportedEntities::getEntityType('Contact'))->load($dao->contact_id);
+        $entityObj->get('field_geolocation')->setValue(array($params));
+        $entityObj->get('field_mapped_location')->setValue(1);
+        $entityObj->save();
      }
 
      $index = \Drupal\search_api\Entity\Index::load('default');
