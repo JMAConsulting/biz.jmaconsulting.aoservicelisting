@@ -310,9 +310,9 @@ class CRM_Aoservicelisting_ExtensionUtil {
    * @param array $nameDetails
    */
   public static function generateDrupalUserName($nameDetails) {
-    $namefields = ['first_name', 'last_name'];
-    foreach($nameFields as $field) {
-      $nameDetails[$field] = preg_replace('/[^a-zA-Z0-9\/]+/', '', strtolower($nameDetails[$field]));
+    $nameFields = ['first_name', 'last_name'];
+    foreach ($nameFields as $field) {
+      $nameDetails[$field] = strtolower(preg_replace('/[^a-zA-Z0-9\/\s]+/', '', $nameDetails[$field]));
     }
     return $nameDetails['first_name'] . '.' . $nameDetails['last_name'] . $nameDetails['id'];
   }
@@ -322,7 +322,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($cid)) {
       return FALSE;
     }
-    $name = CRM_Core_DAO::executeQuery("SELECT id, first_name, last_name AS name, display_name
+    $name = CRM_Core_DAO::executeQuery("SELECT id, first_name, last_name, display_name
           FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
     $userName = self::generateDrupalUserName($name);
     if (self::usernameRule($cid)) {
