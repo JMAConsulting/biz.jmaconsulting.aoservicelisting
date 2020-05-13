@@ -305,14 +305,26 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return TRUE;
   }
 
+  /**
+   * Generate a safe Drupal user name for use
+   * @param array $nameDetails
+   */
+  public static function generateDrupalUserName($nameDetails) {
+    $namefields = ['first_name', 'last_name'];
+    foreach($nameFields as $field) {
+      $nameDetails[$field] = preg_replace('/[^a-zA-Z0-9\/]+/', '', strtolower($nameDetails[$field]));
+    }
+    return $nameDetails['first_name'] . '.' . $nameDetails['last_name'] . $nameDetails['id'];
+  }
 
   public static function createUserAccount($cid) {
     // We create the user account for the primary contact.
     if (empty($cid)) {
       return FALSE;
     }
-    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name, $cid)) AS name, display_name
+    $name = CRM_Core_DAO::executeQuery("SELECT id, first_name, last_name AS name, display_name
           FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
+    $userName = self::generateDrupalUserName($name);
     if (self::usernameRule($cid)) {
       return FALSE;
     }
@@ -322,7 +334,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     // Reset $_post.
     $_POST = [];
     $params = [
-      'cms_name' => $name['name'],
+      'cms_name' => $userName,
       'cms_pass' => 'changeme',
       'cms_confirm_pass' => 'changeme',
       'email' => CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]),
@@ -335,7 +347,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       return FALSE;
     }
 
-    $authorizedContact = user_load_by_name($name['name']);
+    $authorizedContact = user_load_by_name($userName);
     if (!empty($authorizedContact)) {
       $roles = array_merge($authorizedContact->getRoles(), ['authorized_contact']);
       $authorizedContact->set('roles', array_unique($roles));
