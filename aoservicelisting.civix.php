@@ -371,6 +371,10 @@ class CRM_Aoservicelisting_ExtensionUtil {
         if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
           $primaryCid = $relationship['values'][$relationship['id']]['contact_id_a'];
         }
+        if (empty($primaryCid)) {
+          CRM_Core_Session::setStatus(ts('No primary contact found for this service listing! Please specify a primary contact and re-approve the listing.'));
+          return FALSE;
+        }
         // Create drupal account if not exists.
         if (!self::createUserAccount($primaryCid)) {
           // Set status message indicating that user account creation was unsuccessful if the user account doesn't exist.
