@@ -349,7 +349,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       }
     }
     $primaryAddressGeocodeParams = [
-       'country' => 'CA',
+       'country' => 'CAN',
        'street_address' => $values['work_address'][1],
        'city' => $values['city'][1],
        'postal_code' => $values['postal_code'][1],
@@ -358,7 +358,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     try {
       $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
       $geocodeProvider->format($primaryAddressGeocodeParams);
-      if (!empty($primaryAddressGeocodeParams['geo_code_error'])) {
+      if (($primaryAddressGeocodeParams['geo_code_1'] == 'null' && $primaryAddressGeocodeParams['geo_code_2'] == 'null') || !empty($primaryAddressGeocodeParams['geo_code_error'])) {
         $errors['work_address[1]'] = E::ts('Unable to find this location on Google Maps. Please revise the address');
       }
     }
@@ -374,7 +374,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           }
         }
         $supplementalAddressGeocodeParams = [
-          'country' => 'CA',
+          'country' => 'CAN',
           'street_address' => $values['work_address'][$workRecordId],
           'city' => $values['city'][$workRecordId],
           'postal_code' => $values['postal_code'][$workRecordId],
@@ -383,7 +383,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         try {
           $geocodeProvider = CRM_Utils_GeocodeProvider::getConfiguredProvider();
           $geocodeProvider->format($supplementalAddressGeocodeParams);
-          if (!empty($supplementalAddressGeocodeParams['geo_code_error'])) {
+          if (($primaryAddressGeocodeParams['geo_code_1'] == 'null' && $primaryAddressGeocodeParams['geo_code_2'] == 'null') || !empty($supplementalAddressGeocodeParams['geo_code_error'])) {
             $errors['work_address[' . $workRecordId . ']'] = E::ts('Unable to find this location on Google Maps. Please revise the address');
           }
         }
