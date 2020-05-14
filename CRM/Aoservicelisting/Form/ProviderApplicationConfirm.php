@@ -302,6 +302,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
 
         E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
+        if (!empty($individualParams['email'])) {
+          // Check for dupes for primary contact.
+          if (empty($individualParams['contact_id'])) {
+            $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
+            $dedupeParams['check_permission'] = 0;
+            $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 12);
+            $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+          }
+        }
         $abaMember = civicrm_api3('Contact', 'create', $individualParams);
         if (!$primaryContactFound) {
           // Check if primary contact is the same as staff member 1
