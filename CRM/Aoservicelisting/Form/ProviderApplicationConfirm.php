@@ -183,6 +183,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ]);
     }
 
+    //Ensure that the location type of all email addresses are work.
+    self::setEmailsToWorkLocation($organization['id']);
+
     $addId = civicrm_api3('Address', 'get', [
       'contact_id' => $organization['id'],
       'is_primary' => 1,
@@ -280,6 +283,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $params['add_relationship'] = 0;
         $params['update_current_employer'] = 0;
         civicrm_api3('Address', 'create', $params);
+
+        //Ensure that the location type of all email addresses are work.
+        self::setEmailsToWorkLocation($staffMemberId);
       }
     }
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
@@ -316,6 +322,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           civicrm_api3('Address', 'create', $params);
         }
 
+        //Ensure that the location type of all email addresses are work.
+        self::setEmailsToWorkLocation($abaMember['id']);
         // TODO :create website, Do we need to inherit website from the Staff N to ABA Staff N?
       }
     }
@@ -375,6 +383,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $aparams['update_current_employer'] = 0;
         civicrm_api3('Address', 'create', $aparams);
       }
+      //Ensure that the location type of all email addresses are work.
+      self::setEmailsToWorkLocation($primId);
       // Create activity
       if (empty($this->_loggedInContactID)) {
         E::createActivity($organization['id']);
@@ -390,6 +400,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       CRM_Utils_System::redirect(CRM_Utils_System::url('fr/civicrm/service-listing-thankyou', 'reset=1'));
     } else {
       CRM_Utils_System::redirect(CRM_Utils_System::url('civicrm/service-listing-thankyou', 'reset=1'));
+    }
+  }
+
+  public static function setEmailsToWorkLocation($contact_id) {
+    $emails = civicrm_api3('Email', 'get', ['contact_id' => $contact_id])['values'];
+    if (!empty($emails)) {
+      foreach ($emails as $email) {
+        civicrm_api3('Email', ' create', ['id' => $email['id'], 'location_type_id' => 'Work']);
+      }
     }
   }
 
