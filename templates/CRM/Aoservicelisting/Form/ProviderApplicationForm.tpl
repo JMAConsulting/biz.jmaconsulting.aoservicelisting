@@ -312,6 +312,8 @@
       $('#crm-container.crm-public .label').css('font-size', '16px');
       $('.crm-clear-link').hide();
 
+      var selector = {/literal}'{$IS_REGULATED_SERVICE}'{literal};
+      var selectorVal = $('[name=' + selector + ']:checked').val();
       var serviceProvider = $('[name=listing_type]:checked').val();
       if (serviceProvider == "1") {
         $('.edit-row-organization_name').hide();
@@ -369,7 +371,10 @@
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"][value="1"]').prop({'checked': true});
           $('*[data-crm-custom="service_provider_details:Display_First_Name_and_Last_Name_in_public_listing"]').parent('div.content').css('pointer-events', 'all');
           if ($('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']:checked').val() == "1") {
-              $('#add-another-staff, #add-another-aba').show();
+              $('#add-another-aba').show();
+          }
+          if ($('[name=' + selector + ']:checked').val() == "1") {
+              $('#add-another-staff').show();
           }
           $('#aba_first_name_1').parent().parent().show();
           $('#aba_last_name_1').parent().parent().show();
@@ -539,10 +544,13 @@
       if (selectorVal == "1") {
         regulatedServices.show();
         $('#regulated-staff-message, .staff_members').show();
+        if ($('[name=listing_type]:checked').val() != "1") {
+          $('#add-another-staff').show();
+        }
       }
       else {
         regulatedServices.hide();
-        $('#regulated-staff-message, .staff_members').hide();
+        $('#regulated-staff-message, .staff_members, #add-another-staff').hide();
       }
       $('[name=' + selector + ']').change(function() {
         var rsSelector = {/literal}'{$REGULATED_SERVICE_CF}'{literal};
@@ -557,6 +565,9 @@
           $('#staff_first_name_1').val($('#primary_first_name').val()).trigger('change');
           $('#staff_last_name_1').val($('#primary_last_name').val()).trigger('change');
           $('#regulated-staff-message, .staff_members').show();
+          if ($('[name=listing_type]:checked').val() != "1") {
+            $('#add-another-staff').show();
+          }
         }
         else {
           $('#staff_member-1').addClass('hiddenElement');
@@ -570,7 +581,7 @@
             $(this).val('').trigger('change');
             $(this).parent().parent().hide();
           });
-          $('#regulated-staff-message, .staff_members').hide();
+          $('#regulated-staff-message, .staff_members, #add-another-staff').hide();
           $('[id^=staff_first_name]').each(function() {
             if ($(this).attr('id') != 'staff_first_name_1') {
               $(this).val('').trigger('change');

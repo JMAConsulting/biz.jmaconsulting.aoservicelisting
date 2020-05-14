@@ -299,13 +299,29 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
           $values['primary_last_name'] == $values['aba_last_name'][$key]) {
           $individualParams['email'] = $values['email-Primary'];
-          $primaryContactFound = TRUE;
         }
 
         E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
+        if (!empty($individualParams['email'])) {
+          // Check for dupes for primary contact.
+          if (empty($individualParams['contact_id'])) {
+            $dedupeParams = CRM_Dedupe_Finder::formatParams($individualParams, 'Individual');
+            $dedupeParams['check_permission'] = 0;
+            $dupes = CRM_Dedupe_Finder::dupesByParams($dedupeParams, 'Individual', NULL, [], 12);
+            $individualParams['contact_id'] = CRM_Utils_Array::value('0', $dupes, NULL);
+          }
+        }
         $abaMember = civicrm_api3('Contact', 'create', $individualParams);
-        if ($primaryContactFound) {
-          $primaryContactId = $abaMember['id'];
+        if (!$primaryContactFound) {
+          // Check if primary contact is the same as staff member 1
+          if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
+            $values['primary_last_name'] == $values['aba_last_name'][$key]
+          ) {
+            E::createRelationship($abaMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
+            E::createPhone($abaMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
+            $primaryContactFound = TRUE;
+            $primaryContactId = $abaMember['id'];
+          }
         }
 
         E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
