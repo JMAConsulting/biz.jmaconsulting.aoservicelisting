@@ -354,22 +354,25 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ];
       if (!empty($this->_loggedInContactID)) {
         $primaryParams['contact_id'] = $this->_loggedInContactID;
-        $primaryContact = civicrm_api3('Contact', 'getsingle', [
+        $primaryContact = civicrm_api3('Contact', 'get', [
           'id' => $this->_loggedInContactID,
           'contact_type' => 'Individual',
           'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
           'return' => ['first_name', 'last_name', 'email'],
         ]);
-        if ($primaryContact['first_name'] != $primaryParams['first_name'] &&
-          $primaryContact['last_name'] != $primaryParams['last_name'] &&
-          $primaryContact['email'] != $primaryParams['email']
-        ) {
-          civicrm_api3('Relationship', 'get', [
-            'contact_id_a' => $this->_loggedInContactID,
-            'contact_id_b' => $organization['id'],
-            'relationship_type_id' => PRIMARY_CONTACT_REL,
-            'api.relationship.delete' => '$value.id',
-          ]);
+        if (!empty($primaryContact['values'])) {
+          $primaryContact = $primaryContact['values'][$primaryContact['id']];
+          if ($primaryContact['first_name'] != $primaryParams['first_name'] &&
+            $primaryContact['last_name'] != $primaryParams['last_name'] &&
+            $primaryContact['email'] != $primaryParams['email']
+          ) {
+            civicrm_api3('Relationship', 'get', [
+              'contact_id_a' => $this->_loggedInContactID,
+              'contact_id_b' => $organization['id'],
+              'relationship_type_id' => PRIMARY_CONTACT_REL,
+              'api.relationship.delete' => '$value.id',
+            ]);
+          }
         }
       }
       else {
