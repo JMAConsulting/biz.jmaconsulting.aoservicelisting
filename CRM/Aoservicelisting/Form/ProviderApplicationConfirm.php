@@ -266,6 +266,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           if ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
             $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]
           ) {
+            // Ensure that contact is set to the correct subtype.
+            civicrm_api3('Contact', 'create', [
+              'contact_type' => 'Individual',
+              'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
+              'id' => $abaMember['id'],
+            ]);
             E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
             E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
             $primaryContactFound = TRUE;
@@ -317,6 +323,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
             $values['primary_last_name'] == $values['aba_last_name'][$key]
           ) {
+            // Ensure that contact is set to the correct subtype.
+            civicrm_api3('Contact', 'create', [
+              'contact_type' => 'Individual',
+              'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
+              'id' => $abaMember['id'],
+            ]);
             E::createRelationship($abaMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
             E::createPhone($abaMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
             $primaryContactFound = TRUE;
