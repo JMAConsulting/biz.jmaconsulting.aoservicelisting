@@ -35,17 +35,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         ]);
         $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
-          'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER]
+          'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER, REGULATED_URL]
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $website = civicrm_api3('Website', 'get', ['contact_id' => $this->_loggedInContactID, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
-        $regulatorUrlPresent = (!empty($website));
+        $regulatorUrlPresent = (!empty($primaryContact[REGULATED_URL]));
         $staffRowCount = $abaStaffCount = 1;
         if ($regulatorUrlPresent) {
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['staff_last_name['. $staffRowCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
           $defaults['staff_contact_id['. $staffRowCount . ']'] = $this->_loggedInContactID;
-          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website[0]['url'];
+          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = (string)(new SimpleXMLElement($primaryContact[REGULATED_URL]))['href'];
           $staffRowCount++;
         }
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
@@ -85,10 +84,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
         $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
         $defaults['city[1]'] = $primaryWorkAddress['city'];
-        $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
-        if (!empty($primaryWebsite['values'][0]['url'])) {
-          $defaults['website'] = $primaryWebsite['values'][0]['url'];
-        }
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
@@ -101,16 +96,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
-            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
-            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
-            $regulatorUrlPresent = (!empty($website));
+            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [REGULATED_URL, CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
+            $regulatorUrlPresent = (!empty($staffDetails[REGULATED_URL]));
             $certificateNumberPresent = (!empty($staffDetails[CERTIFICATE_NUMBER]));
             if ($regulatorUrlPresent) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website[0]['url'];
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = (string)(new SimpleXMLElement($staffDetails[REGULATED_URL]))['href'];
               $staffRowCount++;
             }
             if ($certificateNumberPresent) {
