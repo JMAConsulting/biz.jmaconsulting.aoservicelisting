@@ -141,6 +141,12 @@ function aoservicelisting_civicrm_themes(&$themes) {
   _aoservicelisting_civix_civicrm_themes($themes);
 }
 
+function aoservicelisting_civicrm_alterCustomFieldDisplayValue(&$displayValue, $value, $entityId, $fieldInfo) {
+  if ('custom_' . $fieldInfo['id'] == REGULATED_URL) {
+    $displayValue = html_entity_decode("<a href='$value'>$value</a>");
+  }
+}
+
 function aoservicelisting_civicrm_preProcess($formName, &$form) {
   if ($formName == "CRM_Contact_Form_Contact") {
     if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
