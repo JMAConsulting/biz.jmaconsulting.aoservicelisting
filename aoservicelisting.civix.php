@@ -399,6 +399,9 @@ class CRM_Aoservicelisting_ExtensionUtil {
             'status_id' => 'Completed',
           ]);
         }
+        // Add URL for listing to the service listing record.
+        $url = CRM_Utils_System::url("service-listing/$cid", NULL, TRUE);
+        civicrm_api3('Contact', 'create', ['id' => $cid, LISTING_URL => $url]);
       }
       if ($oldStatus) {
         civicrm_api3('Activity', 'create', [
