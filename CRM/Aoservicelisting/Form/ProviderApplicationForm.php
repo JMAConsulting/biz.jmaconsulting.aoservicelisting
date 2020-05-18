@@ -44,7 +44,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['staff_last_name['. $staffRowCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
           $defaults['staff_contact_id['. $staffRowCount . ']'] = $this->_loggedInContactID;
-          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = (string)(new SimpleXMLElement($primaryContact[REGULATED_URL]))['href'];
+          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $primaryContact[REGULATED_URL];
           $staffRowCount++;
         }
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
@@ -104,7 +104,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = (string)(new SimpleXMLElement($staffDetails[REGULATED_URL]))['href'];
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $staffDetails[REGULATED_URL];
               $staffRowCount++;
             }
             if ($certificateNumberPresent) {

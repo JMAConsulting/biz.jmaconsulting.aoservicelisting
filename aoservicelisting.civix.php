@@ -203,7 +203,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       return;
     }
     civicrm_api3('Contact', 'create', [
-      REGULATED_URL => "<a href='$url'>$url</a>",
+      REGULATED_URL => $url,
       'contact_id' => $cid,
     ]);
   }
