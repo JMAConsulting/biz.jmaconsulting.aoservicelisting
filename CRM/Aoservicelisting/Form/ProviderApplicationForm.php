@@ -139,6 +139,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     if (empty($this->_loggedInContactID)) {
       $this->assign('isCreate', TRUE);
     }
+    else {
+      $this->assign('isCreate', FALSE);
+    }
 
     $attr = empty($this->organizationId) ? [] : ['readonly' => TRUE];
     $serviceListingOptions = [1 => E::ts('Individual'), 2 => E::ts('Organization')];
