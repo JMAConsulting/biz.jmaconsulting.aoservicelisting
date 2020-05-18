@@ -340,6 +340,26 @@
         $('#staff_first_name_1').parent().parent().show();
         $('#staff_last_name_1').parent().parent().show();
       }
+      function showStaff(countcheck, service) {
+        if (countcheck) {
+          for (var i=1; i<=countcheck; i++) {
+            if ($('[name=listing_type]:checked').val() == "2") {
+              $('#staff_member-' + i).removeClass('hiddenElement');
+            }
+          }
+        }
+      }
+
+      function hideStaff(unchecked, checked) {
+        for (i=checked+1; i<=unchecked; i++) {
+          if (!$('#staff_member-' + i).hasClass('hiddenElement') && i > 1) {
+            $('#staff_member-' + i).addClass('hiddenElement');
+            $('#staff_last_name_' + i).val('').trigger('change');
+            $('#staff_first_name_' + i).val('').trigger('change');
+            $('#staff_record_regulator_' + i).val('');
+          }
+        }
+      }
       $('[name=listing_type]').on('change', function() {
         var servicecheckedcount = 0;
         var serviceunchekecount = 5;
@@ -488,9 +508,9 @@
         }
       });
 
-      // Add domains as default values
-      {/literal}{if $isCreate}{literal}
       var services = $('#editrow-' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + ' input[type=checkbox]');
+      {/literal}{if $isCreate}{literal}
+      // Add domains as default values
       showStaff(services.filter(':checked').length, services.filter(':checked'));
       services.change(function() {
         var checked = parseInt(services.filter(':checked').length);
@@ -498,28 +518,11 @@
         showStaff(checked, services.filter(':checked'));
         hideStaff(unchecked, checked);
       });
-
-      function showStaff(countcheck, service) {
-        if (countcheck) {
-          for (var i=1; i<=countcheck; i++) {
-            if ($('[name=listing_type]:checked').val() == "2") {
-              $('#staff_member-' + i).removeClass('hiddenElement');
-            }
-          }
-        }
-      }
-
-      function hideStaff(unchecked, checked) {
-        for (i=checked+1; i<=unchecked; i++) {
-          if (!$('#staff_member-' + i).hasClass('hiddenElement') && i > 1) {
-            $('#staff_member-' + i).addClass('hiddenElement');
-            $('#staff_last_name_' + i).val('').trigger('change');
-            $('#staff_first_name_' + i).val('').trigger('change');
-            $('#staff_record_regulator_' + i).val('');
-          }
-        }
-      }
-
+      {/literal}{else}{literal}
+      $('[id^=' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + ']').attr('disabled', true);
+      $('[name=' + {/literal}'{$IS_REGULATED_SERVICE}'{literal} + ']').attr('disabled', true);
+      $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').attr('disabled', true);
+      $('[id^=' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ']').attr('disabled', true);
       {/literal}{/if}{literal}
       // End domain default values
       var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];
