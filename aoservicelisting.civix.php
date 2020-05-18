@@ -400,7 +400,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
           ]);
         }
         // Add URL for listing to the service listing record.
-        $url = "<a href='" . CRM_Utils_System::url("service-listing/$cid", TRUE) . "'>" . CRM_Contact_BAO_Contact::displayName($cid) . "</a>";
+        $url = CRM_Utils_System::url("service-listing/$cid", NULL, TRUE);
         civicrm_api3('Contact', 'create', ['id' => $cid, LISTING_URL => $url]);
       }
       if ($oldStatus) {
