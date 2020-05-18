@@ -80,6 +80,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
         $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
         $defaults['city[1]'] = $primaryWorkAddress['city'];
+        $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
+        if (!empty($primaryWebsite['values'][0]['url'])) {
+          $defaults['website'] = $primaryWebsite['values'][0]['url'];
+        }
         // Get details of the other staff members
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
