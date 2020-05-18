@@ -35,17 +35,16 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         ]);
         $primaryContact = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->_loggedInContactID,
-          'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER]
+          'return' => ['id', 'first_name', 'last_name', CERTIFICATE_NUMBER, REGULATED_URL]
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
-        $website = civicrm_api3('Website', 'get', ['contact_id' => $this->_loggedInContactID, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
-        $regulatorUrlPresent = (!empty($website));
+        $regulatorUrlPresent = (!empty($primaryContact[REGULATED_URL]));
         $staffRowCount = $abaStaffCount = 1;
         if ($regulatorUrlPresent) {
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['staff_last_name['. $staffRowCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
           $defaults['staff_contact_id['. $staffRowCount . ']'] = $this->_loggedInContactID;
-          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website[0]['url'];
+          $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $primaryContact[REGULATED_URL];
           $staffRowCount++;
         }
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
@@ -60,10 +59,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['primary_last_name'] = $primaryContact['last_name'];
         }
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
-        $primaryStaffWebsite = civicrm_api3('Website', 'get', ['contact_id' => $primaryContact['id'], 'is_active' => 1, 'url' => ['IS NOT NULL' => 1]]);
-        if (!empty($primaryStaffWebsite['count'])) {
-          $defaults['staff_record_regulator[1]'] = $primaryStaffWebsite['values'][$primaryStaffWebsite['id']]['url'];
-        }
         foreach (['organization_name',  'email'] as $field) {
           if ($field === 'organization_name') {
             if (stristr($organization[$field], 'self-employed') === FALSE) {
@@ -101,16 +96,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($staffMembers['count'])) {
           foreach ($staffMembers['values'] as $staffMember) {
             $staffMemberContactId = $staffMember['contact_id_a'];
-            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
-            $website = civicrm_api3('Website', 'get', ['contact_id' => $staffMemberContactId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1])['values'];
-            $regulatorUrlPresent = (!empty($website));
+            $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [REGULATED_URL, CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
+            $regulatorUrlPresent = (!empty($staffDetails[REGULATED_URL]));
             $certificateNumberPresent = (!empty($staffDetails[CERTIFICATE_NUMBER]));
             if ($regulatorUrlPresent) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
               $defaults['staff_first_name[' . $staffRowCount . ']'] = $staffDetails['first_name'];
               $defaults['staff_last_name[' . $staffRowCount . ']'] = $staffDetails['last_name'];
-              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $website[0]['url'];
+              $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $staffDetails[REGULATED_URL];
               $staffRowCount++;
             }
             if ($certificateNumberPresent) {

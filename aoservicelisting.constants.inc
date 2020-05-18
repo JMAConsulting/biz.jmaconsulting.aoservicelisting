@@ -27,4 +27,5 @@
   define('ABA_CREDENTIALS', 'custom_911');
   define('CERTIFICATE_NUMBER', 'custom_910');
   define('PRIMARY_CONTACT_SUBTYPE', 'authorized_contact');
+  define('REGULATED_URL', 'custom_919');
   define('LISTING_URL', 'custom_918');

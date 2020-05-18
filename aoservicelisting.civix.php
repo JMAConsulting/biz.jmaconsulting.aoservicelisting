@@ -198,6 +198,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
+  public static function createRegulatedURL($cid, $url) {
+    if (empty($url)) {
+      return;
+    }
+    civicrm_api3('Contact', 'create', [
+      REGULATED_URL => $url,
+      'contact_id' => $cid,
+    ]);
+  }
+
   public static function createPhone($cid, $phone) {
     if (empty($phone)) {
       return;

@@ -142,6 +142,9 @@ function aoservicelisting_civicrm_themes(&$themes) {
 }
 
 function aoservicelisting_civicrm_alterCustomFieldDisplayValue(&$displayValue, $value, $entityId, $fieldInfo) {
+  if ('custom_' . $fieldInfo['id'] == REGULATED_URL) {
+    $displayValue = html_entity_decode("<a href='$value'>$value</a>");
+  }
   if ('custom_' . $fieldInfo['id'] == LISTING_URL) {
     $displayValue = html_entity_decode("<a href='$value'>" . CRM_Contact_BAO_Contact::displayName($entityId) . "</a>");
   }

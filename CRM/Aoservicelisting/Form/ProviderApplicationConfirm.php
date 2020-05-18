@@ -257,7 +257,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
         $staffMemberIds[] = $staffMember['id'];
 
-        E::createWebsite($staffMember['id'], $values['staff_record_regulator'][$rowNumber]);
+        E::createRegulatedURL($staffMember['id'], $values['staff_record_regulator'][$rowNumber]);
 
         E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
