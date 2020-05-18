@@ -142,10 +142,10 @@ function aoservicelisting_civicrm_themes(&$themes) {
 }
 
 function aoservicelisting_civicrm_alterCustomFieldDisplayValue(&$displayValue, $value, $entityId, $fieldInfo) {
-  if ('custom_' . $fieldInfo['id'] == REGULATED_URL) {
+  if ('custom_' . $fieldInfo['id'] == REGULATED_URL && !empty($value)) {
     $displayValue = html_entity_decode("<a href='$value'>$value</a>");
   }
-  if ('custom_' . $fieldInfo['id'] == LISTING_URL) {
+  if ('custom_' . $fieldInfo['id'] == LISTING_URL && !empty($value)) {
     $displayValue = html_entity_decode("<a href='$value'>" . CRM_Contact_BAO_Contact::displayName($entityId) . "</a>");
   }
 }
