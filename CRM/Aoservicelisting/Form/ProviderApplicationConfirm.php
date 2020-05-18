@@ -270,7 +270,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             civicrm_api3('Contact', 'create', [
               'contact_type' => 'Individual',
               'contact_sub_type' => PRIMARY_CONTACT_SUBTYPE,
-              'id' => $abaMember['id'],
+              'id' => $staffMember['id'],
             ]);
             E::createRelationship($staffMember['id'], $organization['id'], PRIMARY_CONTACT_REL);
             E::createPhone($staffMember['id'], CRM_Utils_Array::value('phone-Primary-6', $values));
