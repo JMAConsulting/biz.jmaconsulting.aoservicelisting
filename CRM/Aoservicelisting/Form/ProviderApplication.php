@@ -181,7 +181,7 @@ public $_loggedInContactID;
     CRM_Custom_Form_CustomData::setDefaultValues($this);
   }
 
-  public getChangeLog($previousValues, $formValues) {
+  public function getChangeLog($previousValues, $formValues) {
     $mapFields = [
       'listing_type' => [
         1 => ['website'],
@@ -260,7 +260,7 @@ public $_loggedInContactID;
         $count = $fields['count'];
         unset($fields['count']);
         $entryFound = FALSE;
-        for ($i = 1; $i <= $count, $i++) {
+        for ($i = 1; $i <= $count; $i++) {
           if ($entryFound) {
             break;
           }
@@ -269,7 +269,7 @@ public $_loggedInContactID;
               $entryFound = TRUE;
             }
             if ($formValues[$name][$i] != $previousValues["{$name}[{$i}]"]) {
-              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]]);
+              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]);
             }
           }
         }
@@ -284,8 +284,8 @@ public $_loggedInContactID;
             $previousValues[$fieldName] = array_filter($previousValues[$fieldName], 'strlen');
             $result = array_diff_assoc($formValues[$fieldName], $previousValues[$fieldName]);
             if (!empty($result)) {
-              $previousValue = implode(', ' array_keys($previousValues[$fieldName]));
-              $newValue = implode(', ' array_keys($formValues[$fieldName]));
+              $previousValue = implode(', ', array_keys($previousValues[$fieldName]));
+              $newValue = implode(', ', array_keys($formValues[$fieldName]));
               $changedLog[$section] .= sprintf('<br/> %s changed from %s to %s', $this->_elementNames[$fieldName], $previousValue, $newValue);
             }
           }
@@ -298,7 +298,7 @@ public $_loggedInContactID;
         $count = $abaFields['count'];
         unset($abaFields['count']);
         $entryFound = FALSE;
-        for ($i = 1; $i <= $count, $i++) {
+        for ($i = 1; $i <= $count; $i++) {
           if ($entryFound) {
             break;
           }
@@ -307,7 +307,7 @@ public $_loggedInContactID;
               $entryFound = TRUE;
             }
             if ($formValues[$name][$i] != $previousValues["{$name}[{$i}]"]) {
-              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]]);
+              $changedLog[$section] .= sprintf('<br/> %s $d changed from %s to %s', $this->_elementNames["{$name}[{$i}]"], $i, $previousValues["{$name}[{$i}]"], $formValues[$name][$i]);
             }
           }
         }
