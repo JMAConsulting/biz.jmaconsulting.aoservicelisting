@@ -306,6 +306,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     // Now process all ABA staff members that have yet to have been processed. They would only be here if they don't match the regulated staff details.
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
       if (!empty($certificateNumber) && !in_array($key, $abaStaffDone)) {
+        E::endABARelationship($values, $key, $organization['id']);
         $individualParams = [
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],

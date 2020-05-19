@@ -134,10 +134,24 @@ class CRM_Aoservicelisting_ExtensionUtil {
   }
 
   public static function endRelationship($values, $rowNumber, $orgId) {
-    if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_first_name'][$rowNumber])
+    if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_last_name'][$rowNumber])
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
       // We had a staff record but it is gone now
       $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
+      if (!empty($relationships['values'])) {
+        // End Date all relationships as they have either overwritten the data or not.
+        foreach ($relationships['values'] as $relationship) {
+          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
+        }
+      }
+    }
+  }
+
+  public static function endABARelationship($values, $rowNumber, $orgId) {
+    if (empty($values['aba_first_name'][$rowNumber]) && empty($values['aba_last_name'][$rowNumber])
+      && empty($values[CERTIFICATE_NUMBER][$rowNumber]) && !empty($values['aba_contact_id'][$rowNumber])) {
+      // We had an aba staff record but it is gone now
+      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['aba_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
       if (!empty($relationships['values'])) {
         // End Date all relationships as they have either overwritten the data or not.
         foreach ($relationships['values'] as $relationship) {
