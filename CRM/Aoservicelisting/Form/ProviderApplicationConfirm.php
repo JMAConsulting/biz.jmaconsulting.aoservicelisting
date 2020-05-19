@@ -130,8 +130,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $this->submit($values);
   }
 
-  public function submit($values)
-  {
+  public function submit($values) {
     $this->processCustomValue($values);
 
     if (!empty($this->_loggedInContactID)) {
@@ -147,6 +146,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       }
     }
 
+    // Create or update the organisation record which will have the service listing contact sub type added
     $organization_params = [
       'organization_name' => empty($values['organization_name']) ? 'Self-employed ' . $values['primary_first_name'] . ' ' . $values['primary_last_name'] : $values['organization_name'],
       'email' => $values['organization_email'] ?: $values['email-Primary'],
@@ -207,12 +207,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       'entity_id' => $organization['id'],
     ]);
 
-
+    // Begin by processing staff members and also all the addresses
     $staffMemberIds = $abaStaffDone = [];
     $primaryContactFound = FALSE;
     $primaryContactId = 0;
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
 
+      // Add phones and addresses to the service listing contact.
       E::createPhone($organization['id'], $values['phone'][$rowNumber]);
 
       if ($rowNumber !== 1 && !empty($values['work_address'][$rowNumber])) {
@@ -222,6 +223,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       }
       E::endRelationship($values, $rowNumber, $organization['id']);
 
+      // Check to see if the details of the regulated staff member matches those details of the primary contact. 
       if (!empty($values['staff_first_name'][$rowNumber])) {
         $individualParams = [
           'first_name' => $values['staff_first_name'][$rowNumber],
@@ -231,7 +233,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]) {
           $individualParams['email'] = $values['email-Primary'];
         }
-
 
         E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
         if (!empty($individualParams['email'])) {
@@ -245,6 +246,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
         $individualParams['contact_type'] = 'Individual';
         $abaStaffMemberFound = FALSE;
+        // Check to see if the details of the regulated staff member match the details supplied of the ABA staff member. 
         if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) !== FALSE && array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name']) !== FALSE) {
           // Check that we have found the same combination of first and last names
           if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) == array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name'])) {
@@ -254,13 +256,15 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $abaStaffMemberFound = TRUE;
           }
         }
+        // Create the staff contact.  This may include an ABA certificate but is at least regulatd staff member.
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
         $staffMemberIds[] = $staffMember['id'];
 
         E::createRegulatedURL($staffMember['id'], $values['staff_record_regulator'][$rowNumber]);
-
+        // Create employee of relationship between the staff contact and the service listing contact
         E::createRelationship($staffMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
-
+        // If we haven't already found the primary contact but we have found that the supplied details of the regulated staff member and the primary contact match. 
+        // Save hte contact as a authorized contact sub type and also create relationship of primary contact between the staff contact and the service listing and add primary contact details fo the staff member's record.
         if (!$primaryContactFound) {
           // Check if primary contact is the same as staff member 1
           if ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
@@ -280,6 +284,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
       }
     }
+    // Add addresses to alll the regulated staff members excluding any staff that match the primray contact as they will be dealt with later on in the code.  
     foreach ($staffMemberIds as $staffMemberId) {
       foreach ($addressIds as $key => $details) {
         if ($staffMemberId == $primaryContactId) {
@@ -297,6 +302,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         self::setEmailsToWorkLocation($staffMemberId);
       }
     }
+
+    // Now process all ABA staff members that have yet to have been processed. They would only be here if they don't match the regulated staff details.
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
       if (!empty($certificateNumber) && !in_array($key, $abaStaffDone)) {
         $individualParams = [
@@ -321,6 +328,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           }
         }
         $abaMember = civicrm_api3('Contact', 'create', $individualParams);
+        // If we haven't found a matching contact for the primary contact details check to see if the ABA contact details matches. if so create the contact as an authorized listing contact and create 
+        // primary contact relationship between ABA staff member contact and service listing contact and also store primary contact details against the staff member record.
         if (!$primaryContactFound) {
           // Check if primary contact is the same as staff member 1
           if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
@@ -338,10 +347,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
             $primaryContactId = $abaMember['id'];
           }
         }
-
+        // Create employee relationship betwen ABA staff contact and service listing contact. 
         E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
-        // create address
+        // create address for ABA staff as long as they are not primary contact as that will be dealt with lower down. 
         foreach ($addressIds as $key => $details) {
           if ($abaMember['id'] == $primaryContactId) {
             continue;
@@ -349,17 +358,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $params = $details[1];
           unset($params['id']);
           $params['contact_id'] = $abaMember['id'];
-          $params['master_id'] = $addressIds[$addressKey][0];
+          $params['master_id'] = $details[0];
           $params['add_relationship'] = 0;
           $params['update_current_employer'] = 0;
           civicrm_api3('Address', 'create', $params);
-        }
 
-        //Ensure that the location type of all email addresses are work.
-        self::setEmailsToWorkLocation($abaMember['id']);
-        // TODO :create website, Do we need to inherit website from the Staff N to ABA Staff N?
+          //Ensure that the location type of all email addresses are work.
+          self::setEmailsToWorkLocation($abaMember['id']);
+        }
       }
     }
+    // If we still haven't found the primary contact then try and create a new contact for the primary contact. If The primary contact details submitted do not match the ones currently on file for the primary contact (due to them being logged iin). End the current primary contact relationshop. 
     if (!$primaryContactFound) {
       // Create the primary contact
       $primaryParams = [
@@ -409,6 +418,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     else {
       $primId = $primaryContactId;
     }
+    // If we have found a contact that matches the primary contact create an employee of relationship and also save the addresses to the primary contact. 
+    // Also send the email to the primrary contact confirming we have recieved the submission. Then redirect to the thank you page. 
     if ($primId) {
       foreach ($addressIds as $key => $details) {
         $aparams = $details[1];
@@ -439,6 +450,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
   }
 
+  /**
+   * Set all email addresse for a contact to be of location type work.
+   * @param int $contact_id
+   */
   public static function setEmailsToWorkLocation($contact_id) {
     $emails = civicrm_api3('Email', 'get', ['contact_id' => $contact_id])['values'];
     if (!empty($emails)) {

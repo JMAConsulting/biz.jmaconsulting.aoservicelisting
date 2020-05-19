@@ -13,6 +13,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
   public function setDefaultValues() {
     $defaults = [];
+    // Get profile defaults set.
     $fields = CRM_Core_BAO_UFGroup::getFields(PRIMARY_PROFILE, FALSE);
     CRM_Core_BAO_UFGroup::setProfileDefaults($this->organizationId, $fields, $defaults, TRUE);
     $fields = CRM_Core_BAO_UFGroup::getFields(SERVICELISTING_PROFILE1, FALSE);
@@ -28,6 +29,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
     if (!empty($this->_loggedInContactID)) {
       if (!empty($this->organizationId)) {
+        // If we have an org id and we are logged in prefill based on already submitted data.
         $staffMemberIds = [$this->_loggedInContactID];
         $organization = civicrm_api3('Contact', 'getsingle', [
           'id' => $this->organizationId,
@@ -40,6 +42,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
         $regulatorUrlPresent = (!empty($primaryContact[REGULATED_URL]));
         $staffRowCount = $abaStaffCount = 1;
+        //If the primary contact has a regulated url variable set also set the first regulated staff details to match that of the primary contact.
         if ($regulatorUrlPresent) {
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['staff_last_name['. $staffRowCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
@@ -47,18 +50,22 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $primaryContact[REGULATED_URL];
           $staffRowCount++;
         }
+        // if the primary contact has a ABA certificate field set then prefill the first ABA staff member details with teh primary contact details. 
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
-          $defaults['aba_first_name[' . $abaStaffCount . ']'] = $primaryContact['first_name'];
-          $defaults['aba_last_name[' . $abaStaffCount . ']'] = $primaryContact['last_name'];
+          $defaults['aba_first_name[' . $abaStaffCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
+          $defaults['aba_last_name[' . $abaStaffCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
           $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $this->_loggedInContactID;
           $defaults[CERTIFICATE_NUMBER . '[' . $abaStaffCount . ']'] = $primaryContact[CERTIFICATE_NUMBER];
           $abaStaffCount++;
         }
+        // If the primary contact does not have a regulated URL or an ABA certificate then only fill in the primary contact field information
         if (!$regulatorUrlPresent && empty($primaryContact[CERTIFICATE_NUMBER])) {
           $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['primary_last_name'] = $primaryContact['last_name'];
         }
+        // Set the first phone number to be that of the primary contact.
         $defaults['phone[1]'] = $primaryContactPhone['phone'];
+        // Set organization field defaults and listing type default.
         foreach (['organization_name',  'email'] as $field) {
           if ($field === 'organization_name') {
             if (stristr($organization[$field], 'self-employed') === FALSE) {
@@ -76,6 +83,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
           $defaults[$field] = $organization[$field];
         }
+        // Set the first work address field to be that from the primary contact. 
         $primaryWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
         $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
         $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
@@ -84,7 +92,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($primaryWebsite['values'][0]['url'])) {
           $defaults['website'] = $primaryWebsite['values'][0]['url'];
         }
-        // Get details of the other staff members
+        // Get details of the other staff members other than the primary contact. 
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
           'contact_id_a' => ['!=' => $this->_loggedInContactID],
@@ -99,6 +107,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
             $staffDetails = civicrm_api3('Contact', 'getsingle', ['id' => $staffMemberContactId, 'return' => [REGULATED_URL, CERTIFICATE_NUMBER, 'first_name', 'last_name']]);
             $regulatorUrlPresent = (!empty($staffDetails[REGULATED_URL]));
             $certificateNumberPresent = (!empty($staffDetails[CERTIFICATE_NUMBER]));
+            // If the staff member has a regulated url field then fill in the details of the next avaliable regulated staff member key
             if ($regulatorUrlPresent) {
               $staffMemberIds[] = $staffMemberContactId;
               $defaults['staff_contact_id[' . $staffRowCount . ']'] = $staffMember['contact_id_a'];
@@ -107,6 +116,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
               $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $staffDetails[REGULATED_URL];
               $staffRowCount++;
             }
+            // If the staff member has a aba certificate field valid then fill in the details of the next avaliable regulated aba member key
             if ($certificateNumberPresent) {
               $defaults['aba_contact_id[' . $abaStaffCount . ']'] = $staffMember['contact_id_a'];
               $defaults['aba_first_name[' . $abaStaffCount . ']'] = $staffDetails['first_name'];
@@ -322,7 +332,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
       }
     }
-    $options = self::_getServieOptions();
+    $options = self::_getServiceOptions();
     foreach ($verifiedURLCounter as $value => $counter) {
       if (empty($counter) && array_key_exists($value, $options) !== FALSE) {
         $missingRegulators[] = $options[$value];
@@ -445,13 +455,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function postProcess() {
+    // We recet the page here so that the confirm page always gets the latest data from the submission of the form.
     $this->controller->resetPage('ProviderApplicationConfirm');
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
   }
 
-  public static function _getServieOptions() {
+  public static function _getServiceOptions() {
     $options = [];
     $customFieldAPI = civicrm_api3('Custom Field', 'getsingle', ['name' => 'Regulated_Services_Provided']);
     $dbOptions = civicrm_api3('OptionValue', 'get', ['option_group_id' => $customFieldAPI['option_group_id']]);
