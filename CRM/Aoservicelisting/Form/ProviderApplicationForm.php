@@ -263,7 +263,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       if (!empty($label) && !strstr($label, 'captcha')) {
         $name = $element->getName();
         if (strstr($name, '[')) {
-          $parts = explode('[', str_replace(']', '', $name);
+          $parts = explode('[', str_replace(']', '', $name));
           if (empty($elementNames[$parts[0]])) {
             $elementNames[$parts[0]] = [];
           }
