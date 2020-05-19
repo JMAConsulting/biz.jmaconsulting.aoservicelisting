@@ -282,6 +282,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
     foreach ($staffMemberIds as $staffMemberId) {
       foreach ($addressIds as $key => $details) {
+        if ($staffMemberId == $primaryContactId) {
+          continue;
+        }
         $params = $details[1];
         unset($params['id']);
         $params['contact_id'] = $staffMemberId;
@@ -339,9 +342,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         E::createRelationship($abaMember['id'], $organization['id'], EMPLOYER_CONTACT_REL);
 
         // create address
-        $addressKey = $key - 1;
-        if (!empty($addressIds[$addressKey])) {
-          $params = $addressIds[$addressKey][1];
+        foreach ($addressIds as $key => $details) {
+          if ($abaMember['id'] == $primaryContactId) {
+            continue;
+          }
+          $params = $details[1];
           unset($params['id']);
           $params['contact_id'] = $abaMember['id'];
           $params['master_id'] = $addressIds[$addressKey][0];
