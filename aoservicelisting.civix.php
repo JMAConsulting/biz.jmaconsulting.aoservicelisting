@@ -141,7 +141,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       if (!empty($relationships['values'])) {
         // End Date all relationships as they have either overwritten the data or not.
         foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
         }
       }
     }
@@ -156,7 +156,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
         if (!empty($relationships['values'])) {
           // End Date all relationships as they have either overwritten the data or not.
           foreach ($relationships['values'] as $relationship) {
-            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
+            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
           }
         }
       } else {
@@ -377,6 +377,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
           'contact_id_b' => $cid,
           'relationship_type_id' => PRIMARY_CONTACT_REL,
           'return' => 'contact_id_a',
+          'is_active' => 1,
         ]);
         if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
           $primaryCid = $relationship['values'][$relationship['id']]['contact_id_a'];
