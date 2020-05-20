@@ -414,6 +414,15 @@
         });
       });
 
+      $('[id^="aba_staff_member-"]').each(function() {
+          var section = $(this);
+            $(this).find('.content > input').each(function() {
+                if ($(this).val().length) {
+                    section.removeClass('hiddenElement');
+                }
+            });
+      });
+
       $('[id^="work_address-"]').each(function() {
         var workSection = $(this);
         $(this).find('.content > input').each(function() {
