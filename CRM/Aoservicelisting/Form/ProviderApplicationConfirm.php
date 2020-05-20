@@ -12,7 +12,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
   public $_logger;
 
   public function buildQuickForm() {
-    $this->_logger = $this->get('logger');
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
       CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
     }
@@ -170,6 +169,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $organization_params['contact_type'] = 'Organization';
     }
     $organization = civicrm_api3('Contact', 'create', $organization_params);
+    if (!empty($organization['id'])) {
+      $logger = $this->getFieldArray($values);
+      // Create a different activity with activity type = Service Listing Submission.
+      if (!empty($logger)) {
+        E::submissionActivity($logger, $organization['id']);
+      }
+    }
 
     // Set status to submitted for first time this is submitted, else awaiting staff verification if edited.
     if (empty($this->organizationId) && empty($this->_loggedInContactID) && !empty($organization['id'])) {

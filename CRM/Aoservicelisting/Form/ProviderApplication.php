@@ -189,11 +189,11 @@ public $_mapFields;
       'primary_section' => [
         'primary_first_name',
         'primary_last_name',
-        'custom_900',
+        DISPLAY_NAME,
         'email-Primary',
-        'custom_901',
+        DISPLAY_EMAIL,
         'phone-Primary-6',
-        'custom_902',
+        DISPLAY_PHONE,
       ],
       'address_section' => [
         'count' => 10,
@@ -202,10 +202,10 @@ public $_mapFields;
         'city',
         'postal_code',
       ],
-      'description' => ['custom_893'],
+      'description' => [SERVICE_DESCRIPTION],
       'ABA_section' => [
-        'custom_912' => ['yesno'],
-        'custom_911' => ['aba_credentials_held_20200401123810'],
+        ABA_SERVICES => ['yesno'],
+        ABA_CREDENTIALS => ['aba_credentials_held_20200401123810'],
         'aba_staff' => [
           'count' => 20,
           'aba_first_name',
@@ -214,8 +214,8 @@ public $_mapFields;
         ],
       ],
       'staff_section' => [
-        'custom_894' => [],
-        'custom_895' => ['regulated_services_provided_20200226231106'],
+        IS_REGULATED_SERVICE => [],
+        REGULATED_SERVICE_CF => ['regulated_services_provided_20200226231106'],
         'staff' => [
           'count' => 20,
           'staff_first_name',
@@ -224,41 +224,35 @@ public $_mapFields;
         ],
       ],
       'profile_3' => [
-        'custom_896' => ['yesno'],
-        'custom_897' => ['service_provided_20200226231158'],
-        'custom_898' => ['age_groups_served_20200226231233'],
-        'custom_899' => ['language_20180621140924'],
-        'custom_905' => [],
+        ACCEPTING_NEW_CLIENTS => ['yesno'],
+        SERVICES_ARE_PROVIDED => ['service_provided_20200226231158'],
+        AGE_GROUPS_SERVED => ['age_groups_served_20200226231233'],
+        LANGUAGES => ['language_20180621140924'],
+        OTHER_LANGUAGE => [],
       ],
       'camp_section' => [
         'count' => 20,
-        'custom_890',
-        'custom_891',
-        'custom_892',
+        CAMP_SESSION_NAME,
+        CAMP_FROM,
+        CAMP_TO,
       ],
-      'waiver_field',
     ];
     $logger = [];
     foreach ($this->_mapFields as $section => $fields) {
       if ($section == 'listing_type') {
         foreach ($fields[$formValues[$section]] as $fieldName) {
           if (!empty($formValues[$fieldName])) {
-            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
           }
         }
       }
       elseif ($section == 'primary_section') {
         foreach ($fields as $fieldName) {
           if (!empty($formValues[$fieldName])) {
-            if (in_array($fieldName, ['custom_900', 'custom_901', 'custom_902'])) {
-              if (!empty($formValues[$fieldName])) {
-                $formValues[$fieldName] = 'Yes';
-              }
-              else {
-                $formValues[$fieldName] = 'No';
-              }
+            if (in_array($fieldName, [DISPLAY_NAME, DISPLAY_EMAIL, DISPLAY_PHONE])) {
+              self:yesNo($formValues[$fieldName]);
             }
-            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
           }
         }
       }
@@ -275,14 +269,14 @@ public $_mapFields;
               $entryFound = TRUE;
             }
             if (!empty($formValues[$name][$i])) {
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
             }
           }
         }
       }
       elseif ($section == 'description') {
         if (!empty($formValues[$fields[0]])) {
-          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fields[0]], $formValues[$fields[0]]);
+          $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fields[0]], $formValues[$fields[0]]);
         }
       }
       elseif ($section == 'ABA_section' || $section == 'staff_section') {
@@ -298,20 +292,15 @@ public $_mapFields;
               }
               $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
               $newValue = implode(', ', array_keys($newArray));
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $newValue);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $newValue);
             }
           }
           else {
             if (!empty($options) && $options[0] == 'yesno') {
-              if (!empty($formValues[$fieldName])) {
-                $formValues[$fieldName] = 'Yes';
-              }
-              else {
-                $formValues[$fieldName] = 'No';
-              }
+              self:yesNo($formValues[$fieldName]);
             }
             if (!empty($formValues[$fieldName])) {
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
             }
           }
         }
@@ -327,7 +316,7 @@ public $_mapFields;
               $entryFound = TRUE;
             }
             if (!empty($formValues[$name][$i])) {
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
             }
           }
         }
@@ -342,15 +331,15 @@ public $_mapFields;
               }
               $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
               $newValue = implode(', ', array_keys($newArray));
-              if ($fieldName == 'custom_899') {
+              if ($fieldName == LANGUAGES) {
                 $newValue = implode(', ', $formValues[$fieldName]);
               }
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $newValue);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $newValue);
             }
           }
           else {
             if (!empty($formValues[$fieldName])) {
-              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
             }
           }
         }
@@ -360,7 +349,14 @@ public $_mapFields;
     return $logger;
   }
 
-  public function replaceKeys($array, $replacement_keys) {
+  public static function yesNo(&$value) {
+    if (!empty($value)) {
+      $value = 'Yes';
+    }
+    $value = 'No';
+  }
+
+  public static function replaceKeys($array, $replacement_keys) {
     foreach ($array as $key => $name) {
       foreach($replacement_keys as $option => $value) {
         if ($name && array_key_exists($option, $array)) {

@@ -464,7 +464,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $this->controller->resetPage('ProviderApplicationConfirm');
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
     $this->set('formValues', $formValues);
-    $this->set('logger', $this->getFieldArray($formValues));
     parent::postProcess();
   }
 
