@@ -28,6 +28,8 @@ public $formValues = [];
 public $organizationId;
 public $_loggedInContactID;
 public $_mapFields;
+public $_elementNames;
+
 
   public function preProcess() {
     parent::preProcess();
@@ -181,6 +183,7 @@ public $_mapFields;
   }
 
   public function getFieldArray($formValues) {
+    $this->_elementNames = $this->getRenderableElementNames();
     $this->_mapFields = [
       'listing_type' => [
         1 => ['website'],
@@ -214,7 +217,7 @@ public $_mapFields;
         ],
       ],
       'staff_section' => [
-        IS_REGULATED_SERVICE => [],
+        IS_REGULATED_SERVICE => ['yesno'],
         REGULATED_SERVICE_CF => ['regulated_services_provided_20200226231106'],
         'staff' => [
           'count' => 20,
@@ -250,7 +253,7 @@ public $_mapFields;
         foreach ($fields as $fieldName) {
           if (!empty($formValues[$fieldName])) {
             if (in_array($fieldName, [DISPLAY_NAME, DISPLAY_EMAIL, DISPLAY_PHONE])) {
-              self:yesNo($formValues[$fieldName]);
+              self::yesNo($formValues[$fieldName]);
             }
             $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
           }
@@ -297,7 +300,7 @@ public $_mapFields;
           }
           else {
             if (!empty($options) && $options[0] == 'yesno') {
-              self:yesNo($formValues[$fieldName]);
+              self::yesNo($formValues[$fieldName]);
             }
             if (!empty($formValues[$fieldName])) {
               $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
@@ -338,6 +341,9 @@ public $_mapFields;
             }
           }
           else {
+            if (!empty($options) && $options[0] == 'yesno') {
+              self::yesNo($formValues[$fieldName]);
+            }
             if (!empty($formValues[$fieldName])) {
               $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
             }

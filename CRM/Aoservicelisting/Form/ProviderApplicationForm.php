@@ -10,7 +10,6 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
 class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
   public $listingType = 1;
-  public $_elementNames;
 
   public function setDefaultValues() {
     $defaults = [];
@@ -228,7 +227,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         $this->setDefaults($defaults);
       }
     }
-    $this->_elementNames = $this->getRenderableElementNames();
 
     $this->addButtons(array(
       array(

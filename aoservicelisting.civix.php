@@ -141,7 +141,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'status_id' => 'Completed',
       'activity_type_id' => "service_listing_submission",
       'sequential' => 0,
-      'description' => $description,
+      'details' => $description,
     ]);
   }
 
