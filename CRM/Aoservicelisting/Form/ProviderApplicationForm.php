@@ -41,7 +41,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         ]);
         $primaryContactPhone = civicrm_api3('Phone', 'getsingle', ['contact_id' => $this->_loggedInContactID, 'is_primary' => 1]);
         $regulatorUrlPresent = (!empty($primaryContact[REGULATED_URL]));
-        $staffRowCount = $abaStaffCount = 1;
+        $staffRowCount = $abaStaffCount = $addressRowCount = 1;
         //If the primary contact has a regulated url variable set also set the first regulated staff details to match that of the primary contact.
         if ($regulatorUrlPresent) {
           $defaults['staff_first_name['. $staffRowCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
@@ -84,10 +84,22 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults[$field] = $organization[$field];
         }
         // Set the first work address field to be that from the primary contact. 
-        $primaryWorkAddress = civicrm_api3('Address', 'getsingle', ['contact_id' => $this->organizationId, 'is_primary' => 1]);
-        $defaults['work_address[1]'] = $primaryWorkAddress['street_address'];
-        $defaults['postal_code[1]'] = $primaryWorkAddress['postal_code'];
-        $defaults['city[1]'] = $primaryWorkAddress['city'];
+        $organizationAddreses = civicrm_api3('Address', 'get', ['contact_id' => $this->organizationId, 'options' => ['sort' => "is_primary DESC"]])['values'];
+        if (!empty($organizationAddreses)) {
+          foreach ($organizationAddreses as $orgAddress) {
+            $defaults['work_address[' . $addressRowCount . ']'] = $orgAddress['street_address'];
+            $defaults['postal_code[' . $addressRowCount . ']'] = $orgAddress['postal_code'];
+            $defaults['city[' . $addressRowCount . ']'] = $orgAddress['city'];
+            $addressRowCount++;
+          }
+        }
+        $phoneRowId = 2;
+        $phones = civicrm_api3('Phone', 'get', ['contact_id' => $this->organizationId, 'phone' => ['!=' => $primaryContactPhone['phone']], 'options' => ['sort' => "is_primary DESC"]])['values'];
+        if (!empty($phones)) {
+          foreach ($phones as $phone) {
+            $defaults['phone[' . $phoneRowId . ']'] = $phone['phone'];
+          }
+        }
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
         if (!empty($primaryWebsite['values'][0]['url'])) {
           $defaults['website'] = $primaryWebsite['values'][0]['url'];

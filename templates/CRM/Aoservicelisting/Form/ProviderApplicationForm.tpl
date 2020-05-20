@@ -521,10 +521,6 @@
 
       {/literal}{else}{literal}
       $('#email-Primary').attr('readonly', true);
-      $('[id^=' + {/literal}'{$REGULATED_SERVICE_CF}'{literal} + ']').parent().parent().parent().parent().parent('div.content').css('pointer-events', 'none');
-      $('[name=' + {/literal}'{$IS_REGULATED_SERVICE}'{literal} + ']').parent('div.content').css('pointer-events', 'none');
-      $('[name=' + {/literal}'{$ABA_SERVICES}'{literal} + ']').parent('div.content').css('pointer-events', 'none');
-      $('[id^=' + {/literal}'{$ABA_CREDENTIALS}'{literal} + ']').parent().parent().parent().parent().parent('div.content').css('pointer-events', 'none');
       {/literal}{/if}{literal}
       // End domain default values
       var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];

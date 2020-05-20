@@ -183,6 +183,9 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ]);
     }
 
+    // Delete all current addresses from the org contact and other contacts.
+    self::removeAddressesLinkedToOrganization($organization['id']);
+
     //Ensure that the location type of all email addresses are work.
     self::setEmailsToWorkLocation($organization['id']);
 
@@ -460,6 +463,25 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     if (!empty($emails)) {
       foreach ($emails as $email) {
         civicrm_api3('Email', ' create', ['id' => $email['id'], 'location_type_id' => 'Work']);
+      }
+    }
+  }
+
+  /**
+   * Remove all addresses linked to a specific organization id.
+   * @param int $organization_id
+   */
+  public static function removeAddressesLinkedToOrganization($organization_id) {
+    $addresses = civicrm_api3('Address', 'get', ['contact_id' => $organization_id, 'options' => ['limit' => 0]])['values'];
+    if (!empty($addresses)) {
+      foreach ($addresses as $address) {
+        $masterAddresses = civicrm_api3('Address', 'get', ['master_id' => $address['id'], 'options' => ['limit' => 0]])['values'];
+        if (!empty($masterAddresses)) {
+          foreach ($masterAddresses as $mAddress) {
+            civicrm_api3('Address', 'delete', ['id' => $mAddress['id']]);
+          }
+        }
+        civicrm_api3('Address', 'delete', ['id' => $address['id']]);
       }
     }
   }
