@@ -445,12 +445,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       // Create activity
       if (empty($this->_loggedInContactID)) {
         E::createActivity($organization['id']);
-        // Send email on confirmation.
-        E::sendMessage($primId, RECEIVED_MESSAGE);
       }
       else {
         // We need to handle cases of email edit.
       }
+      // Send email on confirmation.
+      E::sendMessage($primId, RECEIVED_MESSAGE);
     }
     // Redirect to thank you page.
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {

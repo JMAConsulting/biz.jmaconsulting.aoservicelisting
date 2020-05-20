@@ -207,7 +207,7 @@
       // hide other language field
       $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal}).hide();
       $('[name^=' + {/literal}'{$LANGUAGES}'{literal}).each(function() {
-        if ($(this).val().indexOf('Other Language') !== -1) {
+        if ($(this).val() && $(this).val().indexOf('Other Language') !== -1) {
           $('#editrow-' + {/literal}'{$OTHER_LANGUAGE}'{literal}).show();
         }
       });
