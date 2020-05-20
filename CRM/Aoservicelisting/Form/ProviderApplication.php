@@ -27,6 +27,7 @@ public $formValues = [];
 
 public $organizationId;
 public $_loggedInContactID;
+public $_mapFields;
 
   public function preProcess() {
     parent::preProcess();
@@ -47,6 +48,39 @@ public $_loggedInContactID;
         $this->_loggedInContactID = NULL;
       }
     }
+  }
+
+  /**
+   * Get the fields/elements defined in this form.
+   *
+   * @return array (string)
+   */
+  public function getRenderableElementNames() {
+    // The _elements list includes some items which should not be
+    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
+    // items don't have labels.  We'll identify renderable by filtering on
+    // the 'label'.
+    $elementNames = array();
+    foreach ($this->_elements as $element) {
+      /** @var HTML_QuickForm_Element $element */
+      $label = $element->getLabel();
+      if (!empty($label) && !strstr($label, 'captcha')) {
+        $name = $element->getName();
+        if (strstr($name, '[')) {
+          $parts = explode('[', str_replace(']', '', $name));
+          if (empty($elementNames[$parts[0]])) {
+            $elementNames[$parts[0]] = [];
+          }
+          if (!empty($parts[1])) {
+            $elementNames[$parts[0]][$parts[1]] = $label . ' ' . $parts[1];
+          }
+        }
+        else {
+          $elementNames[$name] = $label;
+        }
+      }
+    }
+    return $elementNames;
   }
 
   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
@@ -144,6 +178,129 @@ public $_loggedInContactID;
         $this->assign('isCaptcha', TRUE);
       }
     }
+  }
+
+  public function getFieldArray($formValues) {
+    $this->_mapFields = [
+      'listing_type' => [
+        1 => ['website'],
+        2 => ['organization_name', 'organization_email', 'website'],
+      ],
+      'primary_section' => [
+        'primary_first_name',
+        'primary_last_name',
+        'custom_900',
+        'email-Primary',
+        'custom_901',
+        'phone-Primary-6',
+        'custom_902',
+      ],
+      'address_section' => [
+        'count' => 10,
+        'phone',
+        'work_address',
+        'city',
+        'postal_code',
+      ],
+      'custom_893',
+      'ABA_section' => [
+        'custom_912',
+        'custom_911',
+        'aba_staff' => [
+          'count' => 20,
+          'aba_first_name',
+          'aba_last_name',
+          CERTIFICATE_NUMBER,
+        ],
+      ],
+      'staff_section' => [
+        'custom_894',
+        'custom_895',
+        'staff' => [
+          'count' => 20,
+          'staff_first_name',
+          'staff_first_name',
+          'staff_record_regulator',
+        ],
+      ],
+      'profile_3' => [
+        'custom_896',
+        'custom_897',
+        'custom_898',
+        'custom_899',
+        'custom_905',
+      ],
+      'camp_section' => [
+        'count' => 20,
+        'custom_890',
+        'custom_891',
+        'custom_892',
+      ],
+      'waiver_field',
+    ];
+    $logger = [];
+    foreach ($mapFields as $section => $fields) {
+      $this->_logger[$section] = '';
+      if ($section == 'listing_type') {
+        foreach ($fields[$formValues[$section]] as $fieldName) {
+          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+        }
+      }
+      elseif ($section == 'primary_section') {
+        foreach ($fields as $fieldName) {
+          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+        }
+      }
+      elseif ($section == 'address_section') {
+        $count = $fields['count'];
+        unset($fields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count; $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($fields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            $logger[$section] .= sprintf('<br/> %s $d: %s', $this->_elementNames["{$name}[{$i}]"], $i, $formValues[$name][$i]);
+          }
+        }
+      }
+      elseif ($section == 'ABA_section' || $section == 'staff_section') {
+        $key = $section == 'ABA_section' ? 'aba_staff' : 'staff';
+        $abaFields = $fields[$key];
+        unset($fields[$key]);
+        foreach ($fields as $fieldName) {
+          if (is_array($formValues[$fieldName])) {
+            $result = $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
+            if (!empty($result)) {
+              $newValue = implode(', ', array_keys($formValues[$fieldName]));
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $newValue);
+            }
+          }
+          else {
+            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          }
+        }
+        $count = $abaFields['count'];
+        unset($abaFields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count; $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($abaFields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            $logger[$section] .= sprintf('<br/> %s $d: %s', $this->_elementNames["{$name}[{$i}]"], $i, $formValues[$name][$i]);
+          }
+        }
+      }
+    }
+
+    return $logger;
   }
 
   public function processCustomValue(&$values) {

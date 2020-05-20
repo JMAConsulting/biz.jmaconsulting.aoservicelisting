@@ -9,7 +9,10 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  */
 class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservicelisting_Form_ProviderApplication {
 
+  public $_logger;
+
   public function buildQuickForm() {
+    $this->_logger = $this->get('logger');
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
       CRM_Utils_System::setTitle('Demande d\'inscription au Répertoire des services d\'Autisme Ontario');
     }
