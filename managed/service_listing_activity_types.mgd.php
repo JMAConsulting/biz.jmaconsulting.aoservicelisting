@@ -28,8 +28,19 @@ return [
     'update' => 'never',
     'params' => [
       'option_group_id' => 'activity_type',
-      'label' => 'Provider status changed',
+      'label' => 'Service listing status changed',
       'name' => 'provider_status_changed',
+      'is_reserved' => 1,
+    ],
+  ],
+  3 => [
+    'name' => 'ServiceListingSubmissionActivityType',
+    'entity' => 'OptionValue',
+    'update' => 'never',
+    'params' => [
+      'option_group_id' => 'activity_type',
+      'label' => 'Service listing submission',
+      'name' => 'service_listing_submission',
       'is_reserved' => 1,
     ],
   ],

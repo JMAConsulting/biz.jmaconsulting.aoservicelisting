@@ -27,6 +27,9 @@ public $formValues = [];
 
 public $organizationId;
 public $_loggedInContactID;
+public $_mapFields;
+public $_elementNames;
+
 
   public function preProcess() {
     parent::preProcess();
@@ -47,6 +50,39 @@ public $_loggedInContactID;
         $this->_loggedInContactID = NULL;
       }
     }
+  }
+
+  /**
+   * Get the fields/elements defined in this form.
+   *
+   * @return array (string)
+   */
+  public function getRenderableElementNames() {
+    // The _elements list includes some items which should not be
+    // auto-rendered in the loop -- such as "qfKey" and "buttons".  These
+    // items don't have labels.  We'll identify renderable by filtering on
+    // the 'label'.
+    $elementNames = array();
+    foreach ($this->_elements as $element) {
+      /** @var HTML_QuickForm_Element $element */
+      $label = $element->getLabel();
+      if (!empty($label) && !strstr($label, 'captcha')) {
+        $name = $element->getName();
+        if (strstr($name, '[')) {
+          $parts = explode('[', str_replace(']', '', $name));
+          if (empty($elementNames[$parts[0]])) {
+            $elementNames[$parts[0]] = [];
+          }
+          if (!empty($parts[1])) {
+            $elementNames[$parts[0]][$parts[1]] = $label . ' ' . $parts[1];
+          }
+        }
+        else {
+          $elementNames[$name] = $label;
+        }
+      }
+    }
+    return $elementNames;
   }
 
   public function buildCustom($id, $name, $viewOnly = FALSE, $ignoreContact = FALSE) {
@@ -144,6 +180,198 @@ public $_loggedInContactID;
         $this->assign('isCaptcha', TRUE);
       }
     }
+  }
+
+  public function getFieldArray($formValues) {
+    $this->_elementNames = $this->getRenderableElementNames();
+    $this->_mapFields = [
+      'listing_type' => [
+        1 => ['website'],
+        2 => ['organization_name', 'organization_email', 'website'],
+      ],
+      'primary_section' => [
+        'primary_first_name',
+        'primary_last_name',
+        DISPLAY_NAME,
+        'email-Primary',
+        DISPLAY_EMAIL,
+        'phone-Primary-6',
+        DISPLAY_PHONE,
+      ],
+      'address_section' => [
+        'count' => 10,
+        'phone',
+        'work_address',
+        'city',
+        'postal_code',
+      ],
+      'description' => [SERVICE_DESCRIPTION],
+      'ABA_section' => [
+        ABA_SERVICES => ['yesno'],
+        ABA_CREDENTIALS => ['aba_credentials_held_20200401123810'],
+        'aba_staff' => [
+          'count' => 20,
+          'aba_first_name',
+          'aba_last_name',
+          CERTIFICATE_NUMBER,
+        ],
+      ],
+      'staff_section' => [
+        IS_REGULATED_SERVICE => ['yesno'],
+        REGULATED_SERVICE_CF => ['regulated_services_provided_20200226231106'],
+        'staff' => [
+          'count' => 20,
+          'staff_first_name',
+          'staff_last_name',
+          'staff_record_regulator',
+        ],
+      ],
+      'profile_3' => [
+        ACCEPTING_NEW_CLIENTS => ['yesno'],
+        SERVICES_ARE_PROVIDED => ['service_provided_20200226231158'],
+        AGE_GROUPS_SERVED => ['age_groups_served_20200226231233'],
+        LANGUAGES => ['language_20180621140924'],
+        OTHER_LANGUAGE => [],
+      ],
+      'camp_section' => [
+        'count' => 20,
+        CAMP_SESSION_NAME,
+        CAMP_FROM,
+        CAMP_TO,
+      ],
+    ];
+    $logger = [];
+    foreach ($this->_mapFields as $section => $fields) {
+      if ($section == 'listing_type') {
+        foreach ($fields[$formValues[$section]] as $fieldName) {
+          if (!empty($formValues[$fieldName])) {
+            $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          }
+        }
+      }
+      elseif ($section == 'primary_section') {
+        foreach ($fields as $fieldName) {
+          if (!empty($formValues[$fieldName])) {
+            if (in_array($fieldName, [DISPLAY_NAME, DISPLAY_EMAIL, DISPLAY_PHONE])) {
+              self::yesNo($formValues[$fieldName]);
+            }
+            $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          }
+        }
+      }
+      elseif ($section == 'address_section') {
+        $count = $fields['count'];
+        unset($fields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count; $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($fields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            if (!empty($formValues[$name][$i])) {
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+            }
+          }
+        }
+      }
+      elseif ($section == 'description') {
+        if (!empty($formValues[$fields[0]])) {
+          $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fields[0]], $formValues[$fields[0]]);
+        }
+      }
+      elseif ($section == 'ABA_section' || $section == 'staff_section') {
+        $key = $section == 'ABA_section' ? 'aba_staff' : 'staff';
+        $abaFields = $fields[$key];
+        unset($fields[$key]);
+        foreach ($fields as $fieldName => $options) {
+          if (is_array($formValues[$fieldName])) {
+            $result = $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
+            if (!empty($result)) {
+              if (!empty($options)) {
+                $allOptions = CRM_Core_OptionGroup::values($options[0]);
+              }
+              $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
+              $newValue = implode(', ', array_keys($newArray));
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $newValue);
+            }
+          }
+          else {
+            if (!empty($options) && $options[0] == 'yesno') {
+              self::yesNo($formValues[$fieldName]);
+            }
+            if (!empty($formValues[$fieldName])) {
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            }
+          }
+        }
+        $count = $abaFields['count'];
+        unset($abaFields['count']);
+        $entryFound = FALSE;
+        for ($i = 1; $i <= $count; $i++) {
+          if ($entryFound) {
+            break;
+          }
+          foreach ($abaFields as $name) {
+            if (empty($formValues[$name][$i])) {
+              $entryFound = TRUE;
+            }
+            if (!empty($formValues[$name][$i])) {
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+            }
+          }
+        }
+      }
+      elseif ($section == 'profile_3') {
+        foreach ($fields as $fieldName => $options) {
+          if (is_array($formValues[$fieldName])) {
+            $result = $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
+            if (!empty($result)) {
+              if (!empty($options)) {
+                $allOptions = CRM_Core_OptionGroup::values($options[0]);
+              }
+              $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
+              $newValue = implode(', ', array_keys($newArray));
+              if ($fieldName == LANGUAGES) {
+                $newValue = implode(', ', $formValues[$fieldName]);
+              }
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $newValue);
+            }
+          }
+          else {
+            if (!empty($options) && $options[0] == 'yesno') {
+              self::yesNo($formValues[$fieldName]);
+            }
+            if (!empty($formValues[$fieldName])) {
+              $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            }
+          }
+        }
+      }
+    }
+
+    return $logger;
+  }
+
+  public static function yesNo(&$value) {
+    if (!empty($value)) {
+      $value = 'Yes';
+    }
+    $value = 'No';
+  }
+
+  public static function replaceKeys($array, $replacement_keys) {
+    foreach ($array as $key => $name) {
+      foreach($replacement_keys as $option => $value) {
+        if ($name && array_key_exists($option, $array)) {
+          $array[$value] = $name;
+          unset($array[$key]);
+        }
+      }
+    }
+    return $array;
   }
 
   public function processCustomValue(&$values) {

@@ -11,6 +11,13 @@
   define('WAIVER_FIELD', 'custom_903');
   define('IS_REGULATED_SERVICE', 'custom_894');
   define('REGULATED_SERVICE_CF', 'custom_895');
+  define('ACCEPTING_NEW_CLIENTS', 'custom_896');
+  define('SERVICES_ARE_PROVIDED', 'custom_897');
+  define('AGE_GROUPS_SERVED', 'custom_898');
+  define('CAMP_SESSION_NAME', 'custom_890');
+  define('SERVICE_DESCRIPTION', 'custom_893');
+  define('CAMP_FROM', 'custom_891');
+  define('CAMP_TO', 'custom_892');
   define('PRIMARY_CONTACT_REL', 74);
   define('EMPLOYER_CONTACT_REL', 5);
   define('STATUS', 'custom_904');

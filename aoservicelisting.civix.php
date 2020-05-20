@@ -133,6 +133,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
+  public static function submissionActivity($logger, $cid) {
+    $description = implode("<br/>", $logger);
+    civicrm_api3('Activity', 'create', [
+      'source_contact_id' => $cid,
+      'assignee_id' => SPECIALIST_ID,
+      'status_id' => 'Completed',
+      'activity_type_id' => "service_listing_submission",
+      'sequential' => 0,
+      'details' => $description,
+    ]);
+  }
+
   public static function endRelationship($values, $rowNumber, $orgId) {
     if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_last_name'][$rowNumber])
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
