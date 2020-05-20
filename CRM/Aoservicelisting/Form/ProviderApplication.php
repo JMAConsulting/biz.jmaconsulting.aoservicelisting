@@ -202,10 +202,10 @@ public $_mapFields;
         'city',
         'postal_code',
       ],
-      'custom_893',
+      'description' => ['custom_893'],
       'ABA_section' => [
-        'custom_912',
-        'custom_911',
+        'custom_912' => ['yesno'],
+        'custom_911' => ['aba_credentials_held_20200401123810'],
         'aba_staff' => [
           'count' => 20,
           'aba_first_name',
@@ -214,21 +214,21 @@ public $_mapFields;
         ],
       ],
       'staff_section' => [
-        'custom_894',
-        'custom_895',
+        'custom_894' => [],
+        'custom_895' => ['regulated_services_provided_20200226231106'],
         'staff' => [
           'count' => 20,
           'staff_first_name',
-          'staff_first_name',
+          'staff_last_name',
           'staff_record_regulator',
         ],
       ],
       'profile_3' => [
-        'custom_896',
-        'custom_897',
-        'custom_898',
-        'custom_899',
-        'custom_905',
+        'custom_896' => ['yesno'],
+        'custom_897' => ['service_provided_20200226231158'],
+        'custom_898' => ['age_groups_served_20200226231233'],
+        'custom_899' => ['language_20180621140924'],
+        'custom_905' => [],
       ],
       'camp_section' => [
         'count' => 20,
@@ -239,16 +239,27 @@ public $_mapFields;
       'waiver_field',
     ];
     $logger = [];
-    foreach ($mapFields as $section => $fields) {
-      $this->_logger[$section] = '';
+    foreach ($this->_mapFields as $section => $fields) {
       if ($section == 'listing_type') {
         foreach ($fields[$formValues[$section]] as $fieldName) {
-          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          if (!empty($formValues[$fieldName])) {
+            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          }
         }
       }
       elseif ($section == 'primary_section') {
         foreach ($fields as $fieldName) {
-          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          if (!empty($formValues[$fieldName])) {
+            if (in_array($fieldName, ['custom_900', 'custom_901', 'custom_902'])) {
+              if (!empty($formValues[$fieldName])) {
+                $formValues[$fieldName] = 'Yes';
+              }
+              else {
+                $formValues[$fieldName] = 'No';
+              }
+            }
+            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          }
         }
       }
       elseif ($section == 'address_section') {
@@ -263,24 +274,45 @@ public $_mapFields;
             if (empty($formValues[$name][$i])) {
               $entryFound = TRUE;
             }
-            $logger[$section] .= sprintf('<br/> %s $d: %s', $this->_elementNames["{$name}[{$i}]"], $i, $formValues[$name][$i]);
+            if (!empty($formValues[$name][$i])) {
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+            }
           }
+        }
+      }
+      elseif ($section == 'description') {
+        if (!empty($formValues[$fields[0]])) {
+          $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fields[0]], $formValues[$fields[0]]);
         }
       }
       elseif ($section == 'ABA_section' || $section == 'staff_section') {
         $key = $section == 'ABA_section' ? 'aba_staff' : 'staff';
         $abaFields = $fields[$key];
         unset($fields[$key]);
-        foreach ($fields as $fieldName) {
+        foreach ($fields as $fieldName => $options) {
           if (is_array($formValues[$fieldName])) {
             $result = $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
             if (!empty($result)) {
-              $newValue = implode(', ', array_keys($formValues[$fieldName]));
+              if (!empty($options)) {
+                $allOptions = CRM_Core_OptionGroup::values($options[0]);
+              }
+              $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
+              $newValue = implode(', ', array_keys($newArray));
               $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $newValue);
             }
           }
           else {
-            $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            if (!empty($options) && $options[0] == 'yesno') {
+              if (!empty($formValues[$fieldName])) {
+                $formValues[$fieldName] = 'Yes';
+              }
+              else {
+                $formValues[$fieldName] = 'No';
+              }
+            }
+            if (!empty($formValues[$fieldName])) {
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            }
           }
         }
         $count = $abaFields['count'];
@@ -294,13 +326,50 @@ public $_mapFields;
             if (empty($formValues[$name][$i])) {
               $entryFound = TRUE;
             }
-            $logger[$section] .= sprintf('<br/> %s $d: %s', $this->_elementNames["{$name}[{$i}]"], $i, $formValues[$name][$i]);
+            if (!empty($formValues[$name][$i])) {
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$name][$i], $formValues[$name][$i]);
+            }
+          }
+        }
+      }
+      elseif ($section == 'profile_3') {
+        foreach ($fields as $fieldName => $options) {
+          if (is_array($formValues[$fieldName])) {
+            $result = $formValues[$fieldName] = array_filter($formValues[$fieldName], 'strlen');
+            if (!empty($result)) {
+              if (!empty($options)) {
+                $allOptions = CRM_Core_OptionGroup::values($options[0]);
+              }
+              $newArray = self::replaceKeys($formValues[$fieldName], $allOptions);
+              $newValue = implode(', ', array_keys($newArray));
+              if ($fieldName == 'custom_899') {
+                $newValue = implode(', ', $formValues[$fieldName]);
+              }
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $newValue);
+            }
+          }
+          else {
+            if (!empty($formValues[$fieldName])) {
+              $logger[$section] .= sprintf('<br/> %s: %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+            }
           }
         }
       }
     }
 
     return $logger;
+  }
+
+  public function replaceKeys($array, $replacement_keys) {
+    foreach ($array as $key => $name) {
+      foreach($replacement_keys as $option => $value) {
+        if ($name && array_key_exists($option, $array)) {
+          $array[$value] = $name;
+          unset($array[$key]);
+        }
+      }
+    }
+    return $array;
   }
 
   public function processCustomValue(&$values) {
