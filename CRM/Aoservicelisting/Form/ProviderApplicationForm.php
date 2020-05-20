@@ -98,6 +98,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($phones)) {
           foreach ($phones as $phone) {
             $defaults['phone[' . $phoneRowId . ']'] = $phone['phone'];
+            $phoneRowId++;
           }
         }
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);
