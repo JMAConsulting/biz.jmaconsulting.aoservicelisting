@@ -350,10 +350,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
         [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']]); // We expect only a single contact
       if (!empty($existingStaff)) {
         // Dupe found
-        if (E::checkPrimaryContact($existingStaff)) {
-          // The contact being overwritten is a primary contact, so we don't allow for it to be overwritten.
-          return;
-        }
         $individualParams['contact_id'] = $existingStaff;
       }
     }
