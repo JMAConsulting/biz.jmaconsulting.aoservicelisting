@@ -128,6 +128,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'source_contact_id' => $cid,
       'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
+      'target_id' => $cid,
       'activity_type_id' => "service_listing_edited",
       'sequential' => 0,
     ]);
@@ -139,6 +140,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'source_contact_id' => $cid,
       'assignee_id' => SPECIALIST_ID,
       'status_id' => 'Completed',
+      'target_id' => $cid,
       'activity_type_id' => "service_listing_submission",
       'sequential' => 0,
       'details' => $description,
