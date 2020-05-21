@@ -199,13 +199,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (!empty($cid)) {
       // Check to see if this contact is a primary contact.
       if (E::checkPrimaryContact($cid)) {
-        // Prevent changing first name and last name for primary contacts.
-        $primaryContact = civicrm_api3('Contact', 'getsingle', [
-          'return' => ['first_name', 'last_name'],
-          'id' => $cid,
-        ]);
-        $individualParams['first_name'] = $primaryContact['first_name'];
-        $individualParams['last_name'] = $primaryContact['last_name'];
+        // The contact being overwritten is a primary contact, so we don't allow for it to be overwritten.
+        return;
       }
       $individualParams['contact_id'] = $cid;
     }
@@ -223,13 +218,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
       if (!empty($existingStaff)) {
         // Dupe found
         if (E::checkPrimaryContact($existingStaff)) {
-          // Prevent changing first name and last name for primary contacts.
-          $primaryContact = civicrm_api3('Contact', 'getsingle', [
-            'return' => ['first_name', 'last_name'],
-            'id' => $existingStaff,
-          ]);
-          $individualParams['first_name'] = $primaryContact['first_name'];
-          $individualParams['last_name'] = $primaryContact['last_name'];
+          // The contact being overwritten is a primary contact, so we don't allow for it to be overwritten.
+          return;
         }
         $individualParams['contact_id'] = $existingStaff;
       }
