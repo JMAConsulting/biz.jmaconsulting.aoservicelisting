@@ -147,9 +147,25 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
+  public static function checkPrimaryContact($cid) {
+    $authorizedContact = civicrm_api3('Contact', 'get', [
+      'id' => $cid,
+      'contact_sub_type' => "authorized_contact",
+    ]);
+    if (!empty($authorizedContact['count']) && $authorizedContact['count'] == 1) {
+      // The current contact is a primary contact.
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   public static function endRelationship($values, $rowNumber, $orgId) {
     if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_last_name'][$rowNumber])
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
+      // Check to see if this contact is a primary contact.
+      if (E::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
+        return;
+      }
       // We had a staff record but it is gone now
       $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
       if (!empty($relationships['values'])) {
@@ -164,6 +180,10 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function endABARelationship($values, $rowNumber, $orgId) {
     if (empty($values['aba_first_name'][$rowNumber]) && empty($values['aba_last_name'][$rowNumber])
       && empty($values[CERTIFICATE_NUMBER][$rowNumber]) && !empty($values['aba_contact_id'][$rowNumber])) {
+      // Check to see if this contact is a primary contact.
+      if (E::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
+        return;
+      }
       // We had an aba staff record but it is gone now
       $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['aba_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
       if (!empty($relationships['values'])) {
@@ -177,34 +197,41 @@ class CRM_Aoservicelisting_ExtensionUtil {
 
   public static function findDupes($cid, $orgId, &$individualParams, $rel = EMPLOYER_CONTACT_REL, $isOrgOptional = FALSE) {
     if (!empty($cid)) {
-      $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
-      if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
-        $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
-        $relationships = civicrm_api3('Relationship', 'get', $params);
-        if (!empty($relationships['values'])) {
-          // End Date all relationships as they have either overwritten the data or not.
-          foreach ($relationships['values'] as $relationship) {
-            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
-          }
-        }
-      } else {
-        $individualParams['contact_id'] = $cid;
+      // Check to see if this contact is a primary contact.
+      if (E::checkPrimaryContact($cid)) {
+        // Prevent changing first name and last name for primary contacts.
+        $primaryContact = civicrm_api3('Contact', 'getsingle', [
+          'return' => ['first_name', 'last_name'],
+          'id' => $cid,
+        ]);
+        $individualParams['first_name'] = $primaryContact['first_name'];
+        $individualParams['last_name'] = $primaryContact['last_name'];
       }
+      $individualParams['contact_id'] = $cid;
     }
-    if (empty($individualParams['contact_id'])) {
+    else {
       $orgClause = ' r.contact_id_b = ' . $orgId;
       $orgClause = $isOrgOptional ? " ($orgClause OR r.contact_id_b IS NOT NULL) " : $orgClause;
       // Check for dupes.
-      $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
+      $existingStaff = CRM_Core_DAO::singleValueQuery("SELECT r.contact_id_a
          FROM civicrm_relationship r
          INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
          LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
          WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1
          AND ca.first_name = %3 AND ca.last_name = %4",
-        [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']])->fetchAll()[0]; // We expect only a single contact
-      if (!empty($staffDetails)) {
+        [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']]); // We expect only a single contact
+      if (!empty($existingStaff)) {
         // Dupe found
-        $individualParams["contact_id"] = $staffDetails['contact_id_a'];
+        if (E::checkPrimaryContact($existingStaff)) {
+          // Prevent changing first name and last name for primary contacts.
+          $primaryContact = civicrm_api3('Contact', 'getsingle', [
+            'return' => ['first_name', 'last_name'],
+            'id' => $existingStaff,
+          ]);
+          $individualParams['first_name'] = $primaryContact['first_name'];
+          $individualParams['last_name'] = $primaryContact['last_name'];
+        }
+        $individualParams['contact_id'] = $existingStaff;
       }
     }
   }
