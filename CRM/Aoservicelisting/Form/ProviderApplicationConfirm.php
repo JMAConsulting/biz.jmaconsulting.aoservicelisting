@@ -242,7 +242,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams, FALSE, 'regstaff');
+        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams, EMPLOYER_CONTACT_REL, FALSE, 'regstaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
@@ -326,7 +326,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams, FALSE, 'abastaff');
+        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams, EMPLOYER_CONTACT_REL, FALSE, 'abastaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
