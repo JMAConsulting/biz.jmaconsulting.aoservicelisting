@@ -168,16 +168,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
       ]);
       if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
         // Archive the regulated URL
-        E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+        self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
       }
       else {
-        if (E::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
+        if (self::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
           // Only archive field, don't terminate relationship
-          E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+          self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
         }
         else {
           // We had a staff record but it is gone now
-          E::terminateRelationship($values['staff_contact_id'][$rowNumber], $orgId);
+          self::terminateRelationship($values['staff_contact_id'][$rowNumber], $orgId);
         }
       }
     }
@@ -192,16 +192,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
       ]);
       if (!empty($currentDetails[REGULATED_URL])) {
         // Archive the regulated URL
-        E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+        self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
       }
       else {
-        if (E::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
+        if (self::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
           // Only archive field, don't terminate relationship
-          E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+          self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
         }
         else {
           // We had a staff record but it is gone now
-          E::terminateRelationship($values['aba_contact_id'][$rowNumber], $orgId);
+          self::terminateRelationship($values['aba_contact_id'][$rowNumber], $orgId);
         }
       }
     }
@@ -224,7 +224,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'note' => $value,
       'entity_table' => "civicrm_contact",
     ]);
-    civicrm_ap3('Contact', 'create', [
+    civicrm_api3('Contact', 'create', [
       'contact_type' => "Individual",
       'id' => $cid,
       $field => 'null',
@@ -246,16 +246,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
           // This is an overwrite on the record, check to see if this contact has an ABA certificate before ending the relationship.
           if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
-            E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
-            if (E::checkPrimaryContact($cid)) {
+            if (self::checkPrimaryContact($cid)) {
               // Only archive field, don't terminate relationship
-              E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+              self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
             }
             else {
-              E::terminateRelationship($cid, $orgId);
+              self::terminateRelationship($cid, $orgId);
             }
           }
         }
@@ -272,8 +272,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
             $currentDetails['last_name'] != $individualParams['last_name']) &&
             $currentDetails[REGULATED_URL] == $individualParams['regulated_url']) {
             // This is an edit to the name, ensure that it is not a primary contact.
-            if (E::checkPrimaryContact($cid)) {
-              return;
+            if (self::checkPrimaryContact($cid)) {
+              self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
             }
             else {
               $individualParams['contact_id'] = $cid;
@@ -295,16 +295,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
           // This is an overwrite on the record, check to see if this contact has a regulated URL before ending the relationship.
           if (!empty($currentDetails[REGULATED_URL])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
-            E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
-            if (E::checkPrimaryContact($cid)) {
+            if (self::checkPrimaryContact($cid)) {
               // Only archive field, don't terminate relationship
-              E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+              self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
             }
             else {
-              E::terminateRelationship($cid, $orgId);
+              self::terminateRelationship($cid, $orgId);
             }
           }
         }
@@ -321,8 +321,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
               $currentDetails['last_name'] != $individualParams['last_name']) &&
             $currentDetails[CERTIFICATE_NUMBER] == $individualParams[CERTIFICATE_NUMBER]) {
             // This is an edit to the name, ensure that it is not a primary contact.
-            if (E::checkPrimaryContact($cid)) {
-              return;
+            if (self::checkPrimaryContact($cid)) {
+              self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
             }
             else {
               $individualParams['contact_id'] = $cid;
