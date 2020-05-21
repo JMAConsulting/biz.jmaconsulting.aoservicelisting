@@ -162,16 +162,22 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function endRelationship($values, $rowNumber, $orgId) {
     if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_last_name'][$rowNumber])
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
-      // Check to see if this contact is a primary contact.
-      if (E::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
-        return;
+      $currentDetails = civicrm_api3('Contact', 'getsingle', [
+        'id' => $values['staff_contact_id'][$rowNumber],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+      ]);
+      if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
+        // Archive the regulated URL
+        E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
       }
-      // We had a staff record but it is gone now
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
+      else {
+        if (E::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
+          // Only archive field, don't terminate relationship
+          E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+        }
+        else {
+          // We had a staff record but it is gone now
+          E::terminateRelationship($values['staff_contact_id'][$rowNumber], $orgId);
         }
       }
     }
@@ -180,23 +186,29 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function endABARelationship($values, $rowNumber, $orgId) {
     if (empty($values['aba_first_name'][$rowNumber]) && empty($values['aba_last_name'][$rowNumber])
       && empty($values[CERTIFICATE_NUMBER][$rowNumber]) && !empty($values['aba_contact_id'][$rowNumber])) {
-      // Check to see if this contact is a primary contact.
-      if (E::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
-        return;
+      $currentDetails = civicrm_api3('Contact', 'getsingle', [
+        'id' => $values['aba_contact_id'][$rowNumber],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+      ]);
+      if (!empty($currentDetails[REGULATED_URL])) {
+        // Archive the regulated URL
+        E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
       }
-      // We had an aba staff record but it is gone now
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['aba_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
+      else {
+        if (E::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
+          // Only archive field, don't terminate relationship
+          E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+        }
+        else {
+          // We had a staff record but it is gone now
+          E::terminateRelationship($values['aba_contact_id'][$rowNumber], $orgId);
         }
       }
     }
   }
 
   public static function terminateRelationship($cid, $orgId) {
-    $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1, 'relationship_type_id' => ['NOT IN' => [PRIMARY_CONTACT_REL]]];
+    $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
     $relationships = civicrm_api3('Relationship', 'get', $params);
     if (!empty($relationships['values'])) {
       // End Date all relationships as they have either overwritten the data or not.
@@ -238,7 +250,13 @@ class CRM_Aoservicelisting_ExtensionUtil {
           }
           else {
             // There is no certificate number, we can now end the relationship.
-            E::terminateRelationship($cid, $orgId);
+            if (E::checkPrimaryContact($cid)) {
+              // Only archive field, don't terminate relationship
+              E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            }
+            else {
+              E::terminateRelationship($cid, $orgId);
+            }
           }
         }
         else {
@@ -281,7 +299,13 @@ class CRM_Aoservicelisting_ExtensionUtil {
           }
           else {
             // There is no certificate number, we can now end the relationship.
-            E::terminateRelationship($cid, $orgId);
+            if (E::checkPrimaryContact($cid)) {
+              // Only archive field, don't terminate relationship
+              E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            }
+            else {
+              E::terminateRelationship($cid, $orgId);
+            }
           }
         }
         else {
