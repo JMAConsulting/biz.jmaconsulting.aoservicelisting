@@ -235,13 +235,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $individualParams = [
           'first_name' => $values['staff_first_name'][$rowNumber],
           'last_name' => $values['staff_last_name'][$rowNumber],
+          'regulated_url' => $values['staff_record_regulator'][$rowNumber],
         ];
         if ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
           $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]) {
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
+        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams, FALSE, 'regstaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
@@ -325,7 +326,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
+        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams, FALSE, 'abastaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
@@ -410,7 +411,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
       }
       else {
-        E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE);
+        E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE, 'primarycontact');
         // Check for dupes for primary contact.
         if (empty($primaryParams['contact_id'])) {
           $dedupeParams = CRM_Dedupe_Finder::formatParams($primaryParams, 'Individual');
