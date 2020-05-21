@@ -83,7 +83,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         }
         $phoneIds = $addressRowsMissing = [];
         // Fill in the address fields starting with the primary address for the first row
-        $organizationAddreses = civicrm_api3('Address', 'get', ['contact_id' => $this->organizationId, 'options' => ['sort' => "is_primary DESC"], 'return' => ['street_addres', 'postal_code', 'city', PHONE_ID_CUSTOM_FIELD]])['values'];
+        $organizationAddreses = civicrm_api3('Address', 'get', ['contact_id' => $this->organizationId, 'options' => ['sort' => "is_primary DESC"], 'return' => ['street_address', 'postal_code', 'city', PHONE_ID_CUSTOM_FIELD]])['values'];
         if (!empty($organizationAddreses)) {
           foreach ($organizationAddreses as $orgAddress) {
             $defaults['work_address[' . $addressRowCount . ']'] = $orgAddress['street_address'];
