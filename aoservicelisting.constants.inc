@@ -36,4 +36,4 @@
   define('PRIMARY_CONTACT_SUBTYPE', 'authorized_contact');
   define('REGULATED_URL', 'custom_930');
   define('LISTING_URL', 'custom_929');
-  define('PHONE_ID_CUSTOM_FIELD', 'custom_922');
+  define('PHONE_ID_CUSTOM_FIELD', 'custom_931');
