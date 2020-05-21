@@ -1,9 +1,8 @@
 {* HEADER *}
 {crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}
 {if $preFormText}
-  <div class="crm-section form-pre-section">
-    <div class="content">{$preFormText}</div>
-    <div class="clear"</div>
+  <div class="help">
+    {$preFormText}
   </div>
 {/if}
 <div class="crm-section edit-row-{$form.listing_type.id}">
