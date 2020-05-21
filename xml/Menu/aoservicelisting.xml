@@ -21,4 +21,10 @@
     <access_arguments>*always allow*</access_arguments>
     <is_public>true</is_public>
   </item>
+  <item>
+    <path>civicrm/admin/setting/servicelisting</path>
+    <page_callback>CRM_Aoservicelisting_Form_Settings</page_callback>
+    <title>Service Listing Settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>

@@ -139,6 +139,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
       CRM_Utils_System::setTitle('Autism Ontario Service Listing Application');
     }
 
+    $this->assign('preFormText', Civi::settings()->get('aoservicelisting_form_pre_help'));
     // Prevent setting defaults for URLs on edit mode.
     if (empty($this->_loggedInContactID)) {
       $this->assign('isCreate', TRUE);

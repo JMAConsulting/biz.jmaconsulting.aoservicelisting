@@ -163,48 +163,37 @@ function aoservicelisting_civicrm_preProcess($formName, &$form) {
   }
 }
 
-  /**
-   * Implementation of hook_civicrm_postProcess
-   *
-   * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postProcess
-   */
-  function aoservicelisting_civicrm_postProcess($formName, &$form) {
-    if ($formName == "CRM_Contact_Form_Contact") {
-      if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
-        E::setStatus($form->_oldStatus, $form->_contactId, $form->_submitValues);
-      }
-    }
-    if ($formName == "CRM_Contact_Form_Inline_CustomData") {
-      if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
-        E::setStatus($form->_oldStatus, $form->_submitValues['cid'], $form->_submitValues);
-      }
+/**
+ * Implementation of hook_civicrm_postProcess
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postProcess
+ */
+function aoservicelisting_civicrm_postProcess($formName, &$form) {
+  if ($formName == "CRM_Contact_Form_Contact") {
+    if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+      E::setStatus($form->_oldStatus, $form->_contactId, $form->_submitValues);
     }
   }
-
-// --- Functions below this ship commented out. Uncomment as required. ---
-
-/**
- * Implements hook_civicrm_preProcess().
- *
- * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_preProcess
- *
-function aoservicelisting_civicrm_preProcess($formName, &$form) {
-
-} // */
+  if ($formName == "CRM_Contact_Form_Inline_CustomData") {
+    if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
+      E::setStatus($form->_oldStatus, $form->_submitValues['cid'], $form->_submitValues);
+    }
+  }
+}
 
 /**
  * Implements hook_civicrm_navigationMenu().
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_navigationMenu
- *
+ */
 function aoservicelisting_civicrm_navigationMenu(&$menu) {
-  _aoservicelisting_civix_insert_navigation_menu($menu, 'Mailings', array(
-    'label' => E::ts('New subliminal message'),
-    'name' => 'mailing_subliminal_message',
-    'url' => 'civicrm/mailing/subliminal',
-    'permission' => 'access CiviMail',
+  _aoservicelisting_civix_insert_navigation_menu($menu, 'Administer/Communications', array(
+    'label' => E::ts('Service Listing Settings'),
+    'name' => 'service_listing_settings',
+    'url' => 'civicrm/admin/setting/servicelisting',
+    'permission' => 'administer CiviCRM',
     'operator' => 'OR',
     'separator' => 0,
   ));
   _aoservicelisting_civix_navigationMenu($menu);
-} // */
+}
