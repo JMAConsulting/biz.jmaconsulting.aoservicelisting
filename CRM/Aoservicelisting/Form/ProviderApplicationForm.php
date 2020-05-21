@@ -63,8 +63,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['primary_last_name'] = $primaryContact['last_name'];
         }
-        // Set the first phone number to be that of the primary contact.
-        $defaults['phone[1]'] = $primaryContactPhone['phone'];
         // Set organization field defaults and listing type default.
         foreach (['organization_name',  'email'] as $field) {
           if ($field === 'organization_name') {
@@ -83,22 +81,47 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
           $defaults[$field] = $organization[$field];
         }
-        // Set the first work address field to be that from the primary contact. 
-        $organizationAddreses = civicrm_api3('Address', 'get', ['contact_id' => $this->organizationId, 'options' => ['sort' => "is_primary DESC"]])['values'];
+        $phoneIds = $addressRowsMissing = [];
+        // Fill in the address fields starting with the primary address for the first row
+        $organizationAddreses = civicrm_api3('Address', 'get', ['contact_id' => $this->organizationId, 'options' => ['sort' => "is_primary DESC"], 'return' => ['street_addres', 'postal_code', 'city', PHONE_ID_CUSTOM_FIELD]])['values'];
         if (!empty($organizationAddreses)) {
           foreach ($organizationAddreses as $orgAddress) {
             $defaults['work_address[' . $addressRowCount . ']'] = $orgAddress['street_address'];
             $defaults['postal_code[' . $addressRowCount . ']'] = $orgAddress['postal_code'];
             $defaults['city[' . $addressRowCount . ']'] = $orgAddress['city'];
+            // If the address is linked to a phone use that phone id to fill in the phone field in this row.
+            if (!empty($orgAddress[PHONE_ID_CUSTOM_FIELD])) {
+              $phone = civicrm_api3('Phone', 'get', ['id' => $orgAddress[PHONE_ID_CUSTOM_FIELD], 'sequential' => 1])['values'];
+              if (!empty($phone)) {
+                $defaults['phone[' . $addressRowCount . ']'] = $phone[0]['phone'];
+                $phoneIds[] = $orgAddress[PHONE_ID_CUSTOM_FIELD];
+              }
+            }
+            else {
+              $addressRowsMissing[] = $addressRowCount;
+            }
             $addressRowCount++;
           }
         }
-        $phoneRowId = 2;
-        $phones = civicrm_api3('Phone', 'get', ['contact_id' => $this->organizationId, 'phone' => ['!=' => $primaryContactPhone['phone']], 'options' => ['sort' => "is_primary DESC"]])['values'];
-        if (!empty($phones)) {
-          foreach ($phones as $phone) {
-            $defaults['phone[' . $phoneRowId . ']'] = $phone['phone'];
-            $phoneRowId++;
+        // If we have address field rows missing phones lets just start by filling in with any phones from the service listing contact
+        if (!empty($addressRowsMissing)) {
+          $phoneParams = [
+            'contact_id' => $this->organizationId,
+            'options' => ['sort' => "is_primary DESC"],
+          ];
+          // If we have already used some ids to populate the form exclude those.
+          if (!empty($phoneIds)) {
+            $phoneParams['id'] = ['NOT IN' => $phoneIds];
+          }
+          $addressRowKey = 0;
+          $phones = civicrm_api3('Phone', 'get', $phoneParams)['values'];
+          if (!empty($phones)) {
+            foreach ($phones as $phone) {
+              if (!empty($addressRowsMissing[$addressRowKey])) {
+                $defaults['phone[' . $addressRowsMissing[$addressRowKey] . ']'] = $phone['phone'];
+                $addressRowKey++;
+              }
+            }
           }
         }
         $primaryWebsite = civicrm_api3('Website', 'get', ['contact_id' => $this->organizationId, 'url' => ['IS NOT NULL' => 1], 'sequential' => 1]);

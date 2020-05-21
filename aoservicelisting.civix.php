@@ -237,7 +237,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (!empty($result['values'])) {
       return;
     }
-    civicrm_api3('Phone', 'create', $params);
+    $phone = civicrm_api3('Phone', 'create', $params);
+    return $phone['id'];
   }
 
   public static function createRelationship($cid, $orgId, $relType) {
@@ -263,6 +264,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'country_id' => 'CA',
       'state_province_id' => 'Ontario',
       'location_type_id' => 'Work',
+      PHONE_ID_CUSTOM_FIELD => $values['phone_id'][$rowNumber],
     ];
     if ($rowNumber == 1) {
       $addressParams['is_primary'] = 1;
