@@ -234,7 +234,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
           // This is an overwrite on the record, check to see if this contact has an ABA certificate before ending the relationship.
           if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
-            E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
@@ -277,7 +277,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
           // This is an overwrite on the record, check to see if this contact has a regulated URL before ending the relationship.
           if (!empty($currentDetails[REGULATED_URL])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
-            E::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            E::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
