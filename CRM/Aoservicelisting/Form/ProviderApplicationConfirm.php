@@ -192,18 +192,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       ]);
     }
 
+    // Delete all current addresses from the org contact and other contacts.
+    self::removeAddressesLinkedToOrganization($organization['id']);
+
+    // Delete all current phones from the org contact and other contacts.
+    self::removePhonesLinkedToOrganization($organization['id']);
+
     //Ensure that the location type of all email addresses are work.
     self::setEmailsToWorkLocation($organization['id']);
-
-    $addId = civicrm_api3('Address', 'get', [
-      'contact_id' => $organization['id'],
-      'is_primary' => 1,
-      'return' => 'id',
-    ]);
-
-    list($add1Id, $addressParams1) = E::createAddress($values, 1, $organization['id'], CRM_Utils_Array::value('id', $addId));
-
-    $addressIds = [0 => [$add1Id, $addressParams1]];
 
     E::createWebsite($organization['id'], $values['website']);
 
@@ -220,12 +216,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     $staffMemberIds = $abaStaffDone = [];
     $primaryContactFound = FALSE;
     $primaryContactId = 0;
+    // Array to hold all the phone ids that are stored in the database.
+    $values['phone_id'] = [];
     for ($rowNumber = 1; $rowNumber <= 20; $rowNumber++) {
 
       // Add phones and addresses to the service listing contact.
-      E::createPhone($organization['id'], $values['phone'][$rowNumber]);
+      $values['phone_id'][$rowNumber] = E::createPhone($organization['id'], $values['phone'][$rowNumber]);
 
-      if ($rowNumber !== 1 && !empty($values['work_address'][$rowNumber])) {
+      if (!empty($values['work_address'][$rowNumber])) {
         list($addressId, $addressParams) = E::createAddress($values, $rowNumber, $organization['id']);
 
         $addressIds[] = [$addressId, $addressParams];
@@ -469,6 +467,38 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     if (!empty($emails)) {
       foreach ($emails as $email) {
         civicrm_api3('Email', ' create', ['id' => $email['id'], 'location_type_id' => 'Work']);
+      }
+    }
+  }
+
+  /**
+   * Remove all addresses linked to a specific organization id.
+   * @param int $organization_id
+   */
+  public static function removeAddressesLinkedToOrganization($organization_id) {
+    $addresses = civicrm_api3('Address', 'get', ['contact_id' => $organization_id, 'options' => ['limit' => 0]])['values'];
+    if (!empty($addresses)) {
+      foreach ($addresses as $address) {
+        $masterAddresses = civicrm_api3('Address', 'get', ['master_id' => $address['id'], 'options' => ['limit' => 0]])['values'];
+        if (!empty($masterAddresses)) {
+          foreach ($masterAddresses as $mAddress) {
+            civicrm_api3('Address', 'delete', ['id' => $mAddress['id']]);
+          }
+        }
+        civicrm_api3('Address', 'delete', ['id' => $address['id']]);
+      }
+    }
+  }
+
+  /**
+   * Remove all phones linked to a specific organization id.
+   * @param int $organization_id
+   */
+  public static function removePhonesLinkedToOrganization($organization_id) {
+    $phoneses = civicrm_api3('Phone', 'get', ['contact_id' => $organization_id, 'options' => ['limit' => 0]])['values'];
+    if (!empty($phoneses)) {
+      foreach ($phoneses as $phone) {
+        civicrm_api3('Phone', 'delete', ['id' => $phone['id']]);
       }
     }
   }
