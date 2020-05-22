@@ -78,17 +78,17 @@
           <span class="fieldset-legend">{ts 1=$rowa}Staff Person %1{/ts}</span>
         </legend>
         <div class="crm-section">
-          <div class="label">{$form.aba_first_name.$rowa.label}</div>
+          <div class="label">{$form.aba_first_name.$rowa.label} <span class="crm-marker" title="This field is required.">*</span></div>
           <div class="content">{$form.aba_first_name.$rowa.html}</div>
           <div class="clear"></div>
         </div>
         <div class="crm-section">
-          <div class="label">{$form.aba_last_name.$rowa.label}</div>
+          <div class="label">{$form.aba_last_name.$rowa.label} <span class="crm-marker" title="This field is required.">*</span></div>
           <div class="content">{$form.aba_last_name.$rowa.html}</div>
           <div class="clear"></div>
         </div>
         <div class="crm-section">
-          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label}</div>
+          <div class="label">{$form.$CERTIFICATE_NUMBER.$rowa.label} <span class="crm-marker" title="This field is required.">*</span></div>
           <div class="content">{$form.$CERTIFICATE_NUMBER.$rowa.html}</div>
           <div class="clear"></div>
         </div>
@@ -107,13 +107,13 @@
         <legend>
           <span class="fieldset-legend">{ts 1=$rowNum}Staff Person %1{/ts}</span>
         </legend>
-        <div class="label">{$form.staff_first_name.$rowNum.label}</div>
+        <div class="label">{$form.staff_first_name.$rowNum.label} <span class="crm-marker" title="This field is required.">*</span></div>
         <div class="content">{$form.staff_first_name.$rowNum.html}</div>
         <div class="clear"></div><br/>
-        <div class="label">{$form.staff_last_name.$rowNum.label}</div>
+        <div class="label">{$form.staff_last_name.$rowNum.label} <span class="crm-marker" title="This field is required.">*</span></div>
         <div class="content">{$form.staff_last_name.$rowNum.html}</div>
         <div class="clear"></div><br/>
-        <div class="label">{$form.staff_record_regulator.$rowNum.label}</div>
+        <div class="label">{$form.staff_record_regulator.$rowNum.label} <span class="crm-marker" title="This field is required.">*</span></div>
         <div class="content">{$form.staff_record_regulator.$rowNum.html}</div>
         <div class="clear"></div><br/>
       </fieldset>
