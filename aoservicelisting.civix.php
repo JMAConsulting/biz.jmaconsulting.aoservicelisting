@@ -147,15 +147,37 @@ class CRM_Aoservicelisting_ExtensionUtil {
     ]);
   }
 
+  public static function checkPrimaryContact($cid) {
+    $authorizedContact = civicrm_api3('Contact', 'get', [
+      'id' => $cid,
+      'contact_sub_type' => "authorized_contact",
+    ]);
+    if (!empty($authorizedContact['count']) && $authorizedContact['count'] == 1) {
+      // The current contact is a primary contact.
+      return TRUE;
+    }
+    return FALSE;
+  }
+
   public static function endRelationship($values, $rowNumber, $orgId) {
     if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_last_name'][$rowNumber])
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
-      // We had a staff record but it is gone now
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
+      $currentDetails = civicrm_api3('Contact', 'getsingle', [
+        'id' => $values['staff_contact_id'][$rowNumber],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+      ]);
+      if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
+        // Archive the regulated URL
+        self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+      }
+      else {
+        if (self::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
+          // Only archive field, don't terminate relationship
+          self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+        }
+        else {
+          // We had a staff record but it is gone now
+          self::terminateRelationship($values['staff_contact_id'][$rowNumber], $orgId);
         }
       }
     }
@@ -164,47 +186,171 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function endABARelationship($values, $rowNumber, $orgId) {
     if (empty($values['aba_first_name'][$rowNumber]) && empty($values['aba_last_name'][$rowNumber])
       && empty($values[CERTIFICATE_NUMBER][$rowNumber]) && !empty($values['aba_contact_id'][$rowNumber])) {
-      // We had an aba staff record but it is gone now
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['aba_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
+      $currentDetails = civicrm_api3('Contact', 'getsingle', [
+        'id' => $values['aba_contact_id'][$rowNumber],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+      ]);
+      if (!empty($currentDetails[REGULATED_URL])) {
+        // Archive the regulated URL
+        self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+      }
+      else {
+        if (self::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
+          // Only archive field, don't terminate relationship
+          self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+        }
+        else {
+          // We had a staff record but it is gone now
+          self::terminateRelationship($values['aba_contact_id'][$rowNumber], $orgId);
         }
       }
     }
   }
 
-  public static function findDupes($cid, $orgId, &$individualParams, $rel = EMPLOYER_CONTACT_REL, $isOrgOptional = FALSE) {
-    if (!empty($cid)) {
-      $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
-      if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
-        $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
-        $relationships = civicrm_api3('Relationship', 'get', $params);
-        if (!empty($relationships['values'])) {
-          // End Date all relationships as they have either overwritten the data or not.
-          foreach ($relationships['values'] as $relationship) {
-            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
-          }
-        }
-      } else {
-        $individualParams['contact_id'] = $cid;
+  public static function terminateRelationship($cid, $orgId) {
+    $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
+    $relationships = civicrm_api3('Relationship', 'get', $params);
+    if (!empty($relationships['values'])) {
+      // End Date all relationships as they have either overwritten the data or not.
+      foreach ($relationships['values'] as $relationship) {
+        civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'relationship_type_id' => $relationship['relationship_type_id'], 'end_date' => date('Y-m-d')]);
       }
     }
-    if (empty($individualParams['contact_id'])) {
+  }
+
+  public static function archiveField($field, $value, $cid) {
+    civicrm_api3('Note', 'create', [
+      'entity_id' => $cid,
+      'note' => $value,
+      'entity_table' => "civicrm_contact",
+    ]);
+    civicrm_api3('Contact', 'create', [
+      'contact_type' => "Individual",
+      'id' => $cid,
+      $field => 'null',
+    ]);
+  }
+
+  public static function findDupes($cid, $orgId, &$individualParams, $rel = EMPLOYER_CONTACT_REL, $isOrgOptional = FALSE, $staffType) {
+    if (!empty($cid)) {
+      $currentDetails = civicrm_api3('Contact', 'getsingle', [
+        'id' => $cid,
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+      ]);
+      // Check, based on staff type
+      if ($staffType == 'regstaff') {
+        // Get saved regulator URL
+        if ($currentDetails['first_name'] != $individualParams['first_name'] &&
+          $currentDetails['last_name'] != $individualParams['last_name'] &&
+          $currentDetails[REGULATED_URL] != $individualParams['regulated_url']) {
+          // This is an overwrite on the record, check to see if this contact has an ABA certificate before ending the relationship.
+          if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
+            // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
+            self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+          }
+          else {
+            // There is no certificate number, we can now end the relationship.
+            if (self::checkPrimaryContact($cid)) {
+              // Only archive field, don't terminate relationship
+              self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            }
+            else {
+              self::terminateRelationship($cid, $orgId);
+            }
+          }
+        }
+        else {
+          // This is an edit, return the contact ID.
+          if ($currentDetails['first_name'] == $individualParams['first_name'] &&
+            $currentDetails['last_name'] == $individualParams['last_name'] &&
+            $currentDetails[REGULATED_URL] != $individualParams['regulated_url']) {
+            // This is an edit to only the regulated URL field, primary contacts can be edited.
+            $individualParams['contact_id'] = $cid;
+            return;
+          }
+          if (($currentDetails['first_name'] != $individualParams['first_name'] ||
+            $currentDetails['last_name'] != $individualParams['last_name']) &&
+            $currentDetails[REGULATED_URL] == $individualParams['regulated_url']) {
+            // This is an edit to the name, ensure that it is not a primary contact.
+            if (self::checkPrimaryContact($cid)) {
+              self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            }
+            else {
+              $individualParams['contact_id'] = $cid;
+            }
+          }
+          if ($currentDetails['first_name'] == $individualParams['first_name'] &&
+            $currentDetails['last_name'] == $individualParams['last_name'] &&
+            $currentDetails[REGULATED_URL] == $individualParams['regulated_url']) {
+            // No edits, return the contact id.
+            $individualParams['contact_id'] = $cid;
+          }
+        }
+      }
+      elseif ($staffType == 'abastaff') {
+        // Get saved certificate number
+        if ($currentDetails['first_name'] != $individualParams['first_name'] &&
+          $currentDetails['last_name'] != $individualParams['last_name'] &&
+          $individualParams[CERTIFICATE_NUMBER] != $currentDetails[CERTIFICATE_NUMBER]) {
+          // This is an overwrite on the record, check to see if this contact has a regulated URL before ending the relationship.
+          if (!empty($currentDetails[REGULATED_URL])) {
+            // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
+            self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+          }
+          else {
+            // There is no certificate number, we can now end the relationship.
+            if (self::checkPrimaryContact($cid)) {
+              // Only archive field, don't terminate relationship
+              self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            }
+            else {
+              self::terminateRelationship($cid, $orgId);
+            }
+          }
+        }
+        else {
+          // This is an edit, return the contact ID.
+          if ($currentDetails['first_name'] == $individualParams['first_name'] &&
+            $currentDetails['last_name'] == $individualParams['last_name'] &&
+            $currentDetails[CERTIFICATE_NUMBER] != $individualParams[CERTIFICATE_NUMBER]) {
+            // This is an edit to only the certificate field, primary contacts can be edited.
+            $individualParams['contact_id'] = $cid;
+            return;
+          }
+          if (($currentDetails['first_name'] != $individualParams['first_name'] ||
+              $currentDetails['last_name'] != $individualParams['last_name']) &&
+            $currentDetails[CERTIFICATE_NUMBER] == $individualParams[CERTIFICATE_NUMBER]) {
+            // This is an edit to the name, ensure that it is not a primary contact.
+            if (self::checkPrimaryContact($cid)) {
+              self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            }
+            else {
+              $individualParams['contact_id'] = $cid;
+            }
+          }
+          if ($currentDetails['first_name'] == $individualParams['first_name'] &&
+            $currentDetails['last_name'] == $individualParams['last_name'] &&
+            $currentDetails[CERTIFICATE_NUMBER] == $individualParams[CERTIFICATE_NUMBER]) {
+            // No edits, return the contact id.
+            $individualParams['contact_id'] = $cid;
+          }
+        }
+      }
+    }
+    else {
       $orgClause = ' r.contact_id_b = ' . $orgId;
       $orgClause = $isOrgOptional ? " ($orgClause OR r.contact_id_b IS NOT NULL) " : $orgClause;
       // Check for dupes.
-      $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
-         FROM civicrm_relationship r
-         INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
-         LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
-         WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1
-         AND ca.first_name = %3 AND ca.last_name = %4",
-        [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']])->fetchAll()[0]; // We expect only a single contact
-      if (!empty($staffDetails)) {
+      $existingStaff = CRM_Core_DAO::singleValueQuery("SELECT r.contact_id_a
+        FROM civicrm_relationship r
+        INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
+        LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
+        WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1
+        AND ca.first_name = %3 AND ca.last_name = %4",
+        [2 => [$rel, "Integer"], 3 => [$individualParams['first_name'], 'String'], 4 => [$individualParams['last_name'], 'String']]); // We expect only a single contact
+      if (!empty($existingStaff)) {
         // Dupe found
-        $individualParams["contact_id"] = $staffDetails['contact_id_a'];
+        $individualParams['contact_id'] = $existingStaff;
       }
     }
   }

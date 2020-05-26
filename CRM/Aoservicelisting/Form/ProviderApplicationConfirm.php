@@ -55,6 +55,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       $this->add('text', "staff_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "staff_record_regulator[$rowNumber]", E::ts('Record on Regulator\'s site'), ['size' => 20, 'maxlength' => 255, 'class' => 'medium']);
+      $this->add('hidden', "aba_contact_id[$rowNumber]", NULL);
       $this->add('text', "aba_first_name[$rowNumber]", E::ts('First Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       $this->add('text', "aba_last_name[$rowNumber]", E::ts('Last Name'), ['size' => 20, 'maxlength' => 32, 'class' => 'medium']);
       CRM_Core_BAO_CustomField::addQuickFormElement($this, CERTIFICATE_NUMBER . "[$rowNumber]", str_replace('custom_', '', CERTIFICATE_NUMBER), FALSE);
@@ -203,15 +204,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
 
     E::createWebsite($organization['id'], $values['website']);
 
-    $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
-    if (!empty($customValues) && is_array($customValues)) {
-      CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
-    }
-    civicrm_api3('CustomValue', 'create', [
-      WAIVER_FIELD => $values['waiver_field'],
-      'entity_id' => $organization['id'],
-    ]);
-
     // Begin by processing staff members and also all the addresses
     $staffMemberIds = $abaStaffDone = [];
     $primaryContactFound = FALSE;
@@ -235,13 +227,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $individualParams = [
           'first_name' => $values['staff_first_name'][$rowNumber],
           'last_name' => $values['staff_last_name'][$rowNumber],
+          'regulated_url' => $values['staff_record_regulator'][$rowNumber],
         ];
         if ($values['primary_first_name'] == $values['staff_first_name'][$rowNumber] &&
           $values['primary_last_name'] == $values['staff_last_name'][$rowNumber]) {
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams);
+        E::findDupes($values['staff_contact_id'][$rowNumber], $organization['id'], $individualParams, EMPLOYER_CONTACT_REL, FALSE, 'regstaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
@@ -290,6 +283,10 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           }
         }
       }
+      // Check for expired ABA staff members
+      if (!empty($values['aba_contact_id'][$rowNumber])) {
+        E::endABARelationship($values, $rowNumber, $organization['id']);
+      }
     }
     // Add addresses to alll the regulated staff members excluding any staff that match the primray contact as they will be dealt with later on in the code.  
     foreach ($staffMemberIds as $staffMemberId) {
@@ -313,7 +310,6 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     // Now process all ABA staff members that have yet to have been processed. They would only be here if they don't match the regulated staff details.
     foreach ($values[CERTIFICATE_NUMBER] as $key => $certificateNumber) {
       if (!empty($certificateNumber) && !in_array($key, $abaStaffDone)) {
-        E::endABARelationship($values, $key, $organization['id']);
         $individualParams = [
           'first_name' => $values['aba_first_name'][$key],
           'last_name' => $values['aba_last_name'][$key],
@@ -325,7 +321,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $individualParams['email'] = $values['email-Primary'];
         }
 
-        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams);
+        E::findDupes($values['aba_contact_id'][$key], $organization['id'], $individualParams, EMPLOYER_CONTACT_REL, FALSE, 'abastaff');
         if (!empty($individualParams['email'])) {
           // Check for dupes for primary contact.
           if (empty($individualParams['contact_id'])) {
@@ -410,7 +406,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         }
       }
       else {
-        E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE);
+        E::findDupes(NULL, $organization['id'], $primaryParams, PRIMARY_CONTACT_REL, TRUE, 'primarycontact');
         // Check for dupes for primary contact.
         if (empty($primaryParams['contact_id'])) {
           $dedupeParams = CRM_Dedupe_Finder::formatParams($primaryParams, 'Individual');
@@ -450,6 +446,17 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
       // Send email on confirmation.
       E::sendMessage($primId, RECEIVED_MESSAGE);
     }
+
+    // Create custom values here to avoid resetting of any values above.
+    $customValues = CRM_Core_BAO_CustomField::postProcess($values, $organization['id'], 'Organization');
+    if (!empty($customValues) && is_array($customValues)) {
+      CRM_Core_BAO_CustomValueTable::store($customValues, 'civicrm_contact', $organization['id']);
+    }
+    civicrm_api3('CustomValue', 'create', [
+      WAIVER_FIELD => $values['waiver_field'],
+      'entity_id' => $organization['id'],
+    ]);
+
     // Redirect to thank you page.
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
       CRM_Utils_System::redirect(CRM_Utils_System::url('fr/civicrm/service-listing-thankyou', 'reset=1'));
