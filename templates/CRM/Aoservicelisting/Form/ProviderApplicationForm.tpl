@@ -535,6 +535,7 @@
 
       {/literal}{else}{literal}
       $('#email-Primary').attr('readonly', true);
+      $('[name^=listing_type]').parent('div.content').css('pointer-events', 'none');
       {/literal}{/if}{literal}
       // End domain default values
       var addressFields = ['work_address_', 'phone_', 'postal_code_', 'city_'];
