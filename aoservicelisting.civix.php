@@ -355,6 +355,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       $nameDetails[$field] = strtolower(preg_replace('/[^a-zA-Z0-9\/\s]+/', '', $nameDetails[$field]));
     }
     // Check if username is present, and append count to it if it is.
+    $con = \Drupal\Core\Database\Database::getConnection();
     $query = $con->select('users_field_data', 'u')
       ->fields('u', ['name']);
     $query->condition('name', $query->escapeLike($nameDetails['first_name'] . '.' . $nameDetails['last_name']) . "%", 'LIKE');
