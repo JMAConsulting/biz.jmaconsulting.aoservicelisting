@@ -500,7 +500,17 @@ class CRM_Aoservicelisting_ExtensionUtil {
     foreach ($nameFields as $field) {
       $nameDetails[$field] = strtolower(preg_replace('/[^a-zA-Z0-9\/\s]+/', '', $nameDetails[$field]));
     }
-    return $nameDetails['first_name'] . '.' . $nameDetails['last_name'] . $nameDetails['id'];
+    // Check if username is present, and append count to it if it is.
+    $con = \Drupal\Core\Database\Database::getConnection();
+    $query = $con->select('users_field_data', 'u')
+      ->fields('u', ['name']);
+    $query->condition('name', $query->escapeLike($nameDetails['first_name'] . '.' . $nameDetails['last_name']) . "%", 'LIKE');
+    $result = $query->execute()->fetchAll();
+    if (!empty($result)) {
+      $userCount = count($result) + 1;
+      return $nameDetails['first_name'] . '.' . $nameDetails['last_name'] . $userCount;
+    }
+    return $nameDetails['first_name'] . '.' . $nameDetails['last_name'];
   }
 
   public static function createUserAccount($cid) {
