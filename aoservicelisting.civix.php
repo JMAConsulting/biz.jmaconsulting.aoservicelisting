@@ -600,7 +600,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
         $url = CRM_Utils_System::url("service-listing/$cid", NULL, TRUE);
         civicrm_api3('Contact', 'create', ['id' => $cid, LISTING_URL => $url]);
       }
-      if ($oldStatus) {
+      if ($oldStatus != $newStatus) {
         civicrm_api3('Activity', 'create', [
           'source_contact_id' => $cid,
           'activity_type_id' => "provider_status_changed",
