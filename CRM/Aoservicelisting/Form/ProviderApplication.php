@@ -251,12 +251,10 @@ public $_elementNames;
       }
       elseif ($section == 'primary_section') {
         foreach ($fields as $fieldName) {
-          if (!empty($formValues[$fieldName])) {
-            if (in_array($fieldName, [DISPLAY_NAME, DISPLAY_EMAIL, DISPLAY_PHONE])) {
-              self::yesNo($formValues[$fieldName]);
-            }
-            $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
+          if (in_array($fieldName, [DISPLAY_NAME, DISPLAY_EMAIL, DISPLAY_PHONE])) {
+            self::yesNo($formValues[$fieldName]);
           }
+          $logger[$section] .= sprintf('<br/> <b>%s:</b> %s', $this->_elementNames[$fieldName], $formValues[$fieldName]);
         }
       }
       elseif ($section == 'address_section') {
@@ -359,7 +357,9 @@ public $_elementNames;
     if (!empty($value)) {
       $value = 'Yes';
     }
-    $value = 'No';
+    else {
+      $value = 'No';
+    }
   }
 
   public static function replaceKeys($array, $replacement_keys) {
