@@ -284,6 +284,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
   }
 
   public function providerFormRule($values) {
+    CRM_Core_Error::debug_var('formvaluesbeforesubmit', $values);
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = $abaStaffMemberCount = 0;
@@ -503,6 +504,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     // We recet the page here so that the confirm page always gets the latest data from the submission of the form.
     $this->controller->resetPage('ProviderApplicationConfirm');
     $formValues = array_merge($this->controller->exportValues($this->_name), $this->_submitValues);
+    CRM_Core_Error::debug_var('formvaluesaftersubmit', $formValues);
     $this->set('formValues', $formValues);
     parent::postProcess();
   }
