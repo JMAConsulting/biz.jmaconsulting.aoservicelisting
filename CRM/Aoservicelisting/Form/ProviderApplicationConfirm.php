@@ -252,11 +252,12 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           if (array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']) == array_search($values['staff_last_name'][$rowNumber], $values['aba_last_name'])) {
             $arrayKey = array_search($values['staff_first_name'][$rowNumber], $values['aba_first_name']);
             $individualParams[CERTIFICATE_NUMBER] = $values[CERTIFICATE_NUMBER][$arrayKey];
+            $individualParams[CRED_HELD_IND] = E::getCredential($values[CERTIFICATE_NUMBER][$arrayKey]);
             $abaStaffDone[] = $arrayKey;
             $abaStaffMemberFound = TRUE;
           }
         }
-        // Create the staff contact.  This may include an ABA certificate but is at least regulatd staff member.
+        // Create the staff contact.  This may include an ABA certificate but is at least regulated staff member.
         $staffMember = civicrm_api3('Contact', 'create', $individualParams);
         $staffMemberIds[] = $staffMember['id'];
 
@@ -316,6 +317,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           CERTIFICATE_NUMBER => $values[CERTIFICATE_NUMBER][$key],
           'contact_type' => 'Individual',
         ];
+        $individualParams[CRED_HELD_IND] = E::getCredential($values[CERTIFICATE_NUMBER][$key]);
         if ($values['primary_first_name'] == $values['aba_first_name'][$key] &&
           $values['primary_last_name'] == $values['aba_last_name'][$key]) {
           $individualParams['email'] = $values['email-Primary'];

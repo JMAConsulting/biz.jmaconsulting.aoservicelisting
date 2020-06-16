@@ -376,10 +376,42 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($url)) {
       return;
     }
+    // Determine the profession from the URL, and add to the contact record.
+    $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
+    $regulatedServicesProvided = CRM_Core_OptionGroup::values('regulated_services_provided_20200226231106	');
+    foreach ($regulatorUrlMapping as $value => $domain) {
+      if (stristr($url, $domain) !== FALSE) {
+        $serviceProvided = $regulatedServicesProvided[$value];
+      }
+    }
     civicrm_api3('Contact', 'create', [
       REGULATED_URL => $url,
       'contact_id' => $cid,
+      REG_SER_IND => $serviceProvided,
     ]);
+  }
+
+  public static function getCredential($cert) {
+    if (empty($cert)) {
+      return NULL;
+    }
+    // Get first character of the certificate number.
+    $firstChar = (string) strtoupper(substr($cert, 0, 1));
+    $certType = NULL;
+    switch($firstChar) {
+      case '0':
+        $certType = "BCaBA";
+        break;
+      case '1':
+        $certType = "BCBA";
+        break;
+      case 'R':
+        $certType = "RBT";
+        break;
+      default:
+        break;
+    }
+    return $certType;
   }
 
   public static function createPhone($cid, $phone) {
