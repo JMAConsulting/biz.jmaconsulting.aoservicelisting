@@ -378,10 +378,15 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
     // Determine the profession from the URL, and add to the contact record.
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
-    $regulatedServicesProvided = CRM_Core_OptionGroup::values('regulated_services_provided_20200226231106	');
-    foreach ($regulatorUrlMapping as $value => $domain) {
-      if (stristr($url, $domain) !== FALSE) {
-        $serviceProvided = $regulatedServicesProvided[$value];
+    $regulatedServicesProvided = CRM_Core_OptionGroup::values('regulated_services_provided_20200226231106');
+    $serviceProvided = NULL;
+    foreach ($regulatorUrlMapping as $value => $domains) {
+      $parts = (array) explode(',', $domains);
+      foreach ($parts as $domain) {
+        if (stristr($url, $domain) !== FALSE) {
+          $serviceProvided = $regulatedServicesProvided[$value];
+          break;
+        }
       }
     }
     civicrm_api3('Contact', 'create', [
