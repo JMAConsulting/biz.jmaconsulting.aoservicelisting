@@ -37,5 +37,5 @@
   define('REGULATED_URL', 'custom_930');
   define('LISTING_URL', 'custom_929');
   define('PHONE_ID_CUSTOM_FIELD', 'custom_931');
-  define('CRED_HELD_IND', 'custom_923');
-  define('REG_SER_IND', 'custom_924');
+  define('CRED_HELD_IND', 'custom_953');
+  define('REG_SER_IND', 'custom_954');
