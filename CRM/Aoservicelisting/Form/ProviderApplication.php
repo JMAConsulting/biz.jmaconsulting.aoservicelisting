@@ -34,8 +34,33 @@ public $_elementNames;
   public function preProcess() {
     parent::preProcess();
     CRM_Core_Resources::singleton()->addStyleFile('biz.jmaconsulting.aoservicelisting', 'css/providerformstyle.css');
-    // for testing purpose consider cid value from url
-    $loggedInContactId = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE) ?: $this->getLoggedInUserContactID();
+    $invalidUser = FALSE;
+    $loggedInContactId = $this->getLoggedInUserContactID();
+    $cid = CRM_Utils_Request::retrieve('cid', 'Positive', $this, FALSE);
+    $cs = CRM_Utils_Request::retrieve('cs', 'String', $this, FALSE);
+    if (empty($cs) && !empty($_GET['cs'])) {
+      $cs = $_GET['cs'];
+    }
+    if (empty($cid) && !empty($_GET['cid'])) {
+      $cid = $_GET['cid'];
+    }
+    // Validate checksum only if specified in the URL, for non-logged in users.
+    if (!empty($cid) && !empty($cs)) {
+      if (!CRM_Contact_BAO_Contact_Utils::validChecksum($cid, $cs)) {
+        $invalidUser = TRUE;
+      }
+      else {
+        // This is a valid user.
+        $loggedInContactId = $cid;
+      }
+    }
+    // Validate if checksum not found in URL, and contact is not logged in, but has specified cid in the URL.
+    if (empty($cs) && !empty($cid)) {
+      $invalidUser = TRUE;
+    }
+    if ($invalidUser) {
+      CRM_Core_Error::statusBounce(ts('You do not have privilege to edit this application'), CRM_Utils_System::url('civicrm/service-listing-application', 'reset=1'));
+    }
     if (!empty($loggedInContactId)) {
       $this->_loggedInContactID = $loggedInContactId;
       $relationship = civicrm_api3('Relationship', 'get', [
