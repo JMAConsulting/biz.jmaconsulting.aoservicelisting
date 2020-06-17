@@ -164,16 +164,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
       && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
       $currentDetails = civicrm_api3('Contact', 'getsingle', [
         'id' => $values['staff_contact_id'][$rowNumber],
-        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER, REG_SER_IND],
       ]);
       if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
         // Archive the regulated URL
         self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+        self::archiveField(REG_SER_IND, $currentDetails[REG_SER_IND], $values['staff_contact_id'][$rowNumber]);
       }
       else {
         if (self::checkPrimaryContact($values['staff_contact_id'][$rowNumber])) {
           // Only archive field, don't terminate relationship
           self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $values['staff_contact_id'][$rowNumber]);
+          self::archiveField(REG_SER_IND, $currentDetails[REG_SER_IND], $values['staff_contact_id'][$rowNumber]);
         }
         else {
           // We had a staff record but it is gone now
@@ -188,16 +190,18 @@ class CRM_Aoservicelisting_ExtensionUtil {
       && empty($values[CERTIFICATE_NUMBER][$rowNumber]) && !empty($values['aba_contact_id'][$rowNumber])) {
       $currentDetails = civicrm_api3('Contact', 'getsingle', [
         'id' => $values['aba_contact_id'][$rowNumber],
-        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER, CRED_HELD_IND],
       ]);
       if (!empty($currentDetails[REGULATED_URL])) {
         // Archive the regulated URL
         self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+        self::archiveField(CRED_HELD_IND, $currentDetails[CRED_HELD_IND], $values['aba_contact_id'][$rowNumber]);
       }
       else {
         if (self::checkPrimaryContact($values['aba_contact_id'][$rowNumber])) {
           // Only archive field, don't terminate relationship
           self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $values['aba_contact_id'][$rowNumber]);
+          self::archiveField(CRED_HELD_IND, $currentDetails[CRED_HELD_IND], $values['aba_contact_id'][$rowNumber]);
         }
         else {
           // We had a staff record but it is gone now
@@ -235,7 +239,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (!empty($cid)) {
       $currentDetails = civicrm_api3('Contact', 'getsingle', [
         'id' => $cid,
-        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER],
+        'return' => ['first_name', 'last_name', REGULATED_URL, CERTIFICATE_NUMBER, REG_SER_IND, CRED_HELD_IND],
       ]);
       // Check, based on staff type
       if ($staffType == 'regstaff') {
@@ -247,12 +251,15 @@ class CRM_Aoservicelisting_ExtensionUtil {
           if (!empty($currentDetails[CERTIFICATE_NUMBER])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
             self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+            // Also move the certificate type elsewhere and delete it.
+            self::archiveField(REG_SER_IND, $currentDetails[REG_SER_IND], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
             if (self::checkPrimaryContact($cid)) {
               // Only archive field, don't terminate relationship
               self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+              self::archiveField(REG_SER_IND, $currentDetails[REG_SER_IND], $cid);
             }
             else {
               self::terminateRelationship($cid, $orgId);
@@ -274,6 +281,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
             // This is an edit to the name, ensure that it is not a primary contact.
             if (self::checkPrimaryContact($cid)) {
               self::archiveField(REGULATED_URL, $currentDetails[REGULATED_URL], $cid);
+              self::archiveField(REG_SER_IND, $currentDetails[REG_SER_IND], $cid);
             }
             else {
               $individualParams['contact_id'] = $cid;
@@ -296,12 +304,14 @@ class CRM_Aoservicelisting_ExtensionUtil {
           if (!empty($currentDetails[REGULATED_URL])) {
             // Move the certificate number elsewhere and delete the certificate number, don't end the relationship.
             self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+            self::archiveField(CRED_HELD_IND, $currentDetails[CRED_HELD_IND], $cid);
           }
           else {
             // There is no certificate number, we can now end the relationship.
             if (self::checkPrimaryContact($cid)) {
               // Only archive field, don't terminate relationship
               self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+              self::archiveField(CRED_HELD_IND, $currentDetails[CRED_HELD_IND], $cid);
             }
             else {
               self::terminateRelationship($cid, $orgId);
@@ -323,6 +333,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
             // This is an edit to the name, ensure that it is not a primary contact.
             if (self::checkPrimaryContact($cid)) {
               self::archiveField(CERTIFICATE_NUMBER, $currentDetails[CERTIFICATE_NUMBER], $cid);
+              self::archiveField(CRED_HELD_IND, $currentDetails[CRED_HELD_IND], $cid);
             }
             else {
               $individualParams['contact_id'] = $cid;
@@ -376,10 +387,47 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($url)) {
       return;
     }
+    // Determine the profession from the URL, and add to the contact record.
+    $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
+    $regulatedServicesProvided = CRM_Core_OptionGroup::values('regulated_services_provided_20200226231106');
+    $serviceProvided = NULL;
+    foreach ($regulatorUrlMapping as $value => $domains) {
+      $parts = (array) explode(',', $domains);
+      foreach ($parts as $domain) {
+        if (stristr($url, $domain) !== FALSE) {
+          $serviceProvided = $regulatedServicesProvided[$value];
+          break;
+        }
+      }
+    }
     civicrm_api3('Contact', 'create', [
       REGULATED_URL => $url,
       'contact_id' => $cid,
+      REG_SER_IND => $serviceProvided,
     ]);
+  }
+
+  public static function getCredential($cert) {
+    if (empty($cert)) {
+      return NULL;
+    }
+    // Get first character of the certificate number.
+    $firstChar = (string) strtoupper(substr($cert, 0, 1));
+    $certType = NULL;
+    switch($firstChar) {
+      case '0':
+        $certType = "BCaBA";
+        break;
+      case '1':
+        $certType = "BCBA";
+        break;
+      case 'R':
+        $certType = "RBT";
+        break;
+      default:
+        break;
+    }
+    return $certType;
   }
 
   public static function createPhone($cid, $phone) {
