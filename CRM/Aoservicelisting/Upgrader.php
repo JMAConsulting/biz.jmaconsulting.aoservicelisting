@@ -73,6 +73,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
 
     $currentDetails = civicrm_api3('Contact', 'get', [
       'return' => [REGULATED_URL, CERTIFICATE_NUMBER, CRED_HELD_IND, REG_SER_IND],
+      'options' => ['limit' => 0],
     ]);
     if (!empty($currentDetails['values'])) {
       foreach ($currentDetails['values'] as $detail) {
@@ -91,7 +92,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
             }
           }
           civicrm_api3('Contact', 'create', [
-            'contact_id' => $currentDetails['values']['id'],
+            'contact_id' => $detail['id'],
             REG_SER_IND => $serviceProvided,
           ]);
         }
@@ -114,7 +115,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
           }
           if (!empty($certType)) {
             civicrm_api3('Contact', 'create', [
-              'contact_id' => $currentDetails['values']['id'],
+              'contact_id' => $detail['id'],
               CRED_HELD_IND => $certType,
             ]);
           }
