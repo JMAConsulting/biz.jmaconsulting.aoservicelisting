@@ -347,6 +347,7 @@
       }
       function showStaff(countcheck, service) {
         if (countcheck) {
+          $('#staff_member-1').removeClass('hiddenElement');
           for (var i=1; i<=countcheck; i++) {
             if ($('[name=listing_type]:checked').val() == "2") {
               $('#staff_member-' + i).removeClass('hiddenElement');

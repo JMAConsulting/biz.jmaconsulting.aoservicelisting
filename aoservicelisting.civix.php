@@ -120,7 +120,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'activity_type_id' => "service_listing_created",
       'sequential' => 0,
     ]);
-    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, $cid);
+    //self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, $cid);
   }
 
   public static function editActivity($cid) {
