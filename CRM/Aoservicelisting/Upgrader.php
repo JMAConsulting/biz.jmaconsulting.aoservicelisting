@@ -81,7 +81,6 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
       'return' => [REGULATED_URL, REG_SER_IND],
       'contact_type' => 'Individual',
       'options' => ['limit' => 0],
-      REGULATED_URL => ['IS NOT NULL' => 1],
     ]);
     if (!empty($currentDetails['values'])) {
       foreach ($currentDetails['values'] as $detail) {
@@ -99,6 +98,10 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
               }
             }
           }
+          civicrm_api3('Contact', 'create', [
+            'contact_id' => $detail['id'],
+            REG_SER_IND => [$serviceProvided],
+          ]);
         }
       }
     }
@@ -110,14 +113,9 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
       'return' => [CERTIFICATE_NUMBER, CRED_HELD_IND],
       'contact_type' => 'Individual',
       'options' => ['limit' => 0],
-      CERTIFICATE_NUMBER => ['IS NOT NULL' => 1],
     ]);
     if (!empty($currentDetails['values'])) {
       foreach ($currentDetails['values'] as $detail) {
-        civicrm_api3('Contact', 'create', [
-          'contact_id' => $detail['id'],
-          REG_SER_IND => [$serviceProvided],
-        ]);
         if (empty($detail[CRED_HELD_IND]) && !empty($detail[CERTIFICATE_NUMBER])) {
           // This is a certified staff member, update the certificate type if not found.
           $firstChar = (string) strtoupper(substr($detail[CERTIFICATE_NUMBER], 0, 1));
