@@ -99,6 +99,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
               }
             }
           }
+        }
       }
     }
     return TRUE;
@@ -113,11 +114,10 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
     ]);
     if (!empty($currentDetails['values'])) {
       foreach ($currentDetails['values'] as $detail) {
-          civicrm_api3('Contact', 'create', [
-            'contact_id' => $detail['id'],
-            REG_SER_IND => [$serviceProvided],
-          ]);
-        }
+        civicrm_api3('Contact', 'create', [
+          'contact_id' => $detail['id'],
+          REG_SER_IND => [$serviceProvided],
+        ]);
         if (empty($detail[CRED_HELD_IND]) && !empty($detail[CERTIFICATE_NUMBER])) {
           // This is a certified staff member, update the certificate type if not found.
           $firstChar = (string) strtoupper(substr($detail[CERTIFICATE_NUMBER], 0, 1));
