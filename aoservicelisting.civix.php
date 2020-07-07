@@ -390,12 +390,12 @@ class CRM_Aoservicelisting_ExtensionUtil {
     // Determine the profession from the URL, and add to the contact record.
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
     $regulatedServicesProvided = CRM_Core_OptionGroup::values('regulated_services_provided_20200226231106');
-    $serviceProvided = NULL;
+    $serviceProvided = [];
     foreach ($regulatorUrlMapping as $value => $domains) {
       $parts = (array) explode(',', $domains);
       foreach ($parts as $domain) {
         if (stristr($url, $domain) !== FALSE) {
-          $serviceProvided = $regulatedServicesProvided[$value];
+          $serviceProvided = [$regulatedServicesProvided[$value]];
           break;
         }
       }
@@ -413,16 +413,16 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
     // Get first character of the certificate number.
     $firstChar = (string) strtoupper(substr($cert, 0, 1));
-    $certType = NULL;
+    $certType = [];
     switch($firstChar) {
       case '0':
-        $certType = "BCaBA";
+        $certType = ["BCaBA"];
         break;
       case '1':
-        $certType = "BCBA";
+        $certType = ["BCBA"];
         break;
       case 'R':
-        $certType = "RBT";
+        $certType = ["RBT"];
         break;
       default:
         break;
