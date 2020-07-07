@@ -71,17 +71,9 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
   public function upgrade_1200() {
     $this->ctx->log->info('Applying update 1200');
 
-    $this->addTask(E::ts('Update Regulated Service Providers'), 'updateRegServiceProviders');
-    $this->addTask(E::ts('Update Credentials Held'), 'updateCreds');
-    return TRUE;
-  }
-
-  public function updateRegServiceProviders() {
     $currentDetails = civicrm_api3('Contact', 'get', [
-      'return' => [REGULATED_URL, REG_SER_IND],
-      'contact_type' => 'Individual',
+      'return' => [REGULATED_URL, CERTIFICATE_NUMBER, CRED_HELD_IND, REG_SER_IND],
       'options' => ['limit' => 0],
-      REGULATED_URL => ['IS NOT NULL' => 1],
     ]);
     if (!empty($currentDetails['values'])) {
       foreach ($currentDetails['values'] as $detail) {
@@ -101,28 +93,14 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
           }
           civicrm_api3('Contact', 'create', [
             'contact_id' => $detail['id'],
-            REG_SER_IND => $serviceProvided,
+            REG_SER_IND => [$serviceProvided],
           ]);
         }
-      }
-    }
-    return TRUE;
-  }
-
-  public function updateCreds() {
-    $currentDetails = civicrm_api3('Contact', 'get', [
-      'return' => [CERTIFICATE_NUMBER, CRED_HELD_IND],
-      'contact_type' => 'Individual',
-      'options' => ['limit' => 0],
-      CERTIFICATE_NUMBER => ['IS NOT NULL' => 1],
-    ]);
-    if (!empty($currentDetails['values'])) {
-      foreach ($currentDetails['values'] as $detail) {
         if (empty($detail[CRED_HELD_IND]) && !empty($detail[CERTIFICATE_NUMBER])) {
           // This is a certified staff member, update the certificate type if not found.
-          $firstChar = (string)strtoupper(substr($detail[CERTIFICATE_NUMBER], 0, 1));
+          $firstChar = (string) strtoupper(substr($detail[CERTIFICATE_NUMBER], 0, 1));
           $certType = NULL;
-          switch ($firstChar) {
+          switch($firstChar) {
             case '0':
               $certType = "BCaBA";
               break;
@@ -138,7 +116,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
           if (!empty($certType)) {
             civicrm_api3('Contact', 'create', [
               'contact_id' => $detail['id'],
-              CRED_HELD_IND => $certType,
+              CRED_HELD_IND => [$certType],
             ]);
           }
         }
