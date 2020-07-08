@@ -590,13 +590,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($ufId)) {
       return FALSE;
     }
-
-    $authorizedContact = user_load_by_name($userName);
-    if (!empty($authorizedContact)) {
-      $roles = array_merge($authorizedContact->getRoles(), ['authorized_contact']);
-      $authorizedContact->set('roles', array_unique($roles));
-      $authorizedContact->save();
-    }
     return TRUE;
   }
 
