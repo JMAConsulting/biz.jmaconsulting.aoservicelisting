@@ -94,7 +94,7 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
 
         // Add user role too.
         if (!empty($contact['uf_id'])) {
-          $user = user_load($contact['uf_id']);
+          $user = \Drupal\user\Entity\User::load($contact['uf_id']);
           $roles = (array)$user->getRoles();
           if (!in_array('authorized_contact', $roles)) {
             $roles = array_merge($roles, ['authorized_contact']);
