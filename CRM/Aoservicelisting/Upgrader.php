@@ -76,6 +76,37 @@ class CRM_Aoservicelisting_Upgrader extends CRM_Aoservicelisting_Upgrader_Base {
     return TRUE;
   }
 
+  public function upgrade_1300() {
+    $this->ctx->log->info('Applying update 1300');
+
+    $updateContacts = CRM_Core_DAO::executeQuery("SELECT c.id, u.uf_id
+      FROM civicrm_contact c
+      INNER JOIN civicrm_relationship r ON r.contact_id_a = c.id
+      LEFT JOIN civicrm_uf_match u ON u.contact_id = c.id
+      WHERE (c.contact_sub_type = '' OR c.contact_sub_type IS NULL) AND r.relationship_type_id = 74")->fetchAll();
+    if (!empty($updateContacts)) {
+      foreach ($updateContacts as $contact) {
+        civicrm_api3('Contact', 'create', [
+          'contact_type' => 'Individual',
+          'id' => $contact['id'],
+          'contact_sub_type' => 'authorized_contact',
+        ]);
+
+        // Add user role too.
+        if (!empty($contact['uf_id'])) {
+          $user = user_load($contact['uf_id']);
+          $roles = (array)$user->getRoles();
+          if (!in_array('authorized_contact', $roles)) {
+            $roles = array_merge($roles, ['authorized_contact']);
+            $user->set('roles', array_unique($roles));
+            $user->save();
+          }
+        }
+      }
+    }
+    return TRUE;
+  }
+
   public function updateRegServiceProviders() {
     $currentDetails = civicrm_api3('Contact', 'get', [
       'return' => [REGULATED_URL, REG_SER_IND],
