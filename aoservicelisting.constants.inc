@@ -39,3 +39,5 @@
   define('PHONE_ID_CUSTOM_FIELD', 'custom_931');
   define('CRED_HELD_IND', 'custom_953');
   define('REG_SER_IND', 'custom_954');
+  define('VERIFICATION_MSG', 93);
+  define('EXPIRED_MSG', 94);

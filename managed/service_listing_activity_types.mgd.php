@@ -44,4 +44,15 @@ return [
       'is_reserved' => 1,
     ],
   ],
+  4 => [
+    'name' => 'ServiceListingVerificationActivityType',
+    'entity' => 'OptionValue',
+    'update' => 'never',
+    'params' => [
+      'option_group_id' => 'activity_type',
+      'label' => 'Service listing re-verification sent',
+      'name' => 'service_listing_verification',
+      'is_reserved' => 1,
+    ],
+  ],
 ];
