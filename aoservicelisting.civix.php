@@ -79,7 +79,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
   public static function verifyListing($duration) {
     // Get a list of service listings who have been approved with the latest approval activity.
     // Duration is specified in months, so multiply by 4.345
-    $weeks = (round) ($duration * 4.345) - 1;
+    $weeks = (integer) ($duration * 4.345) - 1;
     if (empty($weeks)) {
       $weeks = 25;
     }
