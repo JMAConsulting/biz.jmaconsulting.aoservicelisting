@@ -83,26 +83,31 @@ class CRM_Aoservicelisting_ExtensionUtil {
     if (empty($weeks)) {
       $weeks = 25;
     }
+    // Create temporary table holding all activities ordered by
     $result = [];
-    $sql = "SELECT ac.contact_id, DATE(a.activity_date_time) as activity_date
-      FROM civicrm_activity_contact ac
-      INNER JOIN civicrm_activity a ON a.id = ac.activity_id
-      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = ac.contact_id
-      WHERE ac.record_type_id = 3
-      AND a.is_current_revision = 1
+    $sql = "SELECT cac.contact_id, DATE(act.activity_date_time) AS activity_date
+      FROM civicrm_activity act 
+      INNER JOIN civicrm_activity_contact  cac 
+      ON cac.activity_id = act.id AND cac.record_type_id = 3
+      INNER JOIN (
+        SELECT cac.contact_id contact_id, MAX(activity_date_time) activity_date_time
+        FROM civicrm_activity ca
+        INNER JOIN civicrm_activity_contact cac 
+        ON cac.activity_id = ca.id AND cac.record_type_id = 3
+        WHERE activity_type_id = 142
+        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+        AND ca.subject = \"Application status changed to Approved\"
+        AND ca.is_current_revision = 1
+        GROUP BY cac.contact_id
+      ) AS temp 
+      ON temp.contact_id = cac.contact_id
+      AND temp.activity_date_time = act.activity_date_time
+      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = cac.contact_id
+      WHERE DATE_ADD(DATE(act.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
       AND s.service_provider_status_872 = 'Approved'
-      AND a.activity_type_id = 142
-      AND DATE_ADD(DATE(a.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
-      AND a.subject = \"Application status changed to Approved\"
-      AND a.id IN
-      (SELECT MAX(a.id)
-      FROM civicrm_activity a
-      INNER JOIN civicrm_activity_contact ac ON ac.activity_id = a.id
-      WHERE activity_type_id = 142
-      AND a.is_current_revision = 1
-      AND ac.record_type_id = 3
-      AND a.subject = \"Application status changed to Approved\"
-      GROUP BY ac.contact_id)";
+      AND act.subject = \"Application status changed to Approved\"
+      AND act.is_current_revision = 1
+      GROUP BY cac.contact_id";
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
       // Send an email to these contacts indicating they need to submit listing for re-verification.
@@ -124,25 +129,29 @@ class CRM_Aoservicelisting_ExtensionUtil {
     // Check also if we have listings 6 months since date of approval.
     // This means they have not re-verified their listing.
     $weeks = $weeks + 1;
-    $sql = "SELECT ac.contact_id, DATE(a.activity_date_time) as activity_date
-      FROM civicrm_activity_contact ac
-      INNER JOIN civicrm_activity a ON a.id = ac.activity_id
-      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = ac.contact_id
-      WHERE ac.record_type_id = 3
-      AND a.is_current_revision = 1
+    $sql = "SELECT cac.contact_id, DATE(act.activity_date_time) AS activity_date
+      FROM civicrm_activity act 
+      INNER JOIN civicrm_activity_contact  cac 
+      ON cac.activity_id = act.id AND cac.record_type_id = 3
+      INNER JOIN (
+        SELECT cac.contact_id contact_id, MAX(activity_date_time) activity_date_time
+        FROM civicrm_activity ca
+        INNER JOIN civicrm_activity_contact cac 
+        ON cac.activity_id = ca.id AND cac.record_type_id = 3
+        WHERE activity_type_id = 142
+        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+        AND ca.subject = \"Application status changed to Approved\"
+        AND ca.is_current_revision = 1
+        GROUP BY cac.contact_id
+      ) AS temp 
+      ON temp.contact_id = cac.contact_id
+      AND temp.activity_date_time = act.activity_date_time
+      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = cac.contact_id
+      WHERE DATE_ADD(DATE(act.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
       AND s.service_provider_status_872 = 'Approved'
-      AND a.activity_type_id = 142
-      AND DATE_ADD(DATE(a.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
-      AND a.subject = \"Application status changed to Approved\"
-      AND a.id IN
-      (SELECT MAX(a.id)
-      FROM civicrm_activity a
-      INNER JOIN civicrm_activity_contact ac ON ac.activity_id = a.id
-      WHERE activity_type_id = 142
-      AND a.is_current_revision = 1
-      AND ac.record_type_id = 3
-      AND a.subject = \"Application status changed to Approved\"
-      GROUP BY ac.contact_id)";
+      AND act.subject = \"Application status changed to Approved\"
+      AND act.is_current_revision = 1
+      GROUP BY cac.contact_id";
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
       // We change the service listing status to indicate that the listing has expired.
