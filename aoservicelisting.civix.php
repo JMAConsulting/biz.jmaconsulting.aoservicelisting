@@ -76,6 +76,111 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
+  public static function verifyListing($duration) {
+    // Get a list of service listings who have been approved with the latest approval activity.
+    // Duration is specified in months, so multiply by 4.345
+    $weeks = (integer) ($duration * 4.345) - 1;
+    if (empty($weeks)) {
+      $weeks = 25;
+    }
+    // Create temporary table holding all activities ordered by
+    $result = [];
+    $sql = "SELECT cac.contact_id, DATE(act.activity_date_time) AS activity_date
+      FROM civicrm_activity act 
+      INNER JOIN civicrm_activity_contact  cac 
+      ON cac.activity_id = act.id AND cac.record_type_id = 3
+      INNER JOIN (
+        SELECT cac.contact_id contact_id, MAX(activity_date_time) activity_date_time
+        FROM civicrm_activity ca
+        INNER JOIN civicrm_activity_contact cac 
+        ON cac.activity_id = ca.id AND cac.record_type_id = 3
+        WHERE activity_type_id = 142
+        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+        AND ca.subject = \"Application status changed to Approved\"
+        AND ca.is_current_revision = 1
+        GROUP BY cac.contact_id
+      ) AS temp 
+      ON temp.contact_id = cac.contact_id
+      AND temp.activity_date_time = act.activity_date_time
+      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = cac.contact_id
+      WHERE DATE_ADD(DATE(act.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+      AND s.service_provider_status_872 = 'Approved'
+      AND act.subject = \"Application status changed to Approved\"
+      AND act.is_current_revision = 1
+      GROUP BY cac.contact_id";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while ($dao->fetch()) {
+      // Send an email to these contacts indicating they need to submit listing for re-verification.
+      self::sendMessage($dao->contact_id, VERIFICATION_MSG);
+
+      // Create activity indicating verification was sent.
+      civicrm_api3('Activity', 'create', [
+        'source_contact_id' => $dao->contact_id,
+        'assignee_id' => SPECIALIST_ID,
+        'status_id' => 'Completed',
+        'target_id' => $dao->contact_id,
+        'activity_type_id' => "service_listing_verification",
+        'sequential' => 0,
+      ]);
+
+      $result['contacts_emailed'][] = $dao->contact_id;
+    }
+
+    // Check also if we have listings 6 months since date of approval.
+    // This means they have not re-verified their listing.
+    $weeks = $weeks + 1;
+    $sql = "SELECT cac.contact_id, DATE(act.activity_date_time) AS activity_date
+      FROM civicrm_activity act 
+      INNER JOIN civicrm_activity_contact  cac 
+      ON cac.activity_id = act.id AND cac.record_type_id = 3
+      INNER JOIN (
+        SELECT cac.contact_id contact_id, MAX(activity_date_time) activity_date_time
+        FROM civicrm_activity ca
+        INNER JOIN civicrm_activity_contact cac 
+        ON cac.activity_id = ca.id AND cac.record_type_id = 3
+        WHERE activity_type_id = 142
+        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+        AND ca.subject = \"Application status changed to Approved\"
+        AND ca.is_current_revision = 1
+        GROUP BY cac.contact_id
+      ) AS temp 
+      ON temp.contact_id = cac.contact_id
+      AND temp.activity_date_time = act.activity_date_time
+      INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = cac.contact_id
+      WHERE DATE_ADD(DATE(act.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
+      AND s.service_provider_status_872 = 'Approved'
+      AND act.subject = \"Application status changed to Approved\"
+      AND act.is_current_revision = 1
+      GROUP BY cac.contact_id";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    while ($dao->fetch()) {
+      // We change the service listing status to indicate that the listing has expired.
+      civicrm_api3('Contact', 'create', [
+        'id' => $dao->contact_id,
+        STATUS => 'Expired',
+        'contact_type' => 'Organization',
+        'contact_sub_type' => 'service_provider',
+      ]);
+
+      // Create an activity too, for the status change.
+      civicrm_api3('Activity', 'create', [
+        'source_contact_id' => $dao->contact_id,
+        'activity_type_id' => "provider_status_changed",
+        'subject' => "Application status changed to Expired",
+        'activity_status_id' => 'Completed',
+        'target_id' => $dao->contact_id,
+        'assignee_id' => SPECIALIST_ID,
+      ]);
+
+      // Send an email to these contacts indicating their listing has now expired.
+      self::sendMessage($dao->contact_id, EXPIRED_MSG);
+
+      $result['contacts_expired'][] = $dao->contact_id;
+    }
+
+    return $result;
+  }
+
   public static function sendMessage($contactID, $msgId, $applicantID = NULL) {
     if (empty($contactID)) {
       return;
