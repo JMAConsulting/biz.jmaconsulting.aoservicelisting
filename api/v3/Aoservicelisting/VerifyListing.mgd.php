@@ -15,7 +15,7 @@ return array (
       'description' => 'Call Aoservicelisting.VerifyListing API',
       'run_frequency' => 'Daily',
       'api_entity' => 'Aoservicelisting',
-      'api_action' => 'VerifyListing',
+      'api_action' => 'verify_listing',
       'parameters' => 'duration=6',
     ),
   ),

@@ -9,7 +9,7 @@ use CRM_Aoservicelisting_ExtensionUtil as E;
  *
  * @see https://docs.civicrm.org/dev/en/latest/framework/api-architecture/
  */
-function _civicrm_api3_aoservicelisting_VerifyListing_spec(&$spec) {
+function _civicrm_api3_aoservicelisting_verify_listing_spec(&$spec) {
   $spec['duration']['api.required'] = 1;
 }
 
@@ -25,7 +25,7 @@ function _civicrm_api3_aoservicelisting_VerifyListing_spec(&$spec) {
  *
  * @throws API_Exception
  */
-function civicrm_api3_aoservicelisting_VerifyListing($params) {
+function civicrm_api3_aoservicelisting_verify_listing($params) {
   if (array_key_exists('duration', $params)) {
     $returnValues = E::verifyListing($params['duration']);
     return civicrm_api3_create_success($returnValues, $params, 'Aoservicelisting', 'VerifyListing');
