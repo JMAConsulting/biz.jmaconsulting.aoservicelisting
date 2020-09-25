@@ -1,5 +1,4 @@
 <?php
-require_once 'aoservicelisting.constants.inc';
 
 // AUTO-GENERATED FILE -- Civix may overwrite any changes made to this file
 
@@ -7,10 +6,10 @@ require_once 'aoservicelisting.constants.inc';
  * The ExtensionUtil class provides small stubs for accessing resources of this
  * extension.
  */
-class CRM_Aoservicelisting_ExtensionUtil {
-  const SHORT_NAME = "aoservicelisting";
-  const LONG_NAME = "biz.jmaconsulting.aoservicelisting";
-  const CLASS_PREFIX = "CRM_Aoservicelisting";
+class CRM_Servicelisting_ExtensionUtil {
+  const SHORT_NAME = 'aoservicelisting';
+  const LONG_NAME = 'biz.jmaconsulting.aoservicelisting';
+  const CLASS_PREFIX = 'CRM_Servicelisting';
 
   /**
    * Translate a string using the extension's domain.
@@ -76,319 +75,9 @@ class CRM_Aoservicelisting_ExtensionUtil {
     return self::CLASS_PREFIX . '_' . str_replace('\\', '_', $suffix);
   }
 
-  public static function sendMessage($contactID, $msgId, $applicantID = NULL) {
-    if (empty($contactID)) {
-      return;
-    }
-    $messageTemplates = new CRM_Core_DAO_MessageTemplate();
-    $messageTemplates->id = $msgId;
-    $messageTemplates->find(TRUE);
-
-    $body_subject = CRM_Core_Smarty::singleton()->fetch("string:$messageTemplates->msg_subject");
-    $body_text    = $messageTemplates->msg_text;
-    $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
-    $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
-
-    if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
-      $contact['email'] = ACKNOWLEDGE_SENDER;
-      $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
-      $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
-      $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
-    }
-    $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
-    $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
-    $mailParams = array(
-      'groupName' => 'Service Application Listing Confirmation',
-      'from' => FROM_EMAIL,
-      'toName' =>  $contact['display_name'],
-      'toEmail' => $contact['email'],
-      'subject' => $body_subject,
-      'messageTemplateID' => $messageTemplates->id,
-      'html' => $body_html,
-      'text' => $body_text,
-    );
-    CRM_Utils_Mail::send($mailParams);
-  }
-
-  public static function createActivity($cid) {
-    civicrm_api3('Activity', 'create', [
-      'source_contact_id' => $cid,
-      'assignee_id' => SPECIALIST_ID,
-      'status_id' => 'Scheduled',
-      'target_id' => $cid,
-      'activity_type_id' => "service_listing_created",
-      'sequential' => 0,
-    ]);
-    self::sendMessage(SPECIALIST_ID, ACKNOWLEDGE_MESSAGE, $cid);
-  }
-
-  public static function editActivity($cid) {
-    civicrm_api3('Activity', 'create', [
-      'source_contact_id' => $cid,
-      'assignee_id' => SPECIALIST_ID,
-      'status_id' => 'Completed',
-      'activity_type_id' => "service_listing_edited",
-      'sequential' => 0,
-    ]);
-  }
-
-  public static function endRelationship($values, $rowNumber, $orgId) {
-    if (empty($values['staff_first_name'][$rowNumber]) && empty($values['staff_first_name'][$rowNumber])
-      && empty($values['staff_record_regulator'][$rowNumber]) && !empty($values['staff_contact_id'][$rowNumber])) {
-      // We had a staff record but it is gone now
-      $relationships = civicrm_api3('Relationship', 'get', ['contact_id_a' => $values['staff_contact_id'][$rowNumber], 'contact_id_b' => $orgId, 'is_active' => 1]);
-      if (!empty($relationships['values'])) {
-        // End Date all relationships as they have either overwritten the data or not.
-        foreach ($relationships['values'] as $relationship) {
-          civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
-        }
-      }
-    }
-  }
-
-  public static function findDupes($cid, $orgId, &$individualParams, $rel = EMPLOYER_CONTACT_REL, $isOrgOptional = FALSE) {
-    if (!empty($cid)) {
-      $currentDetails = civicrm_api3('Contact', 'getsingle', ['id' => $cid]);
-      if ($currentDetails['first_name'] != $individualParams['first_name'] || $currentDetails['last_name'] != $individualParams['last_name']) {
-        $params = ['contact_id_a' => $cid, 'contact_id_b' => $orgId, 'is_active' => 1];
-        $relationships = civicrm_api3('Relationship', 'get', $params);
-        if (!empty($relationships['values'])) {
-          // End Date all relationships as they have either overwritten the data or not.
-          foreach ($relationships['values'] as $relationship) {
-            civicrm_api3('Relationship', 'create', ['id' => $relationship['id'], 'is_active' => 0, 'end_date' => date('Y-m-d')]);
-          }
-        }
-      } else {
-        $individualParams['contact_id'] = $cid;
-      }
-    }
-    if (empty($individualParams['contact_id'])) {
-      $orgClause = ' r.contact_id_b = ' . $orgId;
-      $orgClause = $isOrgOptional ? " ($orgClause OR r.contact_id_b IS NOT NULL) " : $orgClause;
-      // Check for dupes.
-      $staffDetails = CRM_Core_DAO::executeQuery("SELECT r.contact_id_a, ca.first_name, ca.last_name
-         FROM civicrm_relationship r
-         INNER JOIN civicrm_contact cb ON cb.id = r.contact_id_b
-         LEFT JOIN civicrm_contact ca ON ca.id = r.contact_id_a
-         WHERE $orgClause AND r.relationship_type_id = %2 AND r.is_active = 1", [2 => [$rel, "Integer"]])->fetchAll()[0]; // We expect only a single contact
-      if (!empty($staffDetails)) {
-        if (($staffDetails['first_name'] == $individualParams['first_name']) && ($staffDetails['last_name'] == $individualParams['last_name'])) {
-          // Dupe found
-          $individualParams["contact_id"] = $staffDetails['contact_id_a'];
-        }
-      }
-    }
-  }
-
-  public static function createWebsite($cid, $url) {
-    $result = civicrm_api3('Website', 'get', [
-      'contact_id' => $cid,
-      'url' => $url,
-      'return' => 'id',
-      'options' => ['limit' => 1],
-    ]);
-    if (!empty($result['id'])) {
-      return;
-    }
-    civicrm_api3('Website', 'create', [
-      'website_type_id' => 'Work',
-      'url' => $url,
-      'contact_id' => $cid,
-    ]);
-  }
-
-  public static function createPhone($cid, $phone) {
-    if (empty($phone)) {
-      return;
-    }
-    $params = [
-      'phone' => $phone,
-      'location_type_id' => 'Work',
-      'contact_id' => $cid,
-      'phone_type_id' => 'Phone',
-      'is_primary' => 1,
-    ];
-    $result = civicrm_api3('Phone', 'get', $params);
-    if (!empty($result['values'])) {
-      return;
-    }
-    civicrm_api3('Phone', 'create', $params);
-  }
-
-  public static function createRelationship($cid, $orgId, $relType) {
-    $relationshipParams = [
-      'contact_id_a' => $cid,
-      'contact_id_b' => $orgId,
-      'relationship_type_id' => $relType,
-    ];
-    $relationshipCheck = civicrm_api3('Relationship', 'get', $relationshipParams);
-    if ($relationshipCheck['count'] < 1) {
-      try {
-        civicrm_api3('Relationship', 'create', $relationshipParams);
-      } catch (Exception $e) {}
-    }
-  }
-
-  public static function createAddress($values, $rowNumber, $cid, $addId = NULL) {
-    $addressParams = [
-      'street_address' => $values['work_address'][$rowNumber],
-      'city' => $values['city'][$rowNumber],
-      'postal_code' => $values['postal_code'][$rowNumber],
-      'contact_id' => $cid,
-      'country_id' => 'CA',
-      'state_province_id' => 'Ontario',
-      'location_type_id' => 'Work',
-    ];
-    if ($rowNumber == 1) {
-      $addressParams['is_primary'] = 1;
-    }
-    if (!empty($addId)) {
-      $addressParams['id'] = $addId;
-    }
-    else {
-      $result = civicrm_api3('Address', 'get', $addressParams);
-      if (!empty($result['values'])) {
-        return;
-      }
-    }
-    $address = civicrm_api3('Address', 'create', $addressParams);
-    return [$address['id'], $addressParams];
-  }
-
-  /**
-   * Validation Rule.
-   *
-   * @param array $params
-   *
-   * @return array|bool
-   */
-  public static function usernameRule($cid) {
-    // Check if there is a UFMatch, if there is, that means there is a CMS ID associated the account.
-    $ufId = CRM_Core_DAO::singleValueQuery("SELECT uf_id FROM civicrm_uf_match WHERE contact_id = %1", [1 => [$cid, "Integer"]]);
-    if (!empty($ufId)) {
-      return TRUE;
-    }
-    // Check if the CMS has an account with the same email.
-    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]);
-    if (!empty($email)) {
-      $config = CRM_Core_Config::singleton();
-      $errors = array();
-      $check_params = array(
-        'mail' => $email,
-      );
-      $config->userSystem->checkUserNameEmailExists($check_params, $errors, 'mail');
-
-      return !empty($errors) ? TRUE : FALSE;
-    }
-    return FALSE;
-  }
-
-  /**
-   * Validation Rule.
-   *
-   * @param array $params
-   *
-   * @return array|bool
-   */
-  public static function emailRule($cid) {
-    // Check if the user has a valid email.
-    $email = CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1 AND on_hold <> 1", [1 => [$cid, "Integer"]]);
-    if (!empty($email)) {
-      // 2nd level check. Check UF table if email exists
-      $emailExists = CRM_Core_DAO::singleValueQuery("SELECT uf_name FROM civicrm_uf_match WHERE uf_name = %1", [1 => [$email, "String"]]);
-      if (!empty($emailExists)) {
-        return TRUE;
-      }
-      return FALSE;
-    }
-    return TRUE;
-  }
-
-
-  public static function createUserAccount($cid) {
-    // We create the user account for the primary contact.
-    $relationship = civicrm_api3('Relationship', 'get', [
-      'contact_id_b' => $cid,
-      'relationship_type_id' => PRIMARY_CONTACT_REL,
-      'return' => 'contact_id_a',
-    ]);
-    if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
-      $cid = $relationship['values'][$relationship['id']]['contact_id_a'];
-    }
-    else {
-      return;
-    }
-    $name = CRM_Core_DAO::executeQuery("SELECT LOWER(CONCAT(first_name, '.', last_name, $cid)) AS name, display_name
-          FROM civicrm_contact WHERE id = %1", [1 => [$cid, "Integer"]])->fetchAll()[0];
-    if (self::usernameRule($cid)) {
-      return FALSE;
-    }
-    if (self::emailRule($cid)) {
-      return FALSE;
-    }
-    // Reset $_post.
-    $_POST = [];
-    $params = [
-      'cms_name' => $name['name'],
-      'cms_pass' => 'changeme',
-      'cms_confirm_pass' => 'changeme',
-      'email' => CRM_Core_DAO::singleValueQuery("SELECT email FROM civicrm_email WHERE contact_id = %1 AND is_primary = 1", [1 => [$cid, "Integer"]]),
-      'contactID' => $cid,
-      'name' => $name['display_name'],
-      'notify' => TRUE,
-    ];
-    CRM_Core_BAO_CMSUser::create($params, 'email');
-
-    $authorizedContact = user_load_by_name($name['name']);
-    if (!empty($authorizedContact)) {
-      $roles = array_merge($authorizedContact->getRoles(), ['authorized_contact']);
-      $authorizedContact->set('roles', array_unique($roles));
-      $authorizedContact->save();
-    }
-  }
-
-  function setStatus($oldStatus = NULL, $cid, $submitValues) {
-    if (!empty($cid)) {
-      $submitKeys = array_keys($submitValues);
-      $key = preg_grep('/^' . STATUS . '_[\d]*/', $submitKeys);
-      $newStatus = reset($key);
-      if ($oldStatus != "Approved" && CRM_Utils_Array::value($newStatus, $submitValues) == 'Approved') {
-        // Create drupal account if not exists.
-        self::createUserAccount($cid);
-
-        // Send Mail
-        self::sendMessage($cid, APPROVED_MESSAGE);
-
-        $activityID = civicrm_api3('Activity', 'get', [
-          'source_contact_id' => $cid,
-          'activity_type_id' => "service_listing_created",
-          'status_id' => 'Scheduled',
-          'sequential' => 1,
-        ])['values'][0]['id'];
-        if ($activityID) {
-          civicrm_api3('Activity', 'create', [
-            'id' => $activityID,
-            'status_id' => 'Completed',
-          ]);
-        }
-      }
-      if ($oldStatus) {
-        civicrm_api3('Activity', 'create', [
-          'source_contact_id' => $cid,
-          'activity_type_id' => "provider_status_changed",
-          'subject' => sprintf("Application status changed to %s", CRM_Utils_Array::value($newStatus, $submitValues)),
-          'activity_status_id' => 'Completed',
-          'details' => '<a class="action-item crm-hover-button" href="https://www.autismontario.com/civicrm/contact/view?cid=' . $cid . '">View Applicant</a>',
-          'target_id' => $cid,
-          'assignee_id' => CRM_Core_Session::singleton()->getLoggedInContactID() ?: NULL,
-        ]);
-      }
-    }
-  }
-
 }
 
-use CRM_Aoservicelisting_ExtensionUtil as E;
+use CRM_Servicelisting_ExtensionUtil as E;
 
 /**
  * (Delegated) Implements hook_civicrm_config().
@@ -504,8 +193,9 @@ function _aoservicelisting_civix_civicrm_disable() {
  * @param $op string, the type of operation being performed; 'check' or 'enqueue'
  * @param $queue CRM_Queue_Queue, (for 'enqueue') the modifiable list of pending up upgrade tasks
  *
- * @return mixed  based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
- *                for 'enqueue', returns void
+ * @return mixed
+ *   based on op. for 'check', returns array(boolean) (TRUE if upgrades are pending)
+ *   for 'enqueue', returns void
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_upgrade
  */
@@ -516,14 +206,14 @@ function _aoservicelisting_civix_civicrm_upgrade($op, CRM_Queue_Queue $queue = N
 }
 
 /**
- * @return CRM_Aoservicelisting_Upgrader
+ * @return CRM_Servicelisting_Upgrader
  */
 function _aoservicelisting_civix_upgrader() {
-  if (!file_exists(__DIR__ . '/CRM/Aoservicelisting/Upgrader.php')) {
+  if (!file_exists(__DIR__ . '/CRM/Servicelisting/Upgrader.php')) {
     return NULL;
   }
   else {
-    return CRM_Aoservicelisting_Upgrader_Base::instance();
+    return CRM_Servicelisting_Upgrader_Base::instance();
   }
 }
 
@@ -536,7 +226,7 @@ function _aoservicelisting_civix_upgrader() {
  * @param string $dir base dir
  * @param string $pattern , glob pattern, eg "*.txt"
  *
- * @return array(string)
+ * @return array
  */
 function _aoservicelisting_civix_find_files($dir, $pattern) {
   if (is_callable(['CRM_Utils_File', 'findFiles'])) {
@@ -555,7 +245,7 @@ function _aoservicelisting_civix_find_files($dir, $pattern) {
     if ($dh = opendir($subdir)) {
       while (FALSE !== ($entry = readdir($dh))) {
         $path = $subdir . DIRECTORY_SEPARATOR . $entry;
-        if ($entry{0} == '.') {
+        if ($entry[0] == '.') {
         }
         elseif (is_dir($path)) {
           $todos[] = $path;
@@ -566,6 +256,7 @@ function _aoservicelisting_civix_find_files($dir, $pattern) {
   }
   return $result;
 }
+
 /**
  * (Delegated) Implements hook_civicrm_managed().
  *
@@ -673,7 +364,7 @@ function _aoservicelisting_civix_civicrm_themes(&$themes) {
  * @link http://php.net/glob
  * @param string $pattern
  *
- * @return array, possibly empty
+ * @return array
  */
 function _aoservicelisting_civix_glob($pattern) {
   $result = glob($pattern);
@@ -781,8 +472,6 @@ function _aoservicelisting_civix_civicrm_alterSettingsFolders(&$metaDataFolders 
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_entityTypes
  */
-
 function _aoservicelisting_civix_civicrm_entityTypes(&$entityTypes) {
-  $entityTypes = array_merge($entityTypes, array (
-  ));
+  $entityTypes = array_merge($entityTypes, []);
 }
