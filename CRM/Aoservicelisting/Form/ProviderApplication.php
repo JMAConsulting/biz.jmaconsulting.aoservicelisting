@@ -75,6 +75,20 @@ public $_elementNames;
         $this->_loggedInContactID = NULL;
       }
     }
+    if (!empty($cs) && empty($this->getLoggedInUserContactID())) {
+      $relationship = civicrm_api3('Relationship', 'get', [
+        'contact_id_b' => $loggedInContactId,
+        'relationship_type_id' => PRIMARY_CONTACT_REL,
+      ]);
+      if (!empty($relationship['values'])) {
+        $this->_loggedInContactID = $relationship['values'][$relationship['id']]['contact_id_a'];
+      }
+      else {
+        $this->_loggedInContactID = NULL;
+      }
+      $this->organizationId = $loggedInContactId;
+      $this->set('organizationId', $loggedInContactId);
+    }
   }
 
   /**
