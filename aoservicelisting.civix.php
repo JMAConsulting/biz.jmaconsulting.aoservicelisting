@@ -103,15 +103,29 @@ class CRM_Aoservicelisting_ExtensionUtil {
       ON temp.contact_id = cac.contact_id
       AND temp.activity_date_time = act.activity_date_time
       INNER JOIN civicrm_value_service_listi_71 s ON s.entity_id = cac.contact_id
+      INNER JOIN civicrm_contact cc ON cc.id = cac.contact_id
       WHERE DATE_ADD(DATE(act.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
       AND s.service_provider_status_872 = 'Approved'
       AND act.subject = \"Application status changed to Approved\"
       AND act.is_current_revision = 1
+      AND cc.is_deleted <> 1
       GROUP BY cac.contact_id";
     $dao = CRM_Core_DAO::executeQuery($sql);
     while ($dao->fetch()) {
-      // Send an email to these contacts indicating they need to submit listing for re-verification.
-      self::sendMessage($dao->contact_id, VERIFICATION_MSG);
+      // Send an email to the authorized personnel for these contacts indicating they need to submit listing for re-verification.
+      $relationship = civicrm_api3('Relationship', 'get', [
+        'contact_id_b' => $dao->contact_id,
+        'relationship_type_id' => PRIMARY_CONTACT_REL,
+        'return' => 'contact_id_a',
+        'is_active' => 1,
+      ]);
+      if ($relationship['count'] > 0 && !empty($relationship['values'][$relationship['id']]['contact_id_a'])) {
+        $primaryCid = $relationship['values'][$relationship['id']]['contact_id_a'];
+      }
+      if (empty($primaryCid)) {
+        continue;
+      }
+      self::sendMessage($primaryCid, VERIFICATION_MSG);
 
       // Create activity indicating verification was sent.
       civicrm_api3('Activity', 'create', [
@@ -123,7 +137,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
         'sequential' => 0,
       ]);
 
-      $result['contacts_emailed'][] = $dao->contact_id;
+      $result['contacts_emailed'][] = $primaryCid;
     }
 
     // Check also if we have listings 6 months since date of approval.
