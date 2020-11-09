@@ -125,7 +125,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
       if (empty($primaryCid)) {
         continue;
       }
-      self::sendMessage($primaryCid, VERIFICATION_MSG);
+      self::sendMessage($dao->contact_id, VERIFICATION_MSG, $primaryCid);
 
       // Create activity indicating verification was sent.
       civicrm_api3('Activity', 'create', [
@@ -208,12 +208,19 @@ class CRM_Aoservicelisting_ExtensionUtil {
     $body_html    = "{crmScope extensionKey='biz.jmaconsulting.aoservicelisting'}" . $messageTemplates->msg_html . "{/crmScope}";
     $contact = civicrm_api3('Contact', 'getsingle', ['id' => $contactID]);
 
-    if ($msgId == ACKNOWLEDGE_MESSAGE && $applicantID) {
+    if ($msgId == ACKNOWLEDGE_MESSAGE && !empty($applicantID)) {
       $contact['email'] = ACKNOWLEDGE_SENDER;
       $contact['display_name'] = CRM_Contact_BAO_Contact::displayName(SPECIALIST_ID);
       $url = CRM_Utils_System::url("civicrm/contact/view", "reset=1&cid=" . $applicantID, TRUE);
       $body_text  = str_replace('{url}', $url, $messageTemplates->msg_text);
       $body_html  = str_replace('{url}', $url, $messageTemplates->msg_html);
+    }
+    if ($msgId == VERIFICATION_MSG && !empty($applicantID)) {
+      $contact = civicrm_api3('Contact', 'getsingle', ['id' => $applicantID]);
+      $cs = CRM_Contact_BAO_Contact_Utils::generateChecksum($contactID);
+      $url = CRM_Utils_System::url("civicrm/service-listing-application", "reset=1&cid=" . $contactID . '&cs=' . $cs, TRUE);
+      $body_text  = str_replace('{verificationurl}', $url, $messageTemplates->msg_text);
+      $body_html  = str_replace('{verificationurl}', $url, $messageTemplates->msg_html);
     }
     $body_html = CRM_Core_Smarty::singleton()->fetch("string:{$body_html}");
     $body_text = CRM_Core_Smarty::singleton()->fetch("string:{$body_text}");
