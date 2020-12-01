@@ -95,7 +95,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
         INNER JOIN civicrm_activity_contact cac 
         ON cac.activity_id = ca.id AND cac.record_type_id = 3
         WHERE activity_type_id = 142
-        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
         AND ca.subject = \"Application status changed to Approved\"
         AND ca.is_current_revision = 1
         GROUP BY cac.contact_id
@@ -153,7 +152,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
         INNER JOIN civicrm_activity_contact cac 
         ON cac.activity_id = ca.id AND cac.record_type_id = 3
         WHERE activity_type_id = 142
-        AND DATE_ADD(DATE(ca.activity_date_time), INTERVAL $weeks WEEK) = DATE(NOW())
         AND ca.subject = \"Application status changed to Approved\"
         AND ca.is_current_revision = 1
         GROUP BY cac.contact_id
