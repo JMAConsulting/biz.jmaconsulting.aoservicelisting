@@ -302,7 +302,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $params['master_id'] = $details[0];
         $params['add_relationship'] = 0;
         $params['update_current_employer'] = 0;
-        civicrm_api3('Address', 'create', $params);
+        // Check if same address exists before creating.
+        $masterAddresses = civicrm_api3('Address', 'get', ['master_id' => $details[0], 'contact_id' => $staffMemberId, 'options' => ['limit' => 0]])['values'];
+        if (empty($masterAddresses)) {
+          civicrm_api3('Address', 'create', $params);
+        }
 
         //Ensure that the location type of all email addresses are work.
         self::setEmailsToWorkLocation($staffMemberId);

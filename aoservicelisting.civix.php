@@ -596,7 +596,6 @@ class CRM_Aoservicelisting_ExtensionUtil {
       'country_id' => 'CA',
       'state_province_id' => 'Ontario',
       'location_type_id' => 'Work',
-      PHONE_ID_CUSTOM_FIELD => $values['phone_id'][$rowNumber],
     ];
     if ($rowNumber == 1) {
       $addressParams['is_primary'] = 1;
@@ -612,6 +611,7 @@ class CRM_Aoservicelisting_ExtensionUtil {
     }
     $addressParams['update_current_employer'] = 0;
     $addressParams['add_relationship'] = 0;
+    $addressParams[PHONE_ID_CUSTOM_FIELD] = $values['phone_id'][$rowNumber];
     $address = civicrm_api3('Address', 'create', $addressParams);
     return [$address['id'], $addressParams];
   }
