@@ -194,7 +194,8 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
     }
 
     // Delete all current addresses from the org contact and other contacts.
-    self::removeAddressesLinkedToOrganization($organization['id']);
+    // self::removeAddressesLinkedToOrganization($organization['id']);
+    // Commented out since we shouldn't be deleting addresses without checking if they are the same.
 
     // Delete all current phones from the org contact and other contacts.
     self::removePhonesLinkedToOrganization($organization['id']);
@@ -289,7 +290,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         E::endABARelationship($values, $rowNumber, $organization['id']);
       }
     }
-    // Add addresses to alll the regulated staff members excluding any staff that match the primray contact as they will be dealt with later on in the code.  
+    // Add addresses to alll the regulated staff members excluding any staff that match the primray contact as they will be dealt with later on in the code.
     foreach ($staffMemberIds as $staffMemberId) {
       foreach ($addressIds as $key => $details) {
         if ($staffMemberId == $primaryContactId) {
@@ -367,7 +368,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
           $params['master_id'] = $details[0];
           $params['add_relationship'] = 0;
           $params['update_current_employer'] = 0;
-          civicrm_api3('Address', 'create', $params);
+          // Check if same address exists before creating.
+          $masterAddresses = civicrm_api3('Address', 'get', ['master_id' => $details[0], 'contact_id' => $abaMember['id'], 'options' => ['limit' => 0]])['values'];
+          if (empty($masterAddresses)) {
+            civicrm_api3('Address', 'create', $params);
+          }
 
           //Ensure that the location type of all email addresses are work.
           self::setEmailsToWorkLocation($abaMember['id']);
@@ -434,7 +439,11 @@ class CRM_Aoservicelisting_Form_ProviderApplicationConfirm extends CRM_Aoservice
         $aparams['master_id'] = $details[0];
         $aparams['add_relationship'] = 0;
         $aparams['update_current_employer'] = 0;
-        civicrm_api3('Address', 'create', $aparams);
+        // Check if same address exists before creating.
+        $masterAddresses = civicrm_api3('Address', 'get', ['master_id' => $details[0], 'contact_id' => $primId, 'options' => ['limit' => 0]])['values'];
+        if (empty($masterAddresses)) {
+          civicrm_api3('Address', 'create', $aparams);
+        }
       }
       //Ensure that the location type of all email addresses are work.
       self::setEmailsToWorkLocation($primId);

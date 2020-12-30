@@ -150,6 +150,18 @@ function aoservicelisting_civicrm_alterCustomFieldDisplayValue(&$displayValue, $
   }
 }
 
+/**
+ * Implements hook_civicrm_pre().
+ *
+ * Prevent inadvertent relationships from being added.
+ */
+function aoservicelisting_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName == 'Address' && in_array($op, ['create', 'edit'])) {
+    $params['add_relationship'] = 0;
+    $params['update_current_employer'] = 0;
+  }
+}
+
 function aoservicelisting_civicrm_preProcess($formName, &$form) {
   if ($formName == "CRM_Contact_Form_Contact") {
     if (!empty($form->_contactId) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {

@@ -610,6 +610,8 @@ class CRM_Aoservicelisting_ExtensionUtil {
         return;
       }
     }
+    $addressParams['update_current_employer'] = 0;
+    $addressParams['add_relationship'] = 0;
     $address = civicrm_api3('Address', 'create', $addressParams);
     return [$address['id'], $addressParams];
   }
