@@ -169,13 +169,13 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
 
   public function buildQuickForm() {
     if (\Drupal::languageManager()->getCurrentLanguage()->getId() == 'fr') {
-      CRM_Utils_System::setTitle('Demande d\'inscription au Community Connect, d\'Autisme Ontario');
+      CRM_Utils_System::setTitle('Demande d\'inscription au CommunityConnect, d\'Autisme Ontario');
       if (!empty($this->_loggedInContactID)) {
         $this->assign('preFormText', Civi::settings()->get('aoservicelisting_form_pre_help_fr'));
       }
     }
     else {
-      CRM_Utils_System::setTitle('Autism Ontario Community Connect Application Form');
+      CRM_Utils_System::setTitle('Autism Ontario CommunityConnect Application Form');
       if (!empty($this->_loggedInContactID)) {
         $this->assign('preFormText', Civi::settings()->get('aoservicelisting_form_pre_help'));
       }
