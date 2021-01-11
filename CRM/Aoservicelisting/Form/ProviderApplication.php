@@ -89,6 +89,23 @@ public $_elementNames;
       $this->organizationId = $loggedInContactId;
       $this->set('organizationId', $loggedInContactId);
     }
+    if (!empty($this->organizationId) && !empty($this->_loggedInContactID)) {
+      // Check status to make sure we only allow edits to Approved service listings.
+      $allowEdit = FALSE;
+      $status = civicrm_api3('Contact', 'get', [
+        'id' => $this->organizationId,
+        'sequential' => 1,
+        'return' => [STATUS],
+      ]);
+      if (!empty($status['values'])) {
+        if ($status['values'][0][STATUS] == 'Approved') {
+          $allowEdit = TRUE;
+        }
+      }
+      if (empty($allowEdit)) {
+        CRM_Core_Error::statusBounce(ts('This application has already been submitted and is under progress.'), CRM_Utils_System::url('civicrm/service-listing-application', 'reset=1'));
+      }
+    }
   }
 
   /**
