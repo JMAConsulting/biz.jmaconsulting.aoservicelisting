@@ -176,6 +176,31 @@ function aoservicelisting_civicrm_preProcess($formName, &$form) {
 }
 
 /**
+ * Implementation of hook_civicrm_post
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
+ */
+function aoservicelisting_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'Relationship' && in_array($op, ['create', 'edit'])) {
+    // Check if the contact id is a child and delete the employee of relationship.
+
+    // Is this an employee of relationship?
+    $employeeOf = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_RelationshipType', 'Employee of', 'id', 'name_a_b');
+    if ($objectRef->relationship_type_id == $employeeOf) {
+      $contact = civicrm_api3('Contact', 'get', [
+        'sequential' => 1,
+        'return' => ["contact_sub_type"],
+        'id' => $objectRef->contact_id_a,
+      ]);
+      if (!empty($contact['values']) && in_array('Child', $contact['values'][0]['contact_sub_type'])) {
+        // This is a child contact, delete the relationship that was created.
+        civicrm_api3('Relationship', 'delete', ['id' => $objectId]);
+      }
+    }
+  }
+}
+
+/**
  * Implementation of hook_civicrm_postProcess
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postProcess
