@@ -195,6 +195,13 @@ function aoservicelisting_civicrm_post($op, $objectName, $objectId, &$objectRef)
       if (!empty($contact['values']) && in_array('Child', $contact['values'][0]['contact_sub_type'])) {
         // This is a child contact, delete the relationship that was created.
         civicrm_api3('Relationship', 'delete', ['id' => $objectId]);
+        // Also delete the employer_id if present.
+        civicrm_api3('Contact', 'create', [
+          'id' => $objectRef->contact_id_a,
+          'employer_id' => 'null',
+          'contact_type' => 'Individual',
+          'contact_sub_type' => 'Child',
+        ]);
       }
     }
   }
