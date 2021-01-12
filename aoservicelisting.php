@@ -160,6 +160,28 @@ function aoservicelisting_civicrm_pre($op, $objectName, $id, &$params) {
     $params['add_relationship'] = 0;
     $params['update_current_employer'] = 0;
   }
+  if ($objectName == 'Relationship' && in_array($op, ['create', 'edit'])) {
+    // Check if the contact id is a child and deactivate the employee of relationship.
+
+    if ($params['relationship_type_id'] == 5) {
+      $contact = civicrm_api3('Contact', 'get', [
+        'sequential' => 1,
+        'return' => ["contact_sub_type"],
+        'id' => $params['contact_id_a'],
+      ]);
+      if (!empty($contact['values']) && in_array('Child', $contact['values'][0]['contact_sub_type'])) {
+        // This is a child contact, set the relationship that was created as inactive.
+        $params['is_active'] = 0;
+        // Also delete the employer_id if present.
+        civicrm_api3('Contact', 'create', [
+          'id' => $params['contact_id_a'],
+          'employer_id' => 'null',
+          'contact_type' => 'Individual',
+          'contact_sub_type' => 'Child',
+        ]);
+      }
+    }
+  }
 }
 
 function aoservicelisting_civicrm_preProcess($formName, &$form) {
@@ -171,38 +193,6 @@ function aoservicelisting_civicrm_preProcess($formName, &$form) {
   if ($formName == "CRM_Contact_Form_Inline_CustomData") {
     if (!empty($form->_submitValues['cid']) && count(preg_grep('/^' . STATUS . '_[\d]*/', array_keys($form->_submitValues))) > 0) {
       $form->_oldStatus = civicrm_api3('Contact', 'getvalue', ['return' => STATUS, 'id' => $form->_contactId]);
-    }
-  }
-}
-
-/**
- * Implementation of hook_civicrm_post
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
- */
-function aoservicelisting_civicrm_post($op, $objectName, $objectId, &$objectRef) {
-  if ($objectName == 'Relationship' && in_array($op, ['create', 'edit'])) {
-    // Check if the contact id is a child and delete the employee of relationship.
-
-    // Is this an employee of relationship?
-    $employeeOf = CRM_Core_DAO::getFieldValue('CRM_Contact_DAO_RelationshipType', 'Employee of', 'id', 'name_a_b');
-    if ($objectRef->relationship_type_id == $employeeOf) {
-      $contact = civicrm_api3('Contact', 'get', [
-        'sequential' => 1,
-        'return' => ["contact_sub_type"],
-        'id' => $objectRef->contact_id_a,
-      ]);
-      if (!empty($contact['values']) && in_array('Child', $contact['values'][0]['contact_sub_type'])) {
-        // This is a child contact, delete the relationship that was created.
-        civicrm_api3('Relationship', 'delete', ['id' => $objectId]);
-        // Also delete the employer_id if present.
-        civicrm_api3('Contact', 'create', [
-          'id' => $objectRef->contact_id_a,
-          'employer_id' => 'null',
-          'contact_type' => 'Individual',
-          'contact_sub_type' => 'Child',
-        ]);
-      }
     }
   }
 }
