@@ -103,7 +103,7 @@ public $_elementNames;
         }
       }
       if (empty($allowEdit)) {
-        CRM_Core_Error::statusBounce(ts('This application has already been submitted and is under progress.'), CRM_Utils_System::url('civicrm/service-listing-application', 'reset=1'));
+        CRM_Core_Error::statusBounce(ts('This application has already been submitted and is under progress.'), CRM_Utils_System::url('civicrm/dashboard', 'reset=1'));
       }
     }
   }
