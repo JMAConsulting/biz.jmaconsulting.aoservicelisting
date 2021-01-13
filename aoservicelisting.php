@@ -163,22 +163,14 @@ function aoservicelisting_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Relationship' && in_array($op, ['create', 'edit'])) {
     // Check if the contact id is a child and deactivate the employee of relationship.
 
-    if ($params['relationship_type_id'] == 5) {
-      $contact = civicrm_api3('Contact', 'get', [
-        'sequential' => 1,
-        'return' => ["contact_sub_type"],
-        'id' => $params['contact_id_a'],
-      ]);
-      if (!empty($contact['values']) && in_array('Child', $contact['values'][0]['contact_sub_type'])) {
+    if ($params['relationship_type_id'] == 5 && !empty($params['contact_id_a'])) {
+      $subType = CRM_Core_DAO::singleValueQuery("SELECT id FROM civicrm_contact WHERE contact_sub_type LIKE '%Child%' AND id = %1", [1 => [$params['contact_id_a'], 'Integer']]);
+      if (!empty($subType)) {
         // This is a child contact, set the relationship that was created as inactive.
         $params['is_active'] = 0;
+        $params['end_date'] = date('Y-m-d');
         // Also delete the employer_id if present.
-        civicrm_api3('Contact', 'create', [
-          'id' => $params['contact_id_a'],
-          'employer_id' => 'null',
-          'contact_type' => 'Individual',
-          'contact_sub_type' => 'Child',
-        ]);
+        CRM_Core_DAO::singleValueQuery("UPDATE civicrm_contact SET employer_id = NULL WHERE id = %1", [1 => [$params['contact_id_a'], 'Integer']]);
       }
     }
   }
