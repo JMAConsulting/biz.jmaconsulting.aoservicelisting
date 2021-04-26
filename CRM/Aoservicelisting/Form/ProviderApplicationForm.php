@@ -288,6 +288,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = $abaStaffMemberCount = 0;
+
+    // Check email for primary contact to see if existing in the database.
+    if (!empty($values['email-Primary'])) {
+      $isProvider = CRM_Core_DAO::singleValueQuery('SELECT e.email FROM civicrm_email e INNER JOIN civicrm_contact c ON c.id = e.contact_id WHERE e.email LIKE %1 AND c.is_deleted <> 1 AND c.contact_sub_type LIKE \'%authorized_contact%\'', [1 => [$values['email-Primary'], 'String']]);
+      if (!empty($isProvider)) {
+        $errors['email-Primary'] = E::ts("A person with this email address has already submitted a CommunityConnect Application. Please contact servicelisting@autismontario.com for more information.");
+      }
+    }
     $regulatorUrlMapping = CRM_Core_OptionGroup::values('regulator_url_mapping');
 
     // Check primary contact first and last name.
