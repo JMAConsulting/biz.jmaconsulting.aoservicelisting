@@ -50,7 +50,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
           $defaults['staff_record_regulator[' . $staffRowCount . ']'] = $primaryContact[REGULATED_URL];
           $staffRowCount++;
         }
-        // if the primary contact has a ABA certificate field set then prefill the first ABA staff member details with teh primary contact details. 
+        // if the primary contact has a ABA certificate field set then prefill the first ABA staff member details with teh primary contact details.
         if (!empty($primaryContact[CERTIFICATE_NUMBER])) {
           $defaults['aba_first_name[' . $abaStaffCount . ']'] = $defaults['primary_first_name'] = $primaryContact['first_name'];
           $defaults['aba_last_name[' . $abaStaffCount . ']'] = $defaults['primary_last_name'] = $primaryContact['last_name'];
@@ -128,7 +128,7 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
         if (!empty($primaryWebsite['values'][0]['url'])) {
           $defaults['website'] = $primaryWebsite['values'][0]['url'];
         }
-        // Get details of the other staff members other than the primary contact. 
+        // Get details of the other staff members other than the primary contact.
         $staffMembers = civicrm_api3('Relationship', 'get', [
           'contact_id_b' => $this->organizationId,
           'contact_id_a' => ['!=' => $this->_loggedInContactID],
@@ -279,19 +279,20 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     ));
 
 
-    $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule']);
+    $this->addFormRule(['CRM_Aoservicelisting_Form_ProviderApplicationForm', 'providerFormRule'], $this);
     parent::buildQuickForm();
   }
 
-  public function providerFormRule($values) {
+  public function providerFormRule($values, $files, $self) {
     CRM_Core_Error::debug_var('formvaluesbeforesubmit', $values);
     $errors = $setValues = [];
     $regulatorRecordKeys = $verifiedURLCounter = [];
     $staffMemberCount = $abaStaffMemberCount = 0;
 
     // Check email for primary contact to see if existing in the database.
-    if (!empty($values['email-Primary'])) {
-      $isProvider = CRM_Core_DAO::singleValueQuery('SELECT e.email FROM civicrm_email e INNER JOIN civicrm_contact c ON c.id = e.contact_id WHERE e.email LIKE %1 AND c.is_deleted <> 1 AND c.contact_sub_type LIKE \'%authorized_contact%\'', [1 => [$values['email-Primary'], 'String']]);
+    if (!empty($values['email-Primary']) ) {
+      $isProvider = CRM_Core_DAO::singleValueQuery('SELECT e.email FROM civicrm_email e INNER JOIN civicrm_contact c ON c.id = e.contact_id WHERE e.email LIKE %1 AND c.id <> %2 AND c.is_deleted <> 1 AND c.contact_sub_type LIKE \'%authorized_contact%\'',
+        [1 => [$values['email-Primary'], 'String'], 2 => [$self->_loggedInContactID, 'Integer']]);
       if (!empty($isProvider)) {
         $errors['email-Primary'] = E::ts("A person with this email address has already submitted a CommunityConnect Application. Please contact servicelisting@autismontario.com for more information.");
       }
