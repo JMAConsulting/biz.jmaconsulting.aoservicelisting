@@ -290,9 +290,14 @@ class CRM_Aoservicelisting_Form_ProviderApplicationForm extends CRM_Aoservicelis
     $staffMemberCount = $abaStaffMemberCount = 0;
 
     // Check email for primary contact to see if existing in the database.
-    if (!empty($values['email-Primary']) ) {
-      $isProvider = CRM_Core_DAO::singleValueQuery('SELECT e.email FROM civicrm_email e INNER JOIN civicrm_contact c ON c.id = e.contact_id WHERE e.email LIKE %1 AND c.id <> %2 AND c.is_deleted <> 1 AND c.contact_sub_type LIKE \'%authorized_contact%\'',
-        [1 => [$values['email-Primary'], 'String'], 2 => [$self->_loggedInContactID, 'Integer']]);
+    if (!empty($values['email-Primary'])) {
+      $query = 'SELECT e.email FROM civicrm_email e INNER JOIN civicrm_contact c ON c.id = e.contact_id WHERE e.email LIKE %1 AND c.is_deleted <> 1 AND c.contact_sub_type LIKE \'%authorized_contact%\'';
+      $params = [1 => [$values['email-Primary'], 'String']];
+      if (!empty($self->_loggedInContactID)) {
+        $query .= ' AND c.id <> %2 ';
+        $params[2] = [$self->_loggedInContactID, 'Integer'];
+      }
+      $isProvider = CRM_Core_DAO::singleValueQuery($query, $params);
       if (!empty($isProvider)) {
         $errors['email-Primary'] = E::ts("A person with this email address has already submitted a CommunityConnect Application. Please contact servicelisting@autismontario.com for more information.");
       }
